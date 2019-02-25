@@ -1,0 +1,10 @@
+urllib3
+Werkzeug
+Flask
+Flask-CAS
+Flask-SQLAlchemy
+json-logic-qubit
+pylxd
+requests
+json-logic-qubit
+launchpadlib
