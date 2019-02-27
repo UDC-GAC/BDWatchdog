@@ -11,38 +11,29 @@ def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
 
-default_experiment_id = "experiment_0"
-
-
 def get_username():
     return pwd.getpwuid(os.getuid())[0]
 
 
-def signal_end(experiment_id, username):
+def signal_experiment(experiment_id, username):
     d = dict()
-
     info = dict()
     info["experiment_id"] = experiment_id
     info["username"] = username
-    info["end_time"] = int(time.time())
-
     d["info"] = info
     d["type"] = "experiment"
+    return d
 
+
+def signal_end(experiment_id, username):
+    d = signal_experiment(experiment_id, username)
+    d["info"]["end_time"] = int(time.time())
     print(json.dumps(d))
 
 
 def signal_start(experiment_id, username):
-    d = dict()
-
-    info = dict()
-    info["experiment_id"] = experiment_id
-    info["username"] = username
-    info["start_time"] = int(time.time())
-
-    d["info"] = info
-    d["type"] = "experiment"
-
+    d = signal_experiment(experiment_id, username)
+    d["info"]["start_time"] = int(time.time())
     print(json.dumps(d))
 
 

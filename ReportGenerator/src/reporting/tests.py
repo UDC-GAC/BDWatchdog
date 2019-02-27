@@ -1,17 +1,17 @@
 #!/usr/bin/env python
 from __future__ import print_function
 
-from TimestampsSnitch.src.reporting.config import BDWATCHDOG_CONTAINER_METRICS, MAX_COLUMNS, \
+from ReportGenerator.src.reporting.config import BDWATCHDOG_CONTAINER_METRICS, MAX_COLUMNS, \
     GENERATE_NODES_PLOTS, ADD_APP_PLOTS_TO_REPORT, ADD_NODES_PLOTS_TO_REPORT, PRINTED_METRICS, \
     GENERATE_APP_PLOTS, BDWATCHDOG_APP_METRICS, TEST_TYPE_STEPPING, num_base_experiments, \
-    USAGE_METRICS_SOURCE, NODES_LIST
-from TimestampsSnitch.src.reporting.latex_output import latex_print, print_latex_stress
+    USAGE_METRICS_SOURCE, NODES_LIST, bdwatchdog_handler
+from ReportGenerator.src.reporting.latex_output import latex_print, print_latex_stress
 
-from TimestampsSnitch.src.reporting.plots.barplots import plot_tests_resource_usage, plot_tests_times, \
+from ReportGenerator.src.plotting.barplots import plot_tests_resource_usage, plot_tests_times, \
     plot_tests_times_with_stepping, plot_tests_resource_usage_with_stepping
-from TimestampsSnitch.src.reporting.plots.timeseries_plots import get_plots, plot_structure, bdwatchdog_handler
+from ReportGenerator.src.plotting.timeseries_plots import get_plots, plot_structure
 
-from TimestampsSnitch.src.reporting.utils import generate_duration, translate_metric, format_metric, flush_table, \
+from ReportGenerator.src.reporting.utils import generate_duration, translate_metric, format_metric, flush_table, \
     print_basic_doc_info, some_test_has_missing_aggregate_information, get_test_type
 
 

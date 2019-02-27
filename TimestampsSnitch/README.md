@@ -1,88 +1,95 @@
-# applications-timestamps-snitch
-This repository provides with a very simple tool to monitor Hadoop YARN applications timestamps (start) and (end) and storing them using a MongoDB databse. Additionally it can be used to repeatedly run and store experiments times, being an experiment a series of tests or applications.
+# Timestamps Snitch
+This module provides a very simple tool to account for experiments and tests 'start' and 'end' UNIX timestamps, considering that an experiment encompasses several tests.
+
+The timestamps can be used for the reporting utility of this module as well as with the timeseriesViewer module.
 
 ## Download and install
 ```
-git clone https://github.com/JonatanEnes/applications-timestamps-snitch
-cd applications-timestamps-snitch
-bash install-python-dependencies.sh
+git clone https://github.com/JonatanEnes/bdwatchdog
+cd TimestampsSnitch
+bash install_scripts
 ```
 ## Usage and examples
 
-The easiest way of using this tools is starting the demonized yarn snitch and then using the multiple scripts to signal the start and ending of an experiment as well as to increment the experiment id. The demonized YARN snitch should poll with a configurable interval for new applications and store their timestamps accordingly.
+the direct way to use this module is to signal for a 'start' or an 'end' evtn of either an experiment or a test. Ad additional parameter that sets the experiment name is needed.
 
-<br>
-
-Alternatively, an script ('run_experiment') is provided to do all the mentioned above automatically.
-
-### Yarn snitch daemon
-* To start the Yarn snitch daemon, run:
-```
-python yarn-snitch-daemon.py start
-```
 ### Experiment handling
-* To run a new experiment, run the script
+Experiments represent a group of several tests, thus its starting and ending times represent the time window while the individual tests were executed.
+
+
+* To create a new experiment timestamping info, signal the start of an experiment by running:
 ```
-bash run_experiments.sh
-```
-* To manually increment the experiment id, stored in the 'experiment_id.txt' file, run:
-```
-python scripts/increment_experiment_counter.py
-```
-* To manually signal the start of an experiment, run:
-```
-python scripts/signal-experiment.py start
+python src/timestamping/signal_experiment.py start Experiment_0
 
 ```
-* To manually signal the end of an experiment, run:
+* and pass the generated data to the mongodb agent that will send it to be stored in the mongodb database:
 ```
-python scripts/signal-experiment.py end
+python src/mongodb/mongodb_agent.py
 
 ```
+* Full 'start' command:
+```
+python src/timestamping/signal_experiment.py start Experiment_0 | python src/mongodb/mongodb_agent.py
+
+```
+
+* To manually signal the end of an experiment, run the same pipeline but by signaling for the end with:
+```
+python src/timestamping/signal_experiment.py end 19-01-20-20:30_TeraSort
+
+```
+* Full 'end' command:
+```
+python src/timestamping/signal_experiment.py end 19-01-20-20:30_TeraSort | python src/mongodb/mongodb_agent.py
+
+```
+
+### Tests handling
+Tests represent a single execution of any application of interest. As tests are associated to an experiment, they must be signaled in a similar way as with experiments, with a start or end parameter, but besides the experiment name an additional test_name parameter is needed.
+
+* Full 'start' command:
+```
+python src/timestamping/signal_test.py start 19-01-20-20:30_TeraSort Test_0 | python src/mongodb/mongodb_agent.py
+
+```
+
+* Full 'end' command:
+```
+python src/timestamping/signal_experiment.py end 19-01-20-20:30_TeraSort Test_0 | python src/mongodb/mongodb_agent.py
+
+```
+:exclamation: _**If the mongodb database schema defined on this project is to be used, experiment names must follow the format "+%y-%m-%d-%H:%M\_{STRING}", e.g., "19-01-20-20:30_TeraSort" **_ :exclamation:
+
+
 ### Retrieving info
-To get and experiment info, a script is provided.
+To get and experiment info, a simple python script is provided.
 * To get the raw info as JSON, run:
 ```
-python scripts/get_experiment_info.py experiment_2
+python src/timestamping/get_experiment_info.py 19-01-20-20:30_TeraSort
 ```
 ```
-{"username": "jonatan", "_updated": "Mon, 17 Apr 2017 15:10:52 GMT", "start_time": 1492441849, "_links": {"self": {"href": "experiments/58f4daf9685a5f05db378b03", "title": "experiment"}, "parent": {"href": "/", "title": "home"}, "collection": {"href": "experiments", "title": "experiments"}}, "end_time": 1492441851, "experiment_id": "experiment_2", "_created": "Mon, 17 Apr 2017 15:10:49 GMT", "_id": "58f4daf9685a5f05db378b03", "_etag": "63017e847b77fda580d09df90ca28a6db7cf36f2"}
+{"type": "experiment", "info": {"username": "root", "start_time": 1550694600, "end_time": 1550702020, "experiment_id": "19-01-20-20:30_TeraSort"}}
 ```
 * You can get the same info prettyfied with:
 ```
-python scripts/get_experiment_info.py experiment_2 | python -m json.tool
+python src/timestamping/get_experiment_info.py 19-01-20-20:30_TeraSort | python -m json.tool
 ```
 ```
 {
-    "_created": "Mon, 17 Apr 2017 15:10:49 GMT",
-    "_etag": "63017e847b77fda580d09df90ca28a6db7cf36f2",
-    "_id": "58f4daf9685a5f05db378b03",
-    "_links": {
-        "collection": {
-            "href": "experiments",
-            "title": "experiments"
-        },
-        "parent": {
-            "href": "/",
-            "title": "home"
-        },
-        "self": {
-            "href": "experiments/58f4daf9685a5f05db378b03",
-            "title": "experiment"
-        }
-    },
-    "_updated": "Mon, 17 Apr 2017 15:10:52 GMT",
-    "end_time": 1492441851,
-    "experiment_id": "experiment_2",
-    "start_time": 1492441849,
-    "username": "jonatan"
+    "type": "experiment",
+    "info": {
+        "username": "root",
+        "start_time": 1551257632,
+        "end_time": 1551257639,
+        "experiment_id": "19-01-20-20:30_TeraSort"
+    }
 }
 ```
 * You can also extract fields from the JSON using bash tools such as 'jq', for example to get the end time:
 ```
-python scripts/get_experiment_info.py experiment_2  2>/dev/null | jq -r '.end_time'
+python3 TimestampsSnitch/src/timestamping/get_experiment_info.py 19-01-20-20:30_TeraSort 2>/dev/null | jq -r '.info.end_time'
 ```
 ```
-1492441851
+1551257639
 ```
 

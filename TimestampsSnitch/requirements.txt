@@ -1,6 +1,2 @@
-pandas
-matplotlib
-numpy
 requests
-configparser
 eve

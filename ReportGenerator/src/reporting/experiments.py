@@ -3,15 +3,15 @@ from __future__ import print_function
 import sys
 import time
 
-from TimestampsSnitch.src.reporting.config import MONGODB_PORT, TESTS_POST_ENDPOINT, \
+from ReportGenerator.src.reporting.config import MONGODB_PORT, TESTS_POST_ENDPOINT, \
     MONGODB_IP, num_base_experiments, GENERATE_NODES_PLOTS, GENERATE_APP_PLOTS, PRINT_NODE_INFO, \
     PRINT_TEST_BASIC_INFORMATION, PRINT_MISSING_INFO_REPORT
-from TimestampsSnitch.src.reporting.latex_output import print_latex_section
-from TimestampsSnitch.src.reporting.tests import print_summarized_tests_info, process_test, print_tests_resource_usage, \
+from ReportGenerator.src.reporting.latex_output import print_latex_section
+from ReportGenerator.src.reporting.tests import print_summarized_tests_info, process_test, print_tests_resource_usage, \
     print_tests_resource_utilization, print_tests_resource_overhead_report, print_test_report, \
     report_resources_missing_data, generate_test_resource_plot, print_tests_resource_hysteresis_report
 from TimestampsSnitch.src.mongodb.mongodb_utils import get_experiment_tests
-from TimestampsSnitch.src.reporting.utils import generate_duration, print_basic_doc_info, split_tests_by_test_type
+from ReportGenerator.src.reporting.utils import generate_duration, print_basic_doc_info, split_tests_by_test_type
 
 
 def eprint(*args, **kwargs):

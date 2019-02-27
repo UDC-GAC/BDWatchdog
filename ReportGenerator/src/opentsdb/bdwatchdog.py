@@ -30,14 +30,6 @@ class BDWatchdog:
             else:
                 self.get_points(query, tries)
 
-    # def get_points(self, query):
-    #     r = self.session.post(self.server + "/api/query", data=json.dumps(query),
-    #                           headers={'content-type': 'application/json', 'Accept': 'application/json'})
-    #     if r.status_code == 200:
-    #         return json.loads(r.text)
-    #     else:
-    #         r.raise_for_status()
-
     def get_structure_timeseries(self, structure_name, start, end, retrieve_metrics, downsample=5):
         usages = dict()
         subquery = list()

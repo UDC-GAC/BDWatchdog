@@ -4,7 +4,6 @@ import sys
 import os
 import json
 
-
 from TimestampsSnitch.src.mongodb.mongodb_agent import get_document
 from TimestampsSnitch.src.mongodb.mongodb_utils import get_all_experiments
 
@@ -47,6 +46,17 @@ post_doc_buffer_length = 1
 
 MAX_CONNECTION_TRIES = 3
 
+
+def print_experiment(experiment_data):
+    doc_to_dump = {"type": "experiment", "info": {}}
+    for field in ["username", "start_time", "end_time", "experiment_id"]:
+        if field not in experiment_data:
+            eprint("Field {0} missing from experiment {1}".format(field, experiment_data["experiment_id"]))
+        else:
+            doc_to_dump["info"][field] = experiment_data[field]
+    print(json.dumps(doc_to_dump))
+
+
 if __name__ == '__main__':
     experiment_id = None
 
@@ -67,10 +77,11 @@ if __name__ == '__main__':
         if not data:
             eprint("Couldn't find experiment with id {0}".format(experiment_id))
             exit(0)
-    if type(data)==type(dict()):
-        print(json.dumps(data))
-    elif type(data)==type(list()):
+
+    if type(data) == type(dict()):
+        print_experiment(data)
+    elif type(data) == type(list()):
         for experiment in data:
-            print(json.dumps(experiment))
+            print_experiment(experiment)
     else:
-        print(json.dumps(data))
+        print_experiment(data)

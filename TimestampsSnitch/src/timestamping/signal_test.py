@@ -14,45 +14,36 @@ from TimestampsSnitch.src.mongodb.mongodb_agent import delete_test_doc
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
+
 def get_username():
     return pwd.getpwuid(os.getuid())[0]
 
 
-def signal_end(experiment_id, username, test_name, timestamp=None):
+def signal_test(experiment_id, username, test_name):
     d = dict()
-
-    if not timestamp:
-        timestamp = int(time.time())
-
     info = dict()
     info["experiment_id"] = experiment_id
     info["username"] = username
-    info["end_time"] = timestamp
     info["test_name"] = test_name
     info["test_id"] = experiment_id + "_" + test_name
-
     d["info"] = info
     d["type"] = "test"
+    return d
 
+
+def signal_end(experiment_id, username, test_name, timestamp=None):
+    d = signal_test(experiment_id, username, test_name)
+    if not timestamp:
+        timestamp = int(time.time())
+    d["info"]["end_time"] = timestamp
     print(json.dumps(d))
 
 
 def signal_start(experiment_id, username, test_name, timestamp=None):
-    d = dict()
-
+    d = signal_test(experiment_id, username, test_name)
     if not timestamp:
         timestamp = int(time.time())
-
-    info = dict()
-    info["experiment_id"] = experiment_id
-    info["username"] = username
-    info["start_time"] = timestamp
-    info["test_name"] = test_name
-    info["test_id"] = experiment_id + "_" + test_name
-
-    d["info"] = info
-    d["type"] = "test"
-
+    d["info"]["start_time"] = timestamp
     print(json.dumps(d))
 
 
@@ -64,23 +55,20 @@ if __name__ == '__main__':
         exit(1)
     else:
         option = sys.argv[1]
-        test_name = sys.argv[2]
-        experiment_name = sys.argv[3]
-        timestamp = None
-        if option == "start":
+        experiment_name = sys.argv[2]
+        test_name = sys.argv[3]
+        if option == "start" or option == "end":
+            timestamp = None
             if len(sys.argv) >= 5:
                 time_str = sys.argv[4]
                 t = time_str
                 ts = datetime.datetime.strptime(t, "%y/%m/%d %H:%M:%S")
                 timestamp = int(time.mktime(ts.timetuple()))
-            signal_start(experiment_name, get_username(), test_name, timestamp=timestamp)
-        elif option == "end":
-            if len(sys.argv) >= 5:
-                time_str = sys.argv[4]
-                t = time_str
-                ts = datetime.datetime.strptime(t, "%y/%m/%d %H:%M:%S")
-                timestamp = int(time.mktime(ts.timetuple()))
-            signal_end(experiment_name, get_username(), test_name, timestamp=timestamp)
+
+            if option == "start":
+                signal_start(experiment_name, get_username(), test_name, timestamp=timestamp)
+            elif option == "end":
+                signal_end(experiment_name, get_username(), test_name, timestamp=timestamp)
         elif option == "delete":
             delete_test_doc(experiment_name, test_name)
         else:

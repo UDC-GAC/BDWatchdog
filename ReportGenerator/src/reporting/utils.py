@@ -3,10 +3,9 @@ from __future__ import print_function
 
 import sys
 import time
-
 from tabulate import tabulate
 
-from TimestampsSnitch.src.reporting.latex_output import latex_print
+from ReportGenerator.src.reporting.latex_output import latex_print
 
 
 def eprint(*args, **kwargs):

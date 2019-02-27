@@ -3,10 +3,10 @@ from __future__ import print_function
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from TimestampsSnitch.src.reporting.config import TEST_TYPE_STEPPING, STATIC_LIMITS
-from TimestampsSnitch.src.reporting.plots.plot_utils import translate_test_run_name_by_conf_number, \
+from ReportGenerator.src.reporting.config import TEST_TYPE_STEPPING, STATIC_LIMITS
+from ReportGenerator.src.plotting.plot_utils import translate_test_run_name_by_conf_number, \
     FIGURE_SIZE, OVERHEAD_VALUE_SIZE, save_figure, get_y_limit
-from TimestampsSnitch.src.reporting.utils import translate_metric, some_test_has_missing_aggregate_information, \
+from ReportGenerator.src.reporting.utils import translate_metric, some_test_has_missing_aggregate_information, \
     translate_benchmark
 
 

@@ -66,7 +66,7 @@ def get_test_by_name(experiment_name, test_name):
         tries += 1
 
     if tries > MAX_CONNECTION_TRIES:
-        error_string = "Information retrieval for document {0} failed too many times, aborting".format(doc_id)
+        error_string = "Information retrieval for document {0} failed too many times, aborting"
         eprint(error_string)
         raise requests.ConnectionError(error_string)
 
@@ -98,17 +98,12 @@ def get_document(doc_id, endpoint):
 
 
 def merge_data_from_existing_doc(old, new):
-    try:
-        if "start_time" not in new.keys():
-            new["start_time"] = old["start_time"]
-    except KeyError:
-        pass
-
-    try:
-        if "end_time" not in new.keys():
-            new["end_time"] = old["end_time"]
-    except KeyError:
-        pass
+    for key in ["start_time", "end_time"]:
+        try:
+            if key not in new.keys():
+                new[key] = old[key]
+        except KeyError:
+            pass
 
     return new
 
@@ -143,9 +138,7 @@ def post_doc(doc, info, endpoint):
                 eprint("[SNITCH MONGODB AGENT] couldn't properly put document to address " + endpoint)
                 eprint(r.text)
             else:
-                print(
-                    "Document updated at: " + time.strftime("%D %H:%M:%S", time.localtime()) + " timestamp is " + str(
-                        time.time()))
+                print("Document updated at: " + time.strftime("%D %H:%M:%S", time.localtime()))
                 break
     if tries > MAX_CONNECTION_TRIES:
         error_string = "Information posting for document {0} failed too many times, aborting".format(str(doc))
@@ -203,8 +196,7 @@ def delete_test_doc(experiment_id, test_id):
         tests_full_endpoint = "http://mongodb:8000/tests/" + test["_id"]
         r = requests.delete(tests_full_endpoint, headers=headers)
         if r.status_code != 204:
-            eprint(
-                "[SNITCH MONGODB AGENT] couldn't properly delete document to address " + tests_full_endpoint)
+            eprint("[SNITCH MONGODB AGENT] couldn't properly delete document to address " + tests_full_endpoint)
             eprint(r.text)
         else:
             print("Document deleted at: " + time.strftime("%D %H:%M:%S", time.localtime()))

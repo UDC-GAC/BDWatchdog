@@ -3,11 +3,11 @@ from __future__ import print_function
 import numpy as np
 import matplotlib.pyplot as plt
 
-from TimestampsSnitch.src.reporting.config import bdwatchdog_handler, STATIC_LIMITS
-from TimestampsSnitch.src.reporting.latex_output import latex_print
-from TimestampsSnitch.src.reporting.plots.plot_utils import translate_plot_name_to_ylabel, line_style, dashes_dict, line_marker, save_figure, \
+from ReportGenerator.src.reporting.config import bdwatchdog_handler, STATIC_LIMITS
+from ReportGenerator.src.reporting.latex_output import latex_print
+from ReportGenerator.src.plotting.plot_utils import translate_plot_name_to_ylabel, line_style, dashes_dict, line_marker, save_figure, \
     get_y_limit
-from TimestampsSnitch.src.reporting.utils import translate_metric
+from ReportGenerator.src.reporting.utils import translate_metric
 
 
 

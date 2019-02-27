@@ -4,8 +4,8 @@ from __future__ import print_function
 import configparser
 import os
 
-from TimestampsSnitch.src.reporting.utils import get_int_value
-from TimestampsSnitch.src.opentsdb import bdwatchdog
+from ReportGenerator.src.reporting.utils import get_int_value
+from ReportGenerator.src.opentsdb import bdwatchdog
 
 STATIC_LIMITS = False  # To be used to set specific values for the limits
 Y_AMPLIFICATION_FACTOR = 1.3
@@ -116,7 +116,6 @@ MONGODB_IP = ENV["MONGODB_IP"]
 MONGODB_PORT = get_int_value(ENV, "MONGODB_PORT", default_environment_values["MONGODB_PORT"])
 TESTS_POST_ENDPOINT = ENV["TESTS_DATABASE_NAME"]
 EXPERIMENTS_POST_ENDPOINT = ENV["EXPERIMENTS_DATABASE_NAME"]
-experiments_full_endpoint = 'http://{0}:{1}/{2}'.format(MONGODB_IP, MONGODB_PORT, EXPERIMENTS_POST_ENDPOINT)
 
 PRINT_MISSING_INFO_REPORT = ENV["PRINT_MISSING_INFO_REPORT"] == "true"
 PRINT_NODE_INFO = ENV["PRINT_NODE_INFO"] == "true"

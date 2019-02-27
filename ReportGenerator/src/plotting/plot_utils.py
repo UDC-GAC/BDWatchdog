@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 from __future__ import print_function
-import os
 import pathlib
 
-from TimestampsSnitch.src.reporting.config import Y_AMPLIFICATION_FACTOR
+from ReportGenerator.src.reporting.config import Y_AMPLIFICATION_FACTOR
 
 OVERHEAD_VALUE_SIZE = 10
 FIGURE_SIZE = (6, 4)

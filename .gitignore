@@ -7,7 +7,7 @@
 .coverage*
 *.data.*
 
-TimestampsSnitch/pandoc_reports/*
+ReportGenerator/pandoc_reports/*
 
 MetricsFeeder/src/daemon/pids/
 MetricsFeeder/src/daemon/logs/
