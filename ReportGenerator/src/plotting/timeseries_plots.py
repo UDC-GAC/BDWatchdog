@@ -5,10 +5,10 @@ import matplotlib.pyplot as plt
 
 from ReportGenerator.src.reporting.config import bdwatchdog_handler, STATIC_LIMITS
 from ReportGenerator.src.reporting.latex_output import latex_print
-from ReportGenerator.src.plotting.plot_utils import translate_plot_name_to_ylabel, line_style, dashes_dict, line_marker, save_figure, \
-    get_y_limit
+from ReportGenerator.src.plotting.plot_utils import translate_plot_name_to_ylabel, line_style, dashes_dict, line_marker, \
+    save_figure, \
+    get_y_limit, get_x_limit
 from ReportGenerator.src.reporting.utils import translate_metric
-
 
 
 def plot_structure(test, test_name, structure, plots, start_time, end_time, add_plots_to_report=True):
@@ -16,7 +16,8 @@ def plot_structure(test, test_name, structure, plots, start_time, end_time, add_
     benchmark_type = test["test_name"].split("_")[0]
 
     for plot in plots:
-        max_ts_point_value = 10
+        max_y_ts_point_value = 10
+        max_x_ts_point_value = 900
 
         check_range, ymin, ymax = False, 0, None
         if plot == "disk":
@@ -55,6 +56,9 @@ def plot_structure(test, test_name, structure, plots, start_time, end_time, add_
             else:
                 y = list(timeseries.values())
 
+            # Set the maximum time series point values
+            max_y_ts_point_value = max(max_y_ts_point_value, max(y))
+
             # Plot a time series
             linestyle = line_style[plot][metric_name]
             ax1.plot(x, y,
@@ -65,29 +69,34 @@ def plot_structure(test, test_name, structure, plots, start_time, end_time, add_
                      markersize=6,
                      markevery=5)
 
-            # Update the maximum time series point value
-            max_ts_point_value = max(max_ts_point_value, max(y))
+        # Set x and y limits
+        top, bottom = get_y_limit("plot_structure", max_y_ts_point_value, resource_label=plot,
+                                  structure_type=structure_type, static_limits=STATIC_LIMITS)
+
+        left_x_limit, right_x_limit = get_x_limit("plot_structure", max_x_ts_point_value,
+                                                  benchmark_type=benchmark_type, static_limits=STATIC_LIMITS)
+
+        plt.xlim(left=left_x_limit, right=right_x_limit)
+        plt.ylim(top=top, bottom=0)
 
         # Set properties to the whole plot
         plt.xlabel('Time (s)')
         plt.ylabel(translate_plot_name_to_ylabel(plot), style="italic", weight="bold", )
         plt.title('')
-        plt.grid(True)
+        plt.grid(True, which="both")
         plt.legend(loc='upper right',
                    shadow=False,
                    fontsize='small',
                    fancybox=True,
                    facecolor='#afeeee')
 
-        # Set y limits
-        top, bottom = get_y_limit("plot_structure", max_ts_point_value, resource_label=plot,
-                                  structure_type=structure_type, static_limits=STATIC_LIMITS)
-        plt.ylim(top=top, bottom=0)
-
-        # May be inaccurate up to +- 'downsample' seconds,
-        # because the data may start a little after the specified 'start' time or end
-        # a little before the specified 'end' time
-        plt.xticks(np.arange(0, int(end_time) - int(start_time), step=100))
+        if STATIC_LIMITS:
+            plt.xticks(np.arange(0, right_x_limit, step=100))
+        else:
+            # May be inaccurate up to +- 'downsample' seconds,
+            # because the data may start a little after the specified 'start' time or end
+            # a little before the specified 'end' time
+            plt.xticks(np.arange(0, int(end_time) - int(start_time), step=100))
 
         # Save the plot
         figure_name = "{0}_{1}.{2}".format(structure_name, plot, "svg")

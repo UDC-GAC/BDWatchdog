@@ -7,7 +7,7 @@ import os
 from ReportGenerator.src.reporting.utils import get_int_value
 from ReportGenerator.src.opentsdb import bdwatchdog
 
-STATIC_LIMITS = False  # To be used to set specific values for the limits
+STATIC_LIMITS = True  # To be used to set specific values for the limits
 Y_AMPLIFICATION_FACTOR = 1.3
 
 def read_config(config_path, config_keys):
@@ -50,7 +50,8 @@ config_keys = [
     "ADD_APP_PLOTS_TO_REPORT",
     "ADD_NODES_PLOTS_TO_REPORT",
     "TEST_TYPE_STEPPING",
-    "PRINT_TEST_BASIC_INFORMATION"
+    "PRINT_TEST_BASIC_INFORMATION",
+    "NODES_LIST"
 
 ]
 default_environment_values = {
@@ -68,7 +69,8 @@ default_environment_values = {
     "ADD_APP_PLOTS_TO_REPORT": "true",
     "ADD_NODES_PLOTS_TO_REPORT": "false",
     "TEST_TYPE_STEPPING": 3,
-    "PRINT_TEST_BASIC_INFORMATION": "false"
+    "PRINT_TEST_BASIC_INFORMATION": "false",
+    "NODES_LIST" : "node1,node2,node3,node4,node5,node6,node7,node8,node9"
 }
 
 ENV = create_environment(read_config(config_path, config_keys), config_keys, default_environment_values)
@@ -135,4 +137,5 @@ USAGE_METRICS_SOURCE = [("structure.cpu.usage", ['proc.cpu.user', 'proc.cpu.kern
 
 PRINT_TEST_BASIC_INFORMATION = ENV["PRINT_TEST_BASIC_INFORMATION"] == "true"
 
-NODES_LIST = ["node1","node2","node3"]
+NODES_LIST = ENV["NODES_LIST"]
+NODES_LIST = NODES_LIST.rstrip('"').lstrip('"').split(",")

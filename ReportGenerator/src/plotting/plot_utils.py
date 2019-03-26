@@ -86,6 +86,22 @@ def translate_test_run_name_by_conf_number(conf_number, benchmark_type):
         return conf_number
 
 
+def get_x_limit(plotting_method, max_x_limit, benchmark_type=None, static_limits = False):
+    if static_limits:
+        if plotting_method == "plot_structure":
+            left, right = -30, 1000
+            if benchmark_type == "terasort":
+                left, right = (left, 800)
+            elif benchmark_type == "pagerank":
+                left, right = (left, 1200)
+            elif benchmark_type == "fixwindow":
+                left, right = (left, 1000)
+            return left, right
+
+    left, right = (-30, max_x_limit)
+    return left, right
+
+
 def get_y_limit(plotting_method, max_y_limit, benchmark_type=None, resource_label=None, structure_type=None, static_limits = False):
 
     if static_limits:
@@ -93,16 +109,16 @@ def get_y_limit(plotting_method, max_y_limit, benchmark_type=None, resource_labe
             top, bottom = 100, 100
             if resource_label == "cpu":
                 if benchmark_type == "terasort":
-                    top, bottom = (280, 0)
+                    top, bottom = (320, 0)
                 elif benchmark_type == "pagerank":
-                    top, bottom = (450, 0)
+                    top, bottom = (500, 0)
                 elif benchmark_type == "fixwindow":
                     top, bottom = (350, 0)
             elif resource_label == "mem":
                 if benchmark_type == "terasort":
-                    top, bottom = (1400, 0)
+                    top, bottom = (1600, 0)
                 elif benchmark_type == "pagerank":
-                    top, bottom = (2500, 0)
+                    top, bottom = (2600, 0)
                 elif benchmark_type == "fixwindow":
                     top, bottom = (2600, 0)
             return top, bottom
@@ -111,7 +127,7 @@ def get_y_limit(plotting_method, max_y_limit, benchmark_type=None, resource_labe
             if benchmark_type == "terasort":
                 top, bottom = (15, 0)
             elif benchmark_type == "pagerank":
-                top, bottom = (21, 0)
+                top, bottom = (23, 0)
             elif benchmark_type == "fixwindow":
                 top, bottom = (20, 0)
             return top, bottom

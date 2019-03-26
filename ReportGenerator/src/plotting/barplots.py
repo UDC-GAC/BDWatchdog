@@ -166,7 +166,12 @@ def plot_tests_resource_usage_with_stepping(tests, num_base_experiments):
 
         # Set the labels
         ax.set_ylabel(ylabels[resource])
-        ax.set_xlabel(translate_benchmark(benchmark_type))
+        if resource == "cpu":
+            ax.set_xlabel("CPU usage")
+        elif resource == "mem":
+            ax.set_xlabel("Memory usage")
+        else:
+            ax.set_xlabel("")
 
         # Set the Y limits
         top, bottom = get_y_limit("resource_usage_with_stepping", max(bars["allocated"]),
@@ -206,13 +211,18 @@ def plot_tests_resource_usage_with_stepping(tests, num_base_experiments):
         bars["utilization_string"] = [str(x) + "%" for x in bars["utilization"]]  # Convert to string labels
         ax.set_ylabel('Utilization (%)', style="italic", weight="bold")
         plt.ylim(top=100, bottom=0)
-        plt.xlim(left=-0.5, right=len(bars["utilization_string"]))
-        # if benchmark_type == "terasort":
-        #     plt.xlim(left=-0.5, right=4.75)
-        # elif benchmark_type == "fixwindow":
-        #     plt.xlim(left=-0.5, right=4.75)
-        # elif benchmark_type == "pagerank":
-        #     plt.xlim(left=-0.5, right=1.5)
+
+        if STATIC_LIMITS:
+            if benchmark_type == "terasort":
+                plt.xlim(left=-0.5, right=4.75)
+            elif benchmark_type == "fixwindow":
+                plt.xlim(left=-0.5, right=4.75)
+            elif benchmark_type == "pagerank":
+                plt.xlim(left=-0.5, right=1.5)
+
+        else:
+            plt.xlim(left=-0.5, right=len(bars["utilization_string"]))
+
         for i in range(len(bars["utilization"])):
             plt.text(x=bars_positions["used"][i],
                      y=bars["utilization"][i],
@@ -272,7 +282,8 @@ def plot_tests_times_with_stepping(tests, num_base_experiments, basetime):
 
     # Set the labels
     ax.set_ylabel("Time (minutes)")
-    ax.set_xlabel(translate_benchmark(benchmark_type))
+    ax.set_xlabel("Overhead")
+    # ax.set_xlabel(translate_benchmark(benchmark_type))
 
     # Set the Y limits
     top, bottom = get_y_limit("times_with_stepping", max(bars), benchmark_type=benchmark_type,
