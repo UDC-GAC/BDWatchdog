@@ -1,0 +1,61 @@
+{
+  "timeseries": [
+    {
+      "metrics": [
+        {
+          "metric": "sys.cpu.user",
+          "aggregator": "zimsum",
+          "tags": [
+            "host=chifflet-1"
+          ]
+        }
+      ],
+      "yranges": {
+        "ymin": 0,
+        "ymax": 5000
+      }
+    },{
+      "metrics": [
+        {
+          "metric": "sys.cpu.user",
+          "aggregator": "zimsum",
+          "tags": [
+            "host=chifflet-2"
+          ]
+        }
+      ],
+      "yranges": {
+        "ymin": 0,
+        "ymax": 5000
+      }
+    },{
+      "metrics": [
+        {
+          "metric": "sys.cpu.user",
+          "aggregator": "zimsum",
+          "tags": [
+            "host=chifflet-3"
+          ]
+        }
+      ],
+      "yranges": {
+        "ymin": 0,
+        "ymax": 5000
+      }
+    },{
+      "metrics": [
+        {
+          "metric": "sys.cpu.user",
+          "aggregator": "zimsum",
+          "tags": [
+            "host=chifflet-4"
+          ]
+        }
+      ],
+      "yranges": {
+        "ymin": 0,
+        "ymax": 5000
+      }
+    }
+  ]
+}

@@ -1,0 +1,117 @@
+{
+  "timeseries": [
+    {
+      "metrics": [
+        {
+          "metric": "proc.mem.resident",
+          "aggregator": "zimsum",
+          "tags": [
+            "host=slave0"
+          ]
+        }
+      ],
+      "yranges": {
+        "ymin": 0,
+        "ymax": 50000
+      }
+    },{
+      "metrics": [
+        {
+          "metric": "proc.mem.resident",
+          "aggregator": "zimsum",
+          "tags": [
+            "host=slave1"
+          ]
+        }
+      ],
+      "yranges": {
+        "ymin": 0,
+        "ymax": 50000
+      }
+    },{
+      "metrics": [
+        {
+          "metric": "proc.mem.resident",
+          "aggregator": "zimsum",
+          "tags": [
+            "host=slave2"
+          ]
+        }
+      ],
+      "yranges": {
+        "ymin": 0,
+        "ymax": 50000
+      }
+    },{
+      "metrics": [
+        {
+          "metric": "proc.mem.resident",
+          "aggregator": "zimsum",
+          "tags": [
+            "host=slave3"
+          ]
+        }
+      ],
+      "yranges": {
+        "ymin": 0,
+        "ymax": 50000
+      }
+    },{
+      "metrics": [
+        {
+          "metric": "proc.mem.resident",
+          "aggregator": "zimsum",
+          "tags": [
+            "host=slave4"
+          ]
+        }
+      ],
+      "yranges": {
+        "ymin": 0,
+        "ymax": 50000
+      }
+    },{
+      "metrics": [
+        {
+          "metric": "proc.mem.resident",
+          "aggregator": "zimsum",
+          "tags": [
+            "host=kafka0"
+          ]
+        }
+      ],
+      "yranges": {
+        "ymin": 0,
+        "ymax": 50000
+      }
+    },{
+      "metrics": [
+        {
+          "metric": "proc.mem.resident",
+          "aggregator": "zimsum",
+          "tags": [
+            "host=kafka1"
+          ]
+        }
+      ],
+      "yranges": {
+        "ymin": 0,
+        "ymax": 50000
+      }
+    },{
+      "metrics": [
+        {
+          "metric": "proc.mem.resident",
+          "aggregator": "zimsum",
+          "tags": [
+            "host=hibench0"
+          ]
+        }
+      ],
+      "yranges": {
+        "ymin": 0,
+        "ymax": 50000
+      }
+    }
+  ]
+}

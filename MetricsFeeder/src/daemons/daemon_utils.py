@@ -13,8 +13,9 @@ import logging
 
 import requests
 
-from AutomaticRescaler.src.StateDatabase import couchdb as couchDB
-from AutomaticRescaler.src.MyUtils import MyUtils as MyUtils
+# AutomaticRescaler
+from src.StateDatabase import couchdb as couchDB
+from src.MyUtils import MyUtils as MyUtils
 
 _base_path = os.path.dirname(os.path.abspath(__file__))
 

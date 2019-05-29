@@ -1,4 +1,4 @@
-# metrics-to-time-series
+# Metrics Feeder
 This repository provides a series of scripts and daemons to parse the output of programs like **atop**, **nethogs** and **turbostat** and create a timeseries of metrics that can be stored in a file or fed into a timeseries database like **OpenTSDB**.
 * With _**atop**_, resources (cpu, memory, disk and network) can be collected system-wise and process-wise.
 * With _**nethogs**_, network usages can be collected pocess-wise.

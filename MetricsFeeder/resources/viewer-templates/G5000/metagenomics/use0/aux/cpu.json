@@ -1,0 +1,47 @@
+{
+  "timeseries": [
+    {
+      "metrics": [
+        {
+          "metric": "proc.cpu.user",
+          "aggregator": "zimsum",
+          "tags": [
+            "host=master1"
+          ]
+        },
+        {
+          "metric": "proc.cpu.kernel",
+          "aggregator": "zimsum",
+          "tags": [
+            "host=master1"
+          ]
+        }
+      ],
+      "yranges": {
+        "ymin": 0,
+        "ymax": 800
+      }
+    },{
+      "metrics": [
+        {
+          "metric": "proc.cpu.user",
+          "aggregator": "zimsum",
+          "tags": [
+            "host=aux0"
+          ]
+        },
+        {
+          "metric": "proc.cpu.kernel",
+          "aggregator": "zimsum",
+          "tags": [
+            "host=aux0"
+          ]
+        }
+      ],
+      "yranges": {
+        "ymin": 0,
+        "ymax": 800
+      }
+    }
+  ]
+}

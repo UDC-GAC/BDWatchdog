@@ -8,7 +8,7 @@ import os
 import sys
 import pwd
 
-from TimestampsSnitch.src.mongodb.mongodb_agent import delete_test_doc
+from TimestampsSnitch.src.mongodb.mongodb_agent import MongoDBTimestampAgent
 
 
 def eprint(*args, **kwargs):
@@ -48,10 +48,11 @@ def signal_start(experiment_id, username, test_name, timestamp=None):
 
 
 if __name__ == '__main__':
+    mongodb_agent = MongoDBTimestampAgent()
     if len(sys.argv) < 4:
         eprint(
-            "Some action is required, currently 'start', 'end' and 'delete' are supported, "
-            "plus the name of the test, final argument (optional) is time or experiment name if delete")
+            "Some action is required, currently 'start' and 'end' are supported, "
+            "plus the name of the experiment and test, final argument (optional) is time")
         exit(1)
     else:
         option = sys.argv[1]
@@ -70,7 +71,7 @@ if __name__ == '__main__':
             elif option == "end":
                 signal_end(experiment_name, get_username(), test_name, timestamp=timestamp)
         elif option == "delete":
-            delete_test_doc(experiment_name, test_name)
+            mongodb_agent.delete_test(experiment_name, test_name)
         else:
             eprint("Bad option")
             exit(1)

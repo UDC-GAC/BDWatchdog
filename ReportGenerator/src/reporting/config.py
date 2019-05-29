@@ -14,7 +14,7 @@ def read_config(config_path, config_keys):
     config_dict = {}
     config = configparser.ConfigParser()
     config.read(os.path.join(_base_path, config_path))
-    #TODO FIX check that the config file existsts, otherwise give a warning
+    #TODO FIX check that the config file exists, otherwise give a warning
     for key in config_keys:
         try:
             config_dict[key] = config['DEFAULT'][key]

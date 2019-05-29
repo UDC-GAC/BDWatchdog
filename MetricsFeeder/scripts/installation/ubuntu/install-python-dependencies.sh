@@ -1,5 +1,3 @@
 #!/usr/bin/env bash
-sudo apt install python-pip
-sudo pip install requests
-sudo apt install python-daemon python-lockfile
-sudo pip install configparser
+sudo apt install python3-daemon python3-lockfile
+pip2 install requests
