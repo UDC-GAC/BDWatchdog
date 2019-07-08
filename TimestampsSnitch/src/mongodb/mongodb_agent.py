@@ -40,10 +40,13 @@ MAX_CONNECTION_TRIES = 3
 
 
 class MongoDBTimestampAgent:
-    def __init__(self):
-        self.tests_full_endpoint = "http://{0}:{1}/{2}".format(mongodb_ip, mongodb_port, tests_post_endpoint)
-        self.experiments_full_endpoint = "http://{0}:{1}/{2}".format(mongodb_ip, mongodb_port,
-                                                                     experiments_post_endpoint)
+    def __init__(self, tests_full_endpoint=None, experiments_full_endpoint=None):
+        if not tests_full_endpoint:
+            self.tests_full_endpoint = "http://{0}:{1}/{2}".format(mongodb_ip, mongodb_port, tests_post_endpoint)
+
+        if not experiments_full_endpoint:
+            self.experiments_full_endpoint = "http://{0}:{1}/{2}".format(mongodb_ip, mongodb_port,
+                                                                         experiments_post_endpoint)
 
     def get_experiments_endpoint(self):
         return self.experiments_full_endpoint
@@ -51,7 +54,7 @@ class MongoDBTimestampAgent:
     def get_tests_endpoint(self):
         return self.tests_full_endpoint
 
-    def get_test_by_name(self, experiment_name, test_name):
+    def get_test(self, experiment_name, test_name):
         query = '?where={%22experiment_id%22: %22' + experiment_name + '%22, %22test_name%22:%22' + test_name + '%22}'
         endpoint = "{0}/{1}".format(self.tests_full_endpoint, query)
         tries = 0
@@ -82,8 +85,13 @@ class MongoDBTimestampAgent:
             eprint(error_string)
             raise requests.ConnectionError(error_string)
 
-    @staticmethod
-    def get_document(doc_id, endpoint):
+    def get_experiment(self, experiment_name):
+        return self.get_document(experiment_name, self.experiments_full_endpoint)
+
+    def get_document(self, doc_id, endpoint=None):
+        if not endpoint:
+            endpoint = self.get_experiments_endpoint()
+
         tries = 0
         while tries <= MAX_CONNECTION_TRIES:
             status_code = None
@@ -192,7 +200,7 @@ class MongoDBTimestampAgent:
 
     def delete_test(self, experiment_id, test_id):
         if self.experiment_exists(experiment_id):
-            test = self.get_test_by_name(experiment_id, test_id)
+            test = self.get_test(experiment_id, test_id)
             if not test:
                 print("Document doesn't {0} exist".format(test_id))
                 return
@@ -227,7 +235,7 @@ class MongoDBTimestampAgent:
         host_endpoint = "http://{0}:{1}".format(mongodb_ip, mongodb_port)
         endpoint = "{0}/{1}".format(host_endpoint, tests_post_endpoint)
         while not last_page:
-            data = self.get_paginated_experiments(endpoint)
+            data = self.get_paginated_docs(endpoint)
             if not data:
                 return all_experiments
             num_page = data["_meta"]["page"]
@@ -240,34 +248,35 @@ class MongoDBTimestampAgent:
             all_experiments += data["_items"]
         return all_experiments
 
+    def get_experiment_tests(self, experiment_id):
+
+        last_page = False
+        all_tests = list()
+        host_endpoint = "http://{0}:{1}".format(mongodb_ip, mongodb_port)
+        endpoint = "{0}/{1}".format(host_endpoint, tests_post_endpoint) + '/?where={"experiment_id":"' + \
+                   experiment_id + '"}'
+        while not last_page:
+            data = self.get_paginated_docs(endpoint)
+            if not data:
+                return all_tests
+            num_page = data["_meta"]["page"]
+            max_num_retrieved_experiments = num_page * data["_meta"]["max_results"]
+            num_total_tests = data["_meta"]["total"]
+            if max_num_retrieved_experiments < num_total_tests:
+                endpoint = "{0}/{1}".format(host_endpoint, data["_links"]["next"]["href"])
+            else:
+                last_page = True
+            all_tests += data["_items"]
+        return all_tests
+
     @staticmethod
-    def get_paginated_experiments(endpoint):
+    def get_paginated_docs(endpoint):
         try:
             r = requests.get(endpoint)
             return r.json()
         except requests.ConnectionError as error:
             eprint("Error with request {0}".format(str(error)))
             return None
-
-    def get_experiment_tests(self, experiment_id, mongodb_address, endpoint, tests=list()):
-        try:
-            r = requests.get(endpoint)
-        except requests.ConnectionError as error:
-            eprint("Error with request {0}".format(str(error)))
-            return None
-
-        response = r.json()
-        tests = tests + response["_items"]
-        max_results_per_page = response["_meta"]["max_results"]
-        num_page = response["_meta"]["page"]
-        total_docs = response["_meta"]["total"]
-
-        if max_results_per_page * num_page < total_docs:
-            # Still documents to retrieve in next page
-            next_endpoint = 'http://{0}/{1}'.format(mongodb_address, response["_links"]["next"]["href"])
-            return self.get_experiment_tests(experiment_id, mongodb_address, next_endpoint, tests=tests)
-        else:
-            return tests
 
 
 if __name__ == '__main__':

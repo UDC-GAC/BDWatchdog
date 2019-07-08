@@ -6,43 +6,8 @@
           "metric": "sys.disk.usage",
           "aggregator": "zimsum",
           "tags": [
-            "host=chifflot-1",
-            "disk=sda"
-          ]
-        },{
-          "metric": "sys.disk.usage",
-          "aggregator": "zimsum",
-          "tags": [
-            "host=chifflot-1",
-            "disk=sdb"
-          ]
-        },{
-          "metric": "sys.disk.usage",
-          "aggregator": "zimsum",
-          "tags": [
-            "host=chifflot-1",
-            "disk=sdc"
-          ]
-        },{
-          "metric": "sys.disk.usage",
-          "aggregator": "zimsum",
-          "tags": [
-            "host=chifflot-1",
-            "disk=sdd"
-          ]
-        },{
-          "metric": "sys.disk.usage",
-          "aggregator": "zimsum",
-          "tags": [
-            "host=chifflot-1",
-            "disk=sde"
-          ]
-        },{
-          "metric": "sys.disk.usage",
-          "aggregator": "zimsum",
-          "tags": [
-            "host=chifflot-1",
-            "disk=sdf"
+            "host=host0",
+            "disk=sd*"
           ]
         }
       ],
@@ -56,43 +21,8 @@
           "metric": "sys.disk.usage",
           "aggregator": "zimsum",
           "tags": [
-            "host=chifflot-2",
-            "disk=sda"
-          ]
-        },{
-          "metric": "sys.disk.usage",
-          "aggregator": "zimsum",
-          "tags": [
-            "host=chifflot-2",
-            "disk=sdb"
-          ]
-        },{
-          "metric": "sys.disk.usage",
-          "aggregator": "zimsum",
-          "tags": [
-            "host=chifflot-2",
-            "disk=sdc"
-          ]
-        },{
-          "metric": "sys.disk.usage",
-          "aggregator": "zimsum",
-          "tags": [
-            "host=chifflot-2",
-            "disk=sdd"
-          ]
-        },{
-          "metric": "sys.disk.usage",
-          "aggregator": "zimsum",
-          "tags": [
-            "host=chifflot-2",
-            "disk=sde"
-          ]
-        },{
-          "metric": "sys.disk.usage",
-          "aggregator": "zimsum",
-          "tags": [
-            "host=chifflot-2",
-            "disk=sdf"
+            "host=host1",
+            "disk=sd*"
           ]
         }
       ],
@@ -106,43 +36,8 @@
           "metric": "sys.disk.usage",
           "aggregator": "zimsum",
           "tags": [
-            "host=chifflot-3",
-            "disk=sda"
-          ]
-        },{
-          "metric": "sys.disk.usage",
-          "aggregator": "zimsum",
-          "tags": [
-            "host=chifflot-3",
-            "disk=sdb"
-          ]
-        },{
-          "metric": "sys.disk.usage",
-          "aggregator": "zimsum",
-          "tags": [
-            "host=chifflot-3",
-            "disk=sdc"
-          ]
-        },{
-          "metric": "sys.disk.usage",
-          "aggregator": "zimsum",
-          "tags": [
-            "host=chifflot-3",
-            "disk=sdd"
-          ]
-        },{
-          "metric": "sys.disk.usage",
-          "aggregator": "zimsum",
-          "tags": [
-            "host=chifflot-3",
-            "disk=sde"
-          ]
-        },{
-          "metric": "sys.disk.usage",
-          "aggregator": "zimsum",
-          "tags": [
-            "host=chifflot-3",
-            "disk=sdf"
+            "host=host2",
+            "disk=sd*"
           ]
         }
       ],
@@ -156,43 +51,8 @@
           "metric": "sys.disk.usage",
           "aggregator": "zimsum",
           "tags": [
-            "host=chifflot-4",
-            "disk=sda"
-          ]
-        },{
-          "metric": "sys.disk.usage",
-          "aggregator": "zimsum",
-          "tags": [
-            "host=chifflot-4",
-            "disk=sdb"
-          ]
-        },{
-          "metric": "sys.disk.usage",
-          "aggregator": "zimsum",
-          "tags": [
-            "host=chifflot-4",
-            "disk=sdc"
-          ]
-        },{
-          "metric": "sys.disk.usage",
-          "aggregator": "zimsum",
-          "tags": [
-            "host=chifflot-4",
-            "disk=sdd"
-          ]
-        },{
-          "metric": "sys.disk.usage",
-          "aggregator": "zimsum",
-          "tags": [
-            "host=chifflot-4",
-            "disk=sde"
-          ]
-        },{
-          "metric": "sys.disk.usage",
-          "aggregator": "zimsum",
-          "tags": [
-            "host=chifflot-4",
-            "disk=sdf"
+            "host=host3",
+            "disk=sd*"
           ]
         }
       ],

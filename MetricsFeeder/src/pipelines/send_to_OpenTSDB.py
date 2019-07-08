@@ -61,7 +61,7 @@ def send_json_documents(json_documents, requests_Session=None):
 
 def behave_like_pipeline():
     # PROGRAM VARIABLES #
-    last_timestamp = time.time()
+    last_timestamp = time.time() - post_doc_buffer_timeout +1
     failed_connections = 0
     fails = 0
     MAX_FAILS = 10
@@ -77,15 +77,16 @@ def behave_like_pipeline():
                 new_doc = json.loads(line)
                 json_documents = json_documents + [new_doc]
                 fails = 0
-            except ValueError:
+            except ValueError as e:
                 eprint("[TSDB SENDER] Error with document " + str(line))
+                eprint(e)
                 fails += 1
                 if fails >= MAX_FAILS:
                     eprint("[TSDB SENDER] terminated due to too many read pipeline errors")
                     exit(1)
                 continue
 
-            current_timestamp = int(new_doc["timestamp"])
+            current_timestamp = time.time()
             time_diff = current_timestamp - last_timestamp
             length_docs = len(json_documents)
             if length_docs >= post_doc_buffer_length or time_diff >= post_doc_buffer_timeout:

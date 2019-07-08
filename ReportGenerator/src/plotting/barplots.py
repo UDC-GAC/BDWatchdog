@@ -3,11 +3,13 @@ from __future__ import print_function
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from ReportGenerator.src.reporting.config import TEST_TYPE_STEPPING, STATIC_LIMITS
 from ReportGenerator.src.plotting.plot_utils import translate_test_run_name_by_conf_number, \
     FIGURE_SIZE, OVERHEAD_VALUE_SIZE, save_figure, get_y_limit
-from ReportGenerator.src.reporting.utils import translate_metric, some_test_has_missing_aggregate_information, \
-    translate_benchmark
+from ReportGenerator.src.reporting.config import ConfigContainer
+from ReportGenerator.src.reporting.utils import translate_metric, some_test_has_missing_aggregate_information
+
+# Get the config
+cfg = ConfigContainer()
 
 
 def translate_shares_to_vcore_minutes(bars):
@@ -134,7 +136,7 @@ def plot_tests_resource_usage_with_stepping(tests, num_base_experiments):
 
     # Compute the overheads for the remaining tests using the step (number of same configuration tests)
     index = num_base_experiments
-    step = TEST_TYPE_STEPPING
+    step = cfg.TEST_TYPE_STEPPING
     while index < len(tests):
         for resource_tuple in resource_tuples:
             resource, usage_metric = resource_tuple
@@ -175,7 +177,8 @@ def plot_tests_resource_usage_with_stepping(tests, num_base_experiments):
 
         # Set the Y limits
         top, bottom = get_y_limit("resource_usage_with_stepping", max(bars["allocated"]),
-                                  benchmark_type=benchmark_type, resource_label=resource, static_limits=STATIC_LIMITS)
+                                  benchmark_type=benchmark_type, resource_label=resource,
+                                  static_limits=cfg.STATIC_LIMITS)
         ax.set_ylim(top=top, bottom=bottom)
 
         # Set the numbers for the used and allocated values
@@ -212,7 +215,7 @@ def plot_tests_resource_usage_with_stepping(tests, num_base_experiments):
         ax.set_ylabel('Utilization (%)', style="italic", weight="bold")
         plt.ylim(top=100, bottom=0)
 
-        if STATIC_LIMITS:
+        if cfg.STATIC_LIMITS:
             if benchmark_type == "terasort":
                 plt.xlim(left=-0.5, right=4.75)
             elif benchmark_type == "fixwindow":
@@ -256,9 +259,9 @@ def plot_tests_times_with_stepping(tests, num_base_experiments, basetime):
     index = num_base_experiments
     while index < len(tests):
         duration = 0
-        for test in tests[index:index + TEST_TYPE_STEPPING]:
+        for test in tests[index:index + cfg.TEST_TYPE_STEPPING]:
             duration += test["duration"]
-        average_duration = duration / TEST_TYPE_STEPPING
+        average_duration = duration / cfg.TEST_TYPE_STEPPING
         overhead = str(int((average_duration / basetime - 1) * 100)) + "%"
 
         durations.append(average_duration)
@@ -267,7 +270,7 @@ def plot_tests_times_with_stepping(tests, num_base_experiments, basetime):
         labels.append(translate_test_run_name_by_conf_number(configuration, benchmark_type))
 
         configuration += 1
-        index += TEST_TYPE_STEPPING
+        index += cfg.TEST_TYPE_STEPPING
 
     # Translate from seconds to minutes
     bars = [x / 60 for x in bars]
@@ -287,7 +290,7 @@ def plot_tests_times_with_stepping(tests, num_base_experiments, basetime):
 
     # Set the Y limits
     top, bottom = get_y_limit("times_with_stepping", max(bars), benchmark_type=benchmark_type,
-                              static_limits=STATIC_LIMITS)
+                              static_limits=cfg.STATIC_LIMITS)
     ax.set_ylim(top=top, bottom=bottom)
 
     # Label the overheads with a number

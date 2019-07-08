@@ -7,11 +7,24 @@ export function getExperimentsFromMongo(username) {
     let endpoint = getMongoURLfromUI();
     let headers = [ {"header":"Accept", "value":"application/json"} ];
     let mongo_REST_endpoint = endpoint + "/experiments?where={%22username%22:%22" + username + "%22}";
-    sendCORSrequest("GET", mongo_REST_endpoint, headers, 200, function (response){
-        populateExperimentsDropdown(response)
-    }, "Error getting experiments");
+
+    //sendCORSrequest("GET", mongo_REST_endpoint, headers, 200, function (response){
+    //    populateExperimentsDropdown(response)
+    //}, "Error getting experiments");
+
+    getExperimentsFromMongoPaginated(mongo_REST_endpoint, true)
+
 }
 
+function getExperimentsFromMongoPaginated(mongo_REST_endpoint, remove_previous){
+    let headers = [ {"header":"Accept", "value":"application/json"} ];
+    sendCORSrequest("GET", mongo_REST_endpoint, headers, 200, function (response){
+        populateExperimentsDropdown(response, remove_previous);
+        if (response._meta["page"] * response["_meta"]["max_results"] < response["_meta"]["total"]){
+            getExperimentsFromMongoPaginated(getMongoURLfromUI() + "/" + response["_links"]["next"]["href"], false);
+        }
+    }, "Error getting experiments");
+}
 
 export function getExperimentTimes() {
     "use strict";
@@ -62,12 +75,14 @@ function propagateExperimentTimes(experiment) {
 
 }
 
-function populateExperimentsDropdown(experiments) {
+function populateExperimentsDropdown(experiments, remove_previous) {
     "use strict";
     let list = document.getElementById("exps_timepicker_list");
 
-    while (list.firstChild) {
-        list.removeChild(list.firstChild);
+    if(remove_previous) {
+        while (list.firstChild) {
+            list.removeChild(list.firstChild);
+        }
     }
 
     for (let experiment of experiments._items) {

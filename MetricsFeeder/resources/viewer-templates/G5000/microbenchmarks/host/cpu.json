@@ -6,13 +6,13 @@
           "metric": "sys.cpu.user",
           "aggregator": "zimsum",
           "tags": [
-            "host=chifflot-1"
+            "host=host0"
           ]
         }
       ],
       "yranges": {
         "ymin": 0,
-        "ymax": 5000
+        "ymax": 2600
       }
     },{
       "metrics": [
@@ -20,13 +20,13 @@
           "metric": "sys.cpu.user",
           "aggregator": "zimsum",
           "tags": [
-            "host=chifflot-2"
+            "host=host1"
           ]
         }
       ],
       "yranges": {
         "ymin": 0,
-        "ymax": 5000
+        "ymax": 2600
       }
     },{
       "metrics": [
@@ -34,13 +34,13 @@
           "metric": "sys.cpu.user",
           "aggregator": "zimsum",
           "tags": [
-            "host=chifflot-3"
+            "host=host2"
           ]
         }
       ],
       "yranges": {
         "ymin": 0,
-        "ymax": 5000
+        "ymax": 2600
       }
     },{
       "metrics": [
@@ -48,13 +48,13 @@
           "metric": "sys.cpu.user",
           "aggregator": "zimsum",
           "tags": [
-            "host=chifflot-4"
+            "host=host3"
           ]
         }
       ],
       "yranges": {
         "ymin": 0,
-        "ymax": 5000
+        "ymax": 2600
       }
     }
   ]

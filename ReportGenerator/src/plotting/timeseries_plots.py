@@ -1,17 +1,26 @@
 #!/usr/bin/env python
 from __future__ import print_function
+
+import sys
+
 import numpy as np
 import matplotlib.pyplot as plt
 
-from ReportGenerator.src.reporting.config import bdwatchdog_handler, STATIC_LIMITS
-from ReportGenerator.src.reporting.latex_output import latex_print
 from ReportGenerator.src.plotting.plot_utils import translate_plot_name_to_ylabel, line_style, dashes_dict, line_marker, \
     save_figure, \
     get_y_limit, get_x_limit
+from ReportGenerator.src.reporting.config import ConfigContainer
 from ReportGenerator.src.reporting.utils import translate_metric
 
+# Get the config
+cfg = ConfigContainer()
 
-def plot_structure(test, test_name, structure, plots, start_time, end_time, add_plots_to_report=True):
+
+def eprint(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
+
+
+def plot_structure(test, test_name, structure, plots, start_time, end_time):
     structure_name, structure_type = structure
     benchmark_type = test["test_name"].split("_")[0]
 
@@ -27,6 +36,16 @@ def plot_structure(test, test_name, structure, plots, start_time, end_time, add_
             elif structure_type == "app":
                 check_range, ymin, ymax = True, 0, 1200
 
+        # Pre-Check for empty plot (no timeseries for all the metrics)
+        empty_plot = True
+        for metric in plots[plot]:
+            metric_name = metric[0]
+            if test["resources"][structure_name][metric_name]:
+                empty_plot = False
+        if empty_plot:
+            eprint("Plot '{0}' for test {1} has no data, skipping".format(plot, test_name))
+            continue
+
         width, height = 8, 3
         fig = plt.figure(figsize=(width, height))
         ax1 = fig.add_subplot(111)
@@ -41,7 +60,7 @@ def plot_structure(test, test_name, structure, plots, start_time, end_time, add_
 
             # Apply range trimming if necessary
             if check_range:
-                timeseries = bdwatchdog_handler.perform_timeseries_range_apply(timeseries, ymin, ymax)
+                timeseries = cfg.bdwatchdog_handler.perform_timeseries_range_apply(timeseries, ymin, ymax)
 
             # Convert the time stamps to times relative to 0 (basetime)
             basetime = int(list(timeseries.keys())[0])
@@ -71,10 +90,10 @@ def plot_structure(test, test_name, structure, plots, start_time, end_time, add_
 
         # Set x and y limits
         top, bottom = get_y_limit("plot_structure", max_y_ts_point_value, resource_label=plot,
-                                  structure_type=structure_type, static_limits=STATIC_LIMITS)
+                                  structure_type=structure_type, static_limits=cfg.STATIC_LIMITS)
 
         left_x_limit, right_x_limit = get_x_limit("plot_structure", max_x_ts_point_value,
-                                                  benchmark_type=benchmark_type, static_limits=STATIC_LIMITS)
+                                                  benchmark_type=benchmark_type, static_limits=cfg.STATIC_LIMITS)
 
         plt.xlim(left=left_x_limit, right=right_x_limit)
         plt.ylim(top=top, bottom=0)
@@ -90,7 +109,7 @@ def plot_structure(test, test_name, structure, plots, start_time, end_time, add_
                    fancybox=True,
                    facecolor='#afeeee')
 
-        if STATIC_LIMITS:
+        if cfg.STATIC_LIMITS:
             plt.xticks(np.arange(0, right_x_limit, step=100))
         else:
             # May be inaccurate up to +- 'downsample' seconds,
@@ -102,12 +121,6 @@ def plot_structure(test, test_name, structure, plots, start_time, end_time, add_
         figure_name = "{0}_{1}.{2}".format(structure_name, plot, "svg")
         figure_filepath_directory = "{0}/{1}/{2}".format("timeseries_plots", benchmark_type, test_name)
         save_figure(figure_filepath_directory, figure_name, fig)
-
-        if add_plots_to_report:
-            figure_name = "{0}_{1}_{2}.{3}".format(test_name, structure_name, plot, "eps")
-            save_figure(".", figure_name, fig, format="eps")
-            latex_print("![Resource for experiment {0} in structure {1}]({2})".format(
-                test_name, structure_name, figure_name))
         plt.close()
 
 

@@ -15,6 +15,12 @@
           "tags": [
             "host=node0"
           ]
+        },{
+          "metric": "structure.cpu.current",
+          "aggregator": "zimsum",
+          "tags": [
+            "structure=node0"
+          ]
         }
       ],
       "yranges": {
@@ -35,6 +41,12 @@
           "aggregator": "zimsum",
           "tags": [
             "host=node1"
+          ]
+        },{
+          "metric": "structure.cpu.current",
+          "aggregator": "zimsum",
+          "tags": [
+            "structure=node1"
           ]
         }
       ],
@@ -57,6 +69,12 @@
           "tags": [
             "host=node2"
           ]
+        },{
+          "metric": "structure.cpu.current",
+          "aggregator": "zimsum",
+          "tags": [
+            "structure=node2"
+          ]
         }
       ],
       "yranges": {
@@ -77,6 +95,12 @@
           "aggregator": "zimsum",
           "tags": [
             "host=node3"
+          ]
+        },{
+          "metric": "structure.cpu.current",
+          "aggregator": "zimsum",
+          "tags": [
+            "structure=node3"
           ]
         }
       ],
@@ -99,6 +123,12 @@
           "tags": [
             "host=node4"
           ]
+        },{
+          "metric": "structure.cpu.current",
+          "aggregator": "zimsum",
+          "tags": [
+            "structure=node4"
+          ]
         }
       ],
       "yranges": {
@@ -119,6 +149,12 @@
           "aggregator": "zimsum",
           "tags": [
             "host=node5"
+          ]
+        },{
+          "metric": "structure.cpu.current",
+          "aggregator": "zimsum",
+          "tags": [
+            "structure=node5"
           ]
         }
       ],
@@ -141,6 +177,12 @@
           "tags": [
             "host=node6"
           ]
+        },{
+          "metric": "structure.cpu.current",
+          "aggregator": "zimsum",
+          "tags": [
+            "structure=node6"
+          ]
         }
       ],
       "yranges": {
@@ -161,6 +203,12 @@
           "aggregator": "zimsum",
           "tags": [
             "host=node7"
+          ]
+        },{
+          "metric": "structure.cpu.current",
+          "aggregator": "zimsum",
+          "tags": [
+            "structure=node7"
           ]
         }
       ],
@@ -183,6 +231,12 @@
           "tags": [
             "host=node8"
           ]
+        },{
+          "metric": "structure.cpu.current",
+          "aggregator": "zimsum",
+          "tags": [
+            "structure=node8"
+          ]
         }
       ],
       "yranges": {
@@ -203,6 +257,12 @@
           "aggregator": "zimsum",
           "tags": [
             "host=node9"
+          ]
+        },{
+          "metric": "structure.cpu.current",
+          "aggregator": "zimsum",
+          "tags": [
+            "structure=node9"
           ]
         }
       ],
@@ -225,6 +285,12 @@
           "tags": [
             "host=node10"
           ]
+        },{
+          "metric": "structure.cpu.current",
+          "aggregator": "zimsum",
+          "tags": [
+            "structure=node10"
+          ]
         }
       ],
       "yranges": {
@@ -245,6 +311,12 @@
           "aggregator": "zimsum",
           "tags": [
             "host=node11"
+          ]
+        },{
+          "metric": "structure.cpu.current",
+          "aggregator": "zimsum",
+          "tags": [
+            "structure=node11"
           ]
         }
       ],
@@ -267,6 +339,12 @@
           "tags": [
             "host=node12"
           ]
+        },{
+          "metric": "structure.cpu.current",
+          "aggregator": "zimsum",
+          "tags": [
+            "structure=node12"
+          ]
         }
       ],
       "yranges": {
@@ -287,6 +365,12 @@
           "aggregator": "zimsum",
           "tags": [
             "host=node13"
+          ]
+        },{
+          "metric": "structure.cpu.current",
+          "aggregator": "zimsum",
+          "tags": [
+            "structure=node13"
           ]
         }
       ],
@@ -309,6 +393,12 @@
           "tags": [
             "host=node14"
           ]
+        },{
+          "metric": "structure.cpu.current",
+          "aggregator": "zimsum",
+          "tags": [
+            "structure=node14"
+          ]
         }
       ],
       "yranges": {
@@ -329,6 +419,12 @@
           "aggregator": "zimsum",
           "tags": [
             "host=node15"
+          ]
+        },{
+          "metric": "structure.cpu.current",
+          "aggregator": "zimsum",
+          "tags": [
+            "structure=node15"
           ]
         }
       ],

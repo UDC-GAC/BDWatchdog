@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 from __future__ import print_function
+
+import argparse
 import sys
 import json
 
@@ -21,24 +23,25 @@ def print_experiment(experiment_data):
 
 
 if __name__ == '__main__':
-    experiment_id = None
     mongodb_agent = MongoDBTimestampAgent()
-    if len(sys.argv) < 2:
-        eprint("Bad argument, an option is required, an experiment name or 'ALL'")
-        exit(1)
-    else:
-        experiment_id = sys.argv[1]
 
-    if experiment_id == "ALL":
+    parser = argparse.ArgumentParser(description='Get test information of a particular experiment')
+    parser.add_argument('experiment_name', metavar='experiment_name', type=str,
+                        help='The name of the experiment to be retrieved or "ALL" in all the experiments are to be retrieved')
+
+    args = parser.parse_args()
+
+    if args.experiment_name == "ALL":
         data = mongodb_agent.get_all_experiments()
         if not data:
-            eprint("Couldn't find experiment with id {0}".format(experiment_id))
-            exit(0)
+            eprint("Couldn't find experiment data, maybe there is none?")
     else:
-        data = mongodb_agent.get_document(experiment_id, mongodb_agent.get_experiments_endpoint())
+        data = mongodb_agent.get_document(args.experiment_name)
         if not data:
-            eprint("Couldn't find experiment with id {0}".format(experiment_id))
-            exit(0)
+            eprint("Couldn't find experiment with id {0}".format(args.experiment_name))
+
+    if not data:
+        exit(0)
 
     if type(data) == type(dict()):
         print_experiment(data)

@@ -107,7 +107,7 @@ class BDWatchdog:
         return misses
 
     @staticmethod
-    def perform_structure_aggregations(start, end, metrics):
+    def perform_structure_metrics_aggregations(start, end, metrics):
         usages = dict()
         for metric in metrics:
             summatory = 0

@@ -42,6 +42,10 @@ tests_schema = {
         'type': 'integer',
         'min': 1,
     },
+    'tags': {
+        'type': 'list',
+        'min': 0,
+    },
     'test_name': {
          'type': 'string',
           'minlength': 1,
@@ -103,7 +107,7 @@ DOMAIN = {'experiments': experiments, 'tests': tests}
 
 # Please note that MONGO_HOST and MONGO_PORT could very well be left
 # out as they already default to a bare bones local 'mongod' instance.
-MONGO_HOST = "192.168.50.61"
+MONGO_HOST = "0.0.0.0"
 MONGO_PORT = 27017
 
 # Skip these if your db has no auth. But it really should.

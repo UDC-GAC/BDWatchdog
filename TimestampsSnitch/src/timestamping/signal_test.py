@@ -7,6 +7,7 @@ import json
 import os
 import sys
 import pwd
+import argparse
 
 from TimestampsSnitch.src.mongodb.mongodb_agent import MongoDBTimestampAgent
 
@@ -19,59 +20,54 @@ def get_username():
     return pwd.getpwuid(os.getuid())[0]
 
 
-def signal_test(experiment_id, username, test_name):
+def signal_test(experiment_id, username, test_name, timestamp, time_signal_field, tags=None):
     d = dict()
     info = dict()
     info["experiment_id"] = experiment_id
     info["username"] = username
     info["test_name"] = test_name
     info["test_id"] = experiment_id + "_" + test_name
+    if tags:
+        info["tags"] = tags
     d["info"] = info
     d["type"] = "test"
-    return d
-
-
-def signal_end(experiment_id, username, test_name, timestamp=None):
-    d = signal_test(experiment_id, username, test_name)
     if not timestamp:
         timestamp = int(time.time())
-    d["info"]["end_time"] = timestamp
+    d["info"]["{0}_time".format(time_signal_field)] = timestamp
     print(json.dumps(d))
-
-
-def signal_start(experiment_id, username, test_name, timestamp=None):
-    d = signal_test(experiment_id, username, test_name)
-    if not timestamp:
-        timestamp = int(time.time())
-    d["info"]["start_time"] = timestamp
-    print(json.dumps(d))
-
 
 if __name__ == '__main__':
     mongodb_agent = MongoDBTimestampAgent()
-    if len(sys.argv) < 4:
-        eprint(
-            "Some action is required, currently 'start' and 'end' are supported, "
-            "plus the name of the experiment and test, final argument (optional) is time")
-        exit(1)
-    else:
-        option = sys.argv[1]
-        experiment_name = sys.argv[2]
-        test_name = sys.argv[3]
-        if option == "start" or option == "end":
-            timestamp = None
-            if len(sys.argv) >= 5:
-                time_str = sys.argv[4]
-                t = time_str
-                ts = datetime.datetime.strptime(t, "%y/%m/%d %H:%M:%S")
-                timestamp = int(time.mktime(ts.timetuple()))
 
-            if option == "start":
-                signal_start(experiment_name, get_username(), test_name, timestamp=timestamp)
-            elif option == "end":
-                signal_end(experiment_name, get_username(), test_name, timestamp=timestamp)
-        elif option == "delete":
-            mongodb_agent.delete_test(experiment_name, test_name)
+    parser = argparse.ArgumentParser(description='Signal for the start, end times or for the deletion of a test.')
+    parser.add_argument('option', metavar='option', type=str,
+                        help='an operation option "start", "end" or "delete"')
+    parser.add_argument('experiment_name', metavar='experiment_name', type=str,
+                        help='The name of the experiment that encompasses this test')
+    parser.add_argument('test_name', metavar='test_name', type=str,
+                        help='The name of the test')
+    parser.add_argument('--time', type=str, default=None,
+                        help="A time string in the form 'yy/mm/dd HH:MM:SS'")
+    parser.add_argument('--tags', type=str, default=None, nargs='+',
+                        help="A list of tags")
+
+    args = parser.parse_args()
+
+    if args.option == "start" or args.option == "end":
+        timestamp = None
+        if args.time:
+            try:
+                ts = datetime.datetime.strptime(args.time, "%y/%m/%d %H:%M:%S")
+                timestamp = int(time.mktime(ts.timetuple()))
+            except ValueError:
+                eprint("Bad time format, it should follow the format 'yy/mm/dd HH:MM:SS' (e.g., '18/06/01 12:34:36')")
+                exit(1)
         else:
-            eprint("Bad option")
-            exit(1)
+            timestamp = args.time
+
+        signal_test(args.experiment_name, get_username(), args.test_name, timestamp, args.option, args.tags)
+    elif args.option == "delete":
+        mongodb_agent.delete_test(args.experiment_name, args.test_name)
+    else:
+        eprint("Bad option")
+        exit(1)

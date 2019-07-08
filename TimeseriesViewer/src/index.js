@@ -10,6 +10,7 @@ import {flameGraphsIdBase} from "./app/profiling/flamegraphs.js";
 
 import {getExperimentsFromMongo, getExperimentTimes, deleteExperiment} from "./app/timestamping/experiments.js";
 import {getApplicationsFromMongo, getApplicationTimes, deleteApplication} from "./app/timestamping/applications.js";
+import {getNowTime, getTodayTime} from "./app/forms.js";
 
 // PUBLIC //
 export const formsContainerId = "formsContainer";
@@ -208,8 +209,7 @@ export function retimeAll() {
 
     if (time_end === "NaN/NaN/NaN-NaN:NaN:NaN") {
         let newDate = new Date()
-        newDate = new Date(newDate.getTime())
-        time_end = newDate.today() + "-" + newDate.timeNow()
+        time_end = getTodayTime(newDate) + "-" + getNowTime(newDate)
     }
 
     for (let form of monitorings) {

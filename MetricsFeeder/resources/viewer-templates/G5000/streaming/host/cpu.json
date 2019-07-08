@@ -6,7 +6,7 @@
           "metric": "sys.cpu.user",
           "aggregator": "zimsum",
           "tags": [
-            "host=chifflot-1"
+            "host=host7"
           ]
         }
       ],
@@ -20,7 +20,7 @@
           "metric": "sys.cpu.user",
           "aggregator": "zimsum",
           "tags": [
-            "host=chifflot-2"
+            "host=host8"
           ]
         }
       ],
@@ -34,7 +34,7 @@
           "metric": "sys.cpu.user",
           "aggregator": "zimsum",
           "tags": [
-            "host=chifflot-3"
+            "host=host9"
           ]
         }
       ],
@@ -48,7 +48,7 @@
           "metric": "sys.cpu.user",
           "aggregator": "zimsum",
           "tags": [
-            "host=chifflot-4"
+            "host=host10"
           ]
         }
       ],

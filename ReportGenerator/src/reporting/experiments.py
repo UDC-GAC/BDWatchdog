@@ -3,16 +3,18 @@ from __future__ import print_function
 import sys
 import time
 
-from ReportGenerator.src.reporting.config import MONGODB_PORT, TESTS_POST_ENDPOINT, \
-    MONGODB_IP, num_base_experiments, GENERATE_NODES_PLOTS, GENERATE_APP_PLOTS, PRINT_NODE_INFO, \
-    PRINT_TEST_BASIC_INFORMATION, PRINT_MISSING_INFO_REPORT
+from ReportGenerator.src.reporting.config import ConfigContainer
+
 from ReportGenerator.src.reporting.latex_output import print_latex_section
 from ReportGenerator.src.reporting.tests import print_summarized_tests_info, process_test, print_tests_resource_usage, \
     print_tests_resource_utilization, print_tests_resource_overhead_report, print_test_report, \
-    report_resources_missing_data, generate_test_resource_plot, print_tests_resource_hysteresis_report
-from TimestampsSnitch.src.mongodb.mongodb_utils import get_experiment_tests
+    report_resources_missing_data, generate_test_resource_plot, print_tests_resource_hysteresis_report, \
+    print_tests_times, print_tests_resource_utilization_with_stepping
+from TimestampsSnitch.src.mongodb.mongodb_agent import MongoDBTimestampAgent
 from ReportGenerator.src.reporting.utils import generate_duration, print_basic_doc_info, split_tests_by_test_type
 
+# Get the config
+cfg = ConfigContainer()
 
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
@@ -34,10 +36,8 @@ def report_experiment(exp):
     processed_experiment = process_experiment(exp)
 
     # GENERATE ALL ADDED INFO ABOUT TESTS
-    mongodb_address = "{0}:{1}".format(MONGODB_IP, MONGODB_PORT)
-    endpoint = "http://{0}/{1}".format(mongodb_address, TESTS_POST_ENDPOINT) + '/?where={"experiment_id":"' + \
-               processed_experiment["experiment_id"] + '"}'
-    tests = get_experiment_tests(processed_experiment["experiment_id"], mongodb_address, endpoint)
+    agent = MongoDBTimestampAgent()
+    tests = agent.get_experiment_tests(processed_experiment["experiment_id"])
 
     processed_tests = list()
     for test in tests:
@@ -52,26 +52,29 @@ def report_experiment(exp):
     benchmarks = split_tests_by_test_type(processed_tests)
     test_reports = [
         ("Resource usages", print_tests_resource_usage, [], True),
-        ("Tests durations and overheads", print_summarized_tests_info, [num_base_experiments], True),
+        ("Tests durations", print_tests_times, [], True),
+        ("Tests basic information", print_test_report, [cfg.PRINT_NODE_INFO], cfg.PRINT_TEST_BASIC_INFORMATION),
+        ("Missing information report", report_resources_missing_data, [], cfg.PRINT_MISSING_INFO_REPORT),
         ("Resource utilization", print_tests_resource_utilization, [], True),
-        ("Resource overheads", print_tests_resource_overhead_report, [num_base_experiments], num_base_experiments != 0),
-        ("Resource hysteresis", print_tests_resource_hysteresis_report, [], False),
-        ("Tests basic information", print_test_report, [PRINT_NODE_INFO], PRINT_TEST_BASIC_INFORMATION),
-        ("Missing information report", report_resources_missing_data, [], PRINT_MISSING_INFO_REPORT)]
+
+        ("Resource utilization with stepping", print_tests_resource_utilization_with_stepping, [], False),
+        ("Tests durations and overheads", print_summarized_tests_info, [cfg.NUM_BASE_EXPERIMENTS], False),
+        ("Resource overheads", print_tests_resource_overhead_report, [cfg.NUM_BASE_EXPERIMENTS],
+         False and cfg.NUM_BASE_EXPERIMENTS != 0),
+        ("Resource hysteresis", print_tests_resource_hysteresis_report, [], False)]
 
     for test_type in benchmarks:
         for report in test_reports:
-            report_name, report_function, report_function_extra, generate = report
-            if generate:
+            report_name, report_function, report_function_extra, bool_apply = report
+            if bool_apply:
                 eprint("Doing {0} for {1} at {2}".format(
                     report_name, test_type, time.strftime("%D %H:%M:%S", time.localtime())))
                 print_latex_section("{0} for {1}".format(report_name, test_type))
                 args = tuple([benchmarks[test_type]] + report_function_extra)
                 report_function(*args)
 
-    if GENERATE_APP_PLOTS or GENERATE_NODES_PLOTS:
+    if cfg.GENERATE_APP_PLOTS or cfg.GENERATE_NODES_PLOTS:
         for test_type in benchmarks:
             eprint("Plotting resource plots for {0} at {1}".format(
                 test_type, time.strftime("%D %H:%M:%S", time.localtime())))
-            print_latex_section("Resource plots for {0}".format(test_type))
             generate_test_resource_plot(benchmarks[test_type])

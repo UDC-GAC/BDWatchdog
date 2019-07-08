@@ -6,29 +6,8 @@
           "metric": "sys.disk.usage",
           "aggregator": "zimsum",
           "tags": [
-            "host=chifflet-1",
-            "disk=sda"
-          ]
-        },{
-          "metric": "sys.disk.usage",
-          "aggregator": "zimsum",
-          "tags": [
-            "host=chifflet-1",
-            "disk=sdb"
-          ]
-        },{
-          "metric": "sys.disk.usage",
-          "aggregator": "zimsum",
-          "tags": [
-            "host=chifflet-1",
-            "disk=sdc"
-          ]
-        },{
-          "metric": "sys.disk.usage",
-          "aggregator": "zimsum",
-          "tags": [
-            "host=chifflet-1",
-            "disk=sdd"
+            "host=host4",
+            "disk=sd*"
           ]
         }
       ],
@@ -42,101 +21,8 @@
           "metric": "sys.disk.usage",
           "aggregator": "zimsum",
           "tags": [
-            "host=chifflet-2",
-            "disk=sda"
-          ]
-        },{
-          "metric": "sys.disk.usage",
-          "aggregator": "zimsum",
-          "tags": [
-            "host=chifflet-2",
-            "disk=sdb"
-          ]
-        },{
-          "metric": "sys.disk.usage",
-          "aggregator": "zimsum",
-          "tags": [
-            "host=chifflet-2",
-            "disk=sdc"
-          ]
-        },{
-          "metric": "sys.disk.usage",
-          "aggregator": "zimsum",
-          "tags": [
-            "host=chifflet-2",
-            "disk=sdd"
-          ]
-        }
-      ],
-      "yranges": {
-        "ymin": 0,
-        "ymax": 100
-      }
-    },{
-      "metrics": [
-        {
-          "metric": "sys.disk.usage",
-          "aggregator": "zimsum",
-          "tags": [
-            "host=chifflet-3",
-            "disk=sda"
-          ]
-        },{
-          "metric": "sys.disk.usage",
-          "aggregator": "zimsum",
-          "tags": [
-            "host=chifflet-3",
-            "disk=sdb"
-          ]
-        },{
-          "metric": "sys.disk.usage",
-          "aggregator": "zimsum",
-          "tags": [
-            "host=chifflet-3",
-            "disk=sdc"
-          ]
-        },{
-          "metric": "sys.disk.usage",
-          "aggregator": "zimsum",
-          "tags": [
-            "host=chifflet-3",
-            "disk=sdd"
-          ]
-        }
-      ],
-      "yranges": {
-        "ymin": 0,
-        "ymax": 100
-      }
-    },{
-      "metrics": [
-        {
-          "metric": "sys.disk.usage",
-          "aggregator": "zimsum",
-          "tags": [
-            "host=chifflet-4",
-            "disk=sda"
-          ]
-        },{
-          "metric": "sys.disk.usage",
-          "aggregator": "zimsum",
-          "tags": [
-            "host=chifflet-4",
-            "disk=sdb"
-          ]
-        },{
-          "metric": "sys.disk.usage",
-          "aggregator": "zimsum",
-          "tags": [
-            "host=chifflet-4",
-            "disk=sdc"
-          ]
-        },{
-          "metric": "sys.disk.usage",
-          "aggregator": "zimsum",
-          "tags": [
-            "host=chifflet-4",
-            "disk=sdd"
+            "host=host5",
+            "disk=sd*"
           ]
         }
       ],
