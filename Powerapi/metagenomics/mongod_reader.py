@@ -16,7 +16,8 @@ total_data = 0
 partial_data = 0
 anomalous_data = 0
 
-MAX_POWER_CAP = 100
+MAX_POWER_CAP = 200
+
 
 def main():
     def dump_target(target):
@@ -46,9 +47,8 @@ def main():
             collection.delete_one({"_id": post['_id']})
         power /= window_size
 
-
         if power > MAX_POWER_CAP:
-            #eprint("Value: {0} for container {1} is too large".format(power_string, target))
+            # eprint("Value: {0} for container {1} is too large".format(power_string, target))
             anomalous_data += 1
             power = MAX_POWER_CAP
 
@@ -61,7 +61,7 @@ def main():
 
         print(json.dumps(doc))
 
-    delay = 20
+    delay = 10
     TWO_HOURS = 2 * 60 * 60
     start_date = time.time() - TWO_HOURS - delay
 
@@ -78,7 +78,7 @@ def main():
         # Host4
         db = client['smartwatts4']
         collection = db['power']
-        for target in ["aux0", "pre0", "pre1"]:
+        for target in ["pre0", "pre1", "pre2", "pre3"]:
             dump_target(target)
         # Remove all the other documents
         collection.delete_many({"timestamp": {'$lte': dt_end}})
@@ -86,7 +86,7 @@ def main():
         # Host5
         db = client['smartwatts5']
         collection = db['power']
-        for target in ["pre2", "comp0", "comp1", "comp2"]:
+        for target in ["comp0", "comp1", "comp2", "comp3"]:
             dump_target(target)
         # Remove all the other documents
         collection.delete_many({"timestamp": {'$lte': dt_end}})
@@ -94,7 +94,7 @@ def main():
         # Host6
         db = client['smartwatts6']
         collection = db['power']
-        for target in ["pre3", "comp3", "comp4", "comp5"]:
+        for target in ["comp4", "comp5", "aux0", "aux1"]:
             dump_target(target)
         # Remove all the other documents
         collection.delete_many({"timestamp": {'$lte': dt_end}})
@@ -111,6 +111,7 @@ def main():
                    )
                    )
             time.sleep(window_size)
+
 
 if __name__ == "__main__":
     main()

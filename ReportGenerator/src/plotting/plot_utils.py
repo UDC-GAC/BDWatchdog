@@ -2,13 +2,13 @@
 from __future__ import print_function
 import pathlib
 
-from ReportGenerator.src.reporting.config import ConfigContainer
+from ReportGenerator.src.reporting.config import ReporterConfig
 
 OVERHEAD_VALUE_SIZE = 10
 FIGURE_SIZE = (6, 4)
 
 # Get the config
-cfg = ConfigContainer()
+cfg = ReporterConfig()
 
 line_marker = {"cpu": {
     "structure.cpu.current": "x",

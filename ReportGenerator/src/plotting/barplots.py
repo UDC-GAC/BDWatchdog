@@ -5,11 +5,11 @@ import matplotlib.pyplot as plt
 
 from ReportGenerator.src.plotting.plot_utils import translate_test_run_name_by_conf_number, \
     FIGURE_SIZE, OVERHEAD_VALUE_SIZE, save_figure, get_y_limit
-from ReportGenerator.src.reporting.config import ConfigContainer
+from ReportGenerator.src.reporting.config import ReporterConfig
 from ReportGenerator.src.reporting.utils import translate_metric, some_test_has_missing_aggregate_information
 
 # Get the config
-cfg = ConfigContainer()
+cfg = ReporterConfig()
 
 
 def translate_shares_to_vcore_minutes(bars):

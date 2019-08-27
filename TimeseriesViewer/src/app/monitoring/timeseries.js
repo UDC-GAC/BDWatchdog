@@ -200,7 +200,13 @@ export function reDrawGraphByNumber(graph_number) {
         drawGraph(graph_info["data"], graphID, true)
     }
 
-    getGraphData(createJson(start_date, end_date, metrics, graph_number), graphID, callback)
+    let callback_error = function (response, graphID) {
+        graph_info["data"] = {}
+        graph_info["data"]["points"] = []
+        drawGraph(graph_info["data"], graphID, true)
+    }
+
+    getGraphData(createJson(start_date, end_date, metrics, graph_number), graphID, callback, callback_error)
 }
 
 export function parseResponseMetricsData(allMetricsData) {
@@ -478,7 +484,7 @@ export function changeGraphValues(graph_number, metrics, start_date, end_date) {
 //######################
 
 //######## AJAX AND HTTP CALLS ############
-export function getGraphData(json, graphID, callback) {
+export function getGraphData(json, graphID, callback, callback_error) {
     "use strict";
     let url = document.getElementById("config_form").elements.endpoint_OpenTSDB.value
     if (url === "undefined" || url === "") {
@@ -500,12 +506,14 @@ export function getGraphData(json, graphID, callback) {
             callback(response, graphID)
         } else {
             response = JSON.parse(xhr.responseText)
-            alert("Error getting graph data")
+            //alert("Error getting graph data")
+            callback_error(response, graphID)
         }
     }
 
     xhr.onerror = function () {
-        alert("Woops, there was an error making the request.")
+        //alert("Woops, there was an error making the request.")
+        callback_error(response, graphID)
     }
 
     xhr.send(JSON.stringify(json))

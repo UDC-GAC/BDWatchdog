@@ -87,6 +87,33 @@
           "metric": "proc.cpu.user",
           "aggregator": "zimsum",
           "tags": [
+            "host=aux1"
+          ]
+        },
+        {
+          "metric": "proc.cpu.kernel",
+          "aggregator": "zimsum",
+          "tags": [
+            "host=aux1"
+          ]
+        },{
+          "metric": "structure.cpu.current",
+          "aggregator": "zimsum",
+          "tags": [
+            "structure=aux1"
+          ]
+        }
+      ],
+      "yranges": {
+        "ymin": 0,
+        "ymax": 800
+      }
+    },{
+      "metrics": [
+        {
+          "metric": "proc.cpu.user",
+          "aggregator": "zimsum",
+          "tags": [
             "host=pre0"
           ]
         },

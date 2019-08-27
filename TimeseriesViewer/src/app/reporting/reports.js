@@ -8,6 +8,7 @@ import {
 import {readFormMetrics} from "../monitoring/monitorings.js";
 import {getNumFromForm} from "../forms.js";
 import {reportsContainerId} from "../../index.js";
+import {drawGraph} from "../monitoring/timeseries.js";
 
 const reportsIdBase = "report_";
 let report_counter = 0;
@@ -323,7 +324,13 @@ function reWriteReportByNumber(report_number) {
         createReport(report_info.data, reportID, true)
     }
 
-    getGraphData(createJson(start_date, end_date, metrics, report_number, "1s-avg"), reportID, callback)
+    let callback_error = function (response, graphID) {
+        graph_info["data"] = {}
+        graph_info["data"]["points"] = []
+        drawGraph(graph_info["data"], graphID, true)
+    }
+
+    getGraphData(createJson(start_date, end_date, metrics, report_number, "1s-avg"), reportID, callback, callback_error)
 }
 
 export function handleReport(form) {

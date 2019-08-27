@@ -20,6 +20,20 @@
           "metric": "sys.cpu.energy",
           "aggregator": "zimsum",
           "tags": [
+            "host=aux1"
+          ]
+        }
+      ],
+      "yranges": {
+        "ymin": 0,
+        "ymax": 100
+      }
+    },{
+      "metrics": [
+        {
+          "metric": "sys.cpu.energy",
+          "aggregator": "zimsum",
+          "tags": [
             "host=pre0"
           ]
         }

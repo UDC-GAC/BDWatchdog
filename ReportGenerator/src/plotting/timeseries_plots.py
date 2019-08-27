@@ -9,11 +9,11 @@ import matplotlib.pyplot as plt
 from ReportGenerator.src.plotting.plot_utils import translate_plot_name_to_ylabel, line_style, dashes_dict, line_marker, \
     save_figure, \
     get_y_limit, get_x_limit
-from ReportGenerator.src.reporting.config import ConfigContainer
+from ReportGenerator.src.reporting.config import ReporterConfig
 from ReportGenerator.src.reporting.utils import translate_metric
 
 # Get the config
-cfg = ConfigContainer()
+cfg = ReporterConfig()
 
 
 def eprint(*args, **kwargs):
