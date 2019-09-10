@@ -1,13 +1,32 @@
-#!/usr/bin/env python
+# Copyright (c) 2019 Universidade da Coruña
+# Authors:
+#     - Jonatan Enes [main](jonatan.enes@udc.es, jonatan.enes.alvarez@gmail.com)
+#     - Roberto R. Expósito
+#     - Juan Touriño
+#
+# This file is part of the ServerlessContainers framework, from
+# now on referred to as ServerlessContainers.
+#
+# ServerlessContainers is free software: you can redistribute it
+# and/or modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation, either version 3
+# of the License, or (at your option) any later version.
+#
+# ServerlessContainers is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with ServerlessContainers. If not, see <http://www.gnu.org/licenses/>.
+
+
 from __future__ import print_function
 import sys
 import fileinput
 
-import nethogs_to_csv
-from src.pipelines import field_translator as field_translator
-from src.pipelines import hadoop_java_translator as hadoop_java_translator
-from src.pipelines import csv_to_json as csv_to_json
-from src.pipelines import json_to_TSDB_json as json_to_TSDB_json
+from MetricsFeeder.src.nethogs import nethogs_to_csv
+from MetricsFeeder.src.pipelines import field_translator, csv_to_json, json_to_TSDB_json, hadoop_java_translator
 
 
 def eprint(*args, **kwargs):
