@@ -85,6 +85,13 @@ function populateExperimentsDropdown(experiments, remove_previous) {
         }
     }
 
+    experiments._items.sort(function(a, b){
+        if(a.start_time < b.start_time) return -1;
+        if(a.start_time > b.start_time) return 1;
+        return 0;
+    });
+
+
     for (let experiment of experiments._items) {
         let child = document.createElement("li");
         child.innerHTML = experiment.experiment_id;

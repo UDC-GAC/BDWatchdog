@@ -20,6 +20,106 @@ def get_int_value(d, key, default):
         return default
 
 
+# Generate the resource ifnormation of both tests and experiments
+def generate_resources_timeseries(document, cfg):
+    #  Check that the needed start and end time are present, otherwise abort
+    if "end_time" not in document or "start_time" not in document:
+        document["resource_aggregates"] = "n/a"
+        return document
+
+    # Initialize variables
+    document["resource_aggregates"], document["resources"] = dict(), dict()
+    start, end = document["start_time"], document["end_time"]
+
+    # Retrieve the timeseries from OpenTSDB and perform the per-structure aggregations
+    # Slow loop due to network call
+    for node_name in cfg.NODES_LIST:
+        document["resources"][node_name] = \
+            cfg.bdwatchdog_handler.get_structure_timeseries(node_name, start, end,
+                                                                 cfg.BDWATCHDOG_NODE_METRICS)
+
+        metrics_to_agregate = document["resources"][node_name]
+        document["resource_aggregates"][node_name] = \
+            cfg.bdwatchdog_handler.perform_structure_metrics_aggregations(start, end, metrics_to_agregate)
+
+    # Generate the per-node time series 'usage' metrics (e.g., structure.cpu.usage)
+    for node_name in cfg.NODES_LIST:
+        for agg_metric in cfg.USAGE_METRICS_SOURCE:
+            agg_metric_name, metric_list = agg_metric
+            metrics_to_agregate = document["resources"][node_name]
+
+            # Initialize
+            if agg_metric_name not in metrics_to_agregate:
+                metrics_to_agregate[agg_metric_name] = dict()
+
+            # Get the first metric as the time reference, considering that all metrics should have
+            # the same timestamps
+            first_metric = metrics_to_agregate[metric_list[0]]
+            for time_point in first_metric:
+                # Iterate through the metrics
+                for metric in metric_list:
+                    # Initialize
+                    if time_point not in metrics_to_agregate[agg_metric_name]:
+                        metrics_to_agregate[agg_metric_name][time_point] = 0
+
+                    # Sum
+                    metrics_to_agregate[agg_metric_name][time_point] += \
+                        metrics_to_agregate[metric][time_point]
+
+    # Generate the per-node aggregated 'usage' metrics (e.g., structure.cpu.usage)
+    for node_name in cfg.NODES_LIST:
+        for agg_metric in cfg.USAGE_METRICS_SOURCE:
+            agg_metric_name, metrics_to_aggregate = agg_metric
+            aggregates = document["resource_aggregates"][node_name]
+
+            # Initialize
+            if agg_metric_name not in aggregates:
+                aggregates[agg_metric_name] = {"SUM": 0, "AVG": 0}
+
+            # Add up to create the SUM
+            for metric in metrics_to_aggregate:
+                aggregates[agg_metric_name]["SUM"] += aggregates[metric]["SUM"]
+
+            # Create the AVG from the SUM
+            aggregates[agg_metric_name]["AVG"] = aggregates[agg_metric_name]["SUM"] / document["duration"]
+
+    # Generate the aggregated ALL pseudo-metrics for the overall application (all the container nodes)
+    document["resource_aggregates"]["ALL"] = dict()
+    for node_name in cfg.NODES_LIST:
+        for metric in document["resource_aggregates"][node_name]:
+            # Initialize
+            if metric not in document["resource_aggregates"]["ALL"]:
+                document["resource_aggregates"]["ALL"][metric] = dict()
+
+            metric_global_aggregates = document["resource_aggregates"]["ALL"][metric]
+            node_agg_metric = document["resource_aggregates"][node_name][metric]
+
+            for aggregation in node_agg_metric:
+                # Initialize
+                if aggregation not in metric_global_aggregates:
+                    metric_global_aggregates[aggregation] = 0
+
+                # Add up
+                metric_global_aggregates[aggregation] += node_agg_metric[aggregation]
+
+    for app in cfg.APPS_LIST:
+        document["resources"][app] = \
+            cfg.bdwatchdog_handler.get_structure_timeseries(app, start, end, cfg.BDWATCHDOG_APP_METRICS)
+
+        document["resource_aggregates"][app] = \
+            cfg.bdwatchdog_handler.perform_structure_metrics_aggregations(start, end, document["resources"][app])
+
+    # This metric is manually added because container structures do not have it, only application structures
+    document["resource_aggregates"]["ALL"]["structure.energy.max"] = {"SUM": 0, "AVG": 0}
+    for app in cfg.APPS_LIST:
+        document["resource_aggregates"]["ALL"]["structure.energy.max"]["SUM"] += \
+            document["resource_aggregates"][app]["structure.energy.max"]["SUM"]
+        document["resource_aggregates"]["ALL"]["structure.energy.max"]["AVG"] += \
+            document["resource_aggregates"][app]["structure.energy.max"]["AVG"]
+
+    return document
+
+
 def generate_duration(document):
     document["duration"] = "n/a"
     if "end_time" in document and "start_time" in document:
@@ -107,11 +207,11 @@ def translate_metric(metric):
 
     if metric_type == "structure":
         if measure_kind == "usage":
-            translated_metric.append("used")
+            translated_metric.append("{0} used".format(resource))
         elif measure_kind == "current":
-            translated_metric.append("allocated")
+            translated_metric.append("{0} allocated".format(resource))
         elif measure_kind == "max":
-            translated_metric.append("reserved")
+            translated_metric.append("{0} reserved".format(resource))
         else:
             translated_metric.append(measure_kind)
 

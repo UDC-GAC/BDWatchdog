@@ -75,7 +75,7 @@ def main():
         start_date += window_size
 
         # Host0
-        db = client['smartwatts0']
+        db = client['smartwatts16']
         collection = db['power']
         for target in ["node0", "node1", "node2", "node3"]:
             dump_target(target)
@@ -83,7 +83,7 @@ def main():
         collection.delete_many({"timestamp": {'$lte': dt_end}})
 
         # Host1
-        db = client['smartwatts1']
+        db = client['smartwatts17']
         collection = db['power']
         for target in ["node4", "node5", "node6", "node7"]:
             dump_target(target)
@@ -91,7 +91,7 @@ def main():
         collection.delete_many({"timestamp": {'$lte': dt_end}})
 
         # Host2
-        db = client['smartwatts2']
+        db = client['smartwatts18']
         collection = db['power']
         for target in ["node8", "node9", "node10", "node11"]:
             dump_target(target)
@@ -99,9 +99,41 @@ def main():
         collection.delete_many({"timestamp": {'$lte': dt_end}})
 
         # Host3
-        db = client['smartwatts3']
+        db = client['smartwatts19']
         collection = db['power']
         for target in ["node12", "node13", "node14", "node15"]:
+            dump_target(target)
+        # Remove all the other documents
+        collection.delete_many({"timestamp": {'$lte': dt_end}})
+
+        # Host3
+        db = client['smartwatts20']
+        collection = db['power']
+        for target in ["node16", "node17", "node18", "node19"]:
+            dump_target(target)
+        # Remove all the other documents
+        collection.delete_many({"timestamp": {'$lte': dt_end}})
+
+        # Host3
+        db = client['smartwatts21']
+        collection = db['power']
+        for target in ["node20", "node21", "node22", "node23"]:
+            dump_target(target)
+        # Remove all the other documents
+        collection.delete_many({"timestamp": {'$lte': dt_end}})
+
+        # Host3
+        db = client['smartwatts22']
+        collection = db['power']
+        for target in ["node24", "node25", "node26", "node27"]:
+            dump_target(target)
+        # Remove all the other documents
+        collection.delete_many({"timestamp": {'$lte': dt_end}})
+
+        # Host3
+        db = client['smartwatts23']
+        collection = db['power']
+        for target in ["node28", "node29", "node30", "node31"]:
             dump_target(target)
         # Remove all the other documents
         collection.delete_many({"timestamp": {'$lte': dt_end}})

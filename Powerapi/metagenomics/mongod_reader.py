@@ -94,7 +94,15 @@ def main():
         # Host6
         db = client['smartwatts6']
         collection = db['power']
-        for target in ["comp4", "comp5", "aux0", "aux1"]:
+        for target in ["comp4", "comp5", "comp6", "comp7"]:
+            dump_target(target)
+        # Remove all the other documents
+        collection.delete_many({"timestamp": {'$lte': dt_end}})
+
+        # Host7
+        db = client['smartwatts7']
+        collection = db['power']
+        for target in ["comp8", "comp9", "aux0", "aux1"]:
             dump_target(target)
         # Remove all the other documents
         collection.delete_many({"timestamp": {'$lte': dt_end}})

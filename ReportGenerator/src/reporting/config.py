@@ -16,14 +16,16 @@ class MongoDBConfig:
         "EXPERIMENTS_POST_ENDPOINT",
         "MAX_CONNECTION_TRIES",
         "MONGODB_IP",
-        "MONGODB_PORT"
+        "MONGODB_PORT",
+        "MONGODB_USER"
     ]
     __default_config_values = {
         "TESTS_POST_ENDPOINT": "tests",
         "EXPERIMENTS_POST_ENDPOINT": "experiments",
         "MAX_CONNECTION_TRIES": 3,
-        "MONGODB_IP": "times-meta",
-        "MONGODB_PORT": 8000
+        "MONGODB_IP": "times",
+        "MONGODB_PORT": 8000,
+        "MONGODB_USER": "root"
     }
 
     def read_config(self):
@@ -59,13 +61,16 @@ class ReporterConfig:
         "PRINT_NODE_INFO",
         "GENERATE_APP_PLOTS",
         "GENERATE_NODES_PLOTS",
+        "GENERATE_EXPERIMENT_PLOT",
         "NODES_LIST",
         "APPS_LIST",
         "NUM_BASE_EXPERIMENTS",
         "TEST_TYPE_STEPPING",
         "PRINT_TEST_BASIC_INFORMATION",
         "STATIC_LIMITS",
-        "Y_AMPLIFICATION_FACTOR"
+        "Y_AMPLIFICATION_FACTOR",
+        "XLIM",
+        "YLIM"
     ]
     __default_environment_values = {
         "NUM_BASE_EXPERIMENTS": 3,
@@ -74,12 +79,15 @@ class ReporterConfig:
         "PRINT_NODE_INFO": "true",
         "GENERATE_APP_PLOTS": "true",
         "GENERATE_NODES_PLOTS": "true",
+        "GENERATE_EXPERIMENT_PLOT": "false",
         "TEST_TYPE_STEPPING": 3,
         "PRINT_TEST_BASIC_INFORMATION": "false",
         "STATIC_LIMITS": "true",
         "NODES_LIST": "node1,node2,node3,node4,node5,node6,node7,node8,node9",
         "APPS_LIST": "app1",
-        "Y_AMPLIFICATION_FACTOR": 1.3
+        "Y_AMPLIFICATION_FACTOR": 1.3,
+        "XLIM": 1000,
+        "YLIM": 100
     }
 
     def read_config(self):
@@ -114,35 +122,47 @@ class ReporterConfig:
 
         self.MAX_DIFF_TIME = get_int_value(ENV, "MAX_DIFF_TIME", self.__default_environment_values["MAX_DIFF_TIME"])
 
+        # self.BDWATCHDOG_APP_METRICS = [('structure.cpu.current', 'structure'),
+        #                                ('structure.mem.current', 'structure'),
+        #                                ('structure.disk.current', 'structure'),
+        #                                ('structure.net.current', 'structure'),
+        #                                ('structure.energy.max', 'structure'),
+        #                                ('structure.cpu.usage', 'structure'),
+        #                                ('structure.mem.usage', 'structure'),
+        #                                ('structure.disk.usage', 'structure'),
+        #                                ('structure.net.usage', 'structure'),
+        #                                ('structure.energy.usage', 'structure')]
+
         self.BDWATCHDOG_APP_METRICS = [('structure.cpu.current', 'structure'),
-                                       ('structure.mem.current', 'structure'),
-                                       ('structure.disk.current', 'structure'),
-                                       ('structure.net.current', 'structure'),
                                        ('structure.energy.max', 'structure'),
                                        ('structure.cpu.usage', 'structure'),
-                                       ('structure.mem.usage', 'structure'),
-                                       ('structure.disk.usage', 'structure'),
-                                       ('structure.net.usage', 'structure'),
                                        ('structure.energy.usage', 'structure')]
+
+        # self.BDWATCHDOG_NODE_METRICS = [('structure.cpu.current', 'structure'), ('proc.cpu.user', 'host'),
+        #                                 ('proc.cpu.kernel', 'host'), ('limit.cpu.upper', 'structure'),
+        #                                 ('limit.cpu.lower', 'structure'),
+        #                                 ('structure.mem.current', 'structure'), ('proc.mem.resident', 'host'),
+        #                                 ('proc.mem.virtual', 'host'), ('limit.mem.upper', 'structure'),
+        #                                 ('limit.mem.lower', 'structure'),
+        #                                 ('structure.disk.current', 'structure'), ('proc.disk.reads.mb', 'host'),
+        #                                 ('proc.disk.writes.mb', 'host'), ('limit.disk.upper', 'structure'),
+        #                                 ('limit.disk.lower', 'structure'),
+        #                                 ('structure.net.current', 'structure'), ('proc.net.tcp.out.mb', 'host'),
+        #                                 ('limit.net.upper', 'structure'), ('limit.net.lower', 'structure'),
+        #                                 ('proc.net.tcp.in.mb', 'host'), ('structure.energy.usage', 'structure')]
 
         self.BDWATCHDOG_NODE_METRICS = [('structure.cpu.current', 'structure'), ('proc.cpu.user', 'host'),
                                         ('proc.cpu.kernel', 'host'), ('limit.cpu.upper', 'structure'),
-                                        ('limit.cpu.lower', 'structure'),
-                                        ('structure.mem.current', 'structure'), ('proc.mem.resident', 'host'),
-                                        ('proc.mem.virtual', 'host'), ('limit.mem.upper', 'structure'),
-                                        ('limit.mem.lower', 'structure'),
-                                        ('structure.disk.current', 'structure'), ('proc.disk.reads.mb', 'host'),
-                                        ('proc.disk.writes.mb', 'host'), ('limit.disk.upper', 'structure'),
-                                        ('limit.disk.lower', 'structure'),
-                                        ('structure.net.current', 'structure'), ('proc.net.tcp.out.mb', 'host'),
-                                        ('limit.net.upper', 'structure'), ('limit.net.lower', 'structure'),
-                                        ('proc.net.tcp.in.mb', 'host'), ('structure.energy.usage', 'structure')]
+                                        ('limit.cpu.lower', 'structure'), ('sys.cpu.energy', 'host')]
 
-        self.PRINTED_METRICS = ['structure.cpu.current', 'structure.cpu.usage', 'proc.cpu.user', 'proc.cpu.kernel',
-                                'structure.mem.current', 'structure.mem.usage', 'proc.mem.resident', 'proc.mem.virtual',
-                                'structure.disk.current', 'proc.disk.reads.mb', 'proc.disk.writes.mb',
-                                'structure.net.current',
-                                'proc.net.tcp.out.mb', 'proc.net.tcp.in.mb', 'structure.energy.usage']
+        # self.PRINTED_METRICS = ['structure.cpu.current', 'structure.cpu.usage', 'proc.cpu.user', 'proc.cpu.kernel',
+        #                         'structure.mem.current', 'structure.mem.usage', 'proc.mem.resident', 'proc.mem.virtual',
+        #                         'structure.disk.current', 'proc.disk.reads.mb', 'proc.disk.writes.mb',
+        #                         'structure.net.current',
+        #                         'proc.net.tcp.out.mb', 'proc.net.tcp.in.mb', 'structure.energy.usage']
+
+        self.PRINTED_METRICS = ['structure.cpu.current', 'structure.cpu.usage', 'structure.energy.max',
+                                'structure.energy.usage']
 
         self.MAX_COLUMNS = {"print_test_resources": 6, "print_summarized_tests_info": 8,
                             "print_tests_resource_utilization_report": 8, "print_tests_resource_overhead_report": 8,
@@ -154,11 +174,14 @@ class ReporterConfig:
 
         self.Y_AMPLIFICATION_FACTOR = get_int_value(ENV, "Y_AMPLIFICATION_FACTOR",
                                                     self.__default_environment_values["Y_AMPLIFICATION_FACTOR"])
+        self.XLIM = get_int_value(ENV, "XLIM", self.__default_environment_values["XLIM"])
+        self.YLIM = get_int_value(ENV, "YLIM", self.__default_environment_values["YLIM"])
 
         self.PRINT_MISSING_INFO_REPORT = ENV["PRINT_MISSING_INFO_REPORT"] == "true"
         self.PRINT_NODE_INFO = ENV["PRINT_NODE_INFO"] == "true"
         self.GENERATE_APP_PLOTS = ENV["GENERATE_APP_PLOTS"] == "true"
         self.GENERATE_NODES_PLOTS = ENV["GENERATE_NODES_PLOTS"] == "true"
+        self.GENERATE_EXPERIMENT_PLOT = ENV["GENERATE_EXPERIMENT_PLOT"] == "true"
         self.NUM_BASE_EXPERIMENTS = get_int_value(ENV, "NUM_BASE_EXPERIMENTS",
                                                   self.__default_environment_values["NUM_BASE_EXPERIMENTS"])
 
@@ -166,24 +189,48 @@ class ReporterConfig:
                                                 self.__default_environment_values["TEST_TYPE_STEPPING"])
         self.bdwatchdog_handler = bdwatchdog.BDWatchdog()
 
+        # self.RESOURCE_UTILIZATION_TUPLES = [
+        #     ("cpu", "structure.cpu.current", "structure.cpu.usage"),
+        #     ("mem", "structure.mem.current", "structure.mem.usage"),
+        #     ("energy", "structure.energy.max", "structure.energy.usage")]
+
         self.RESOURCE_UTILIZATION_TUPLES = [
             ("cpu", "structure.cpu.current", "structure.cpu.usage"),
-            ("mem", "structure.mem.current", "structure.mem.usage")]
-        # ,("energy", "structure.energy.max", "structure.energy.usage")
+            ("energy", "structure.energy.max", "structure.energy.usage")]
+
+        # self.USAGE_METRICS_SOURCE = [("structure.cpu.usage", ['proc.cpu.user', 'proc.cpu.kernel']),
+        #                              ("structure.mem.usage", ['proc.mem.resident']),
+        #                              ("structure.disk.usage", ['proc.disk.writes.mb', 'proc.disk.reads.mb']),
+        #                              ("structure.net.usage", ['proc.net.tcp.in.mb', 'proc.net.tcp.out.mb']),
+        #                              ("structure.energy.usage", ['structure.energy.usage'])
+        #                              ]
 
         self.USAGE_METRICS_SOURCE = [("structure.cpu.usage", ['proc.cpu.user', 'proc.cpu.kernel']),
-                                     ("structure.mem.usage", ['proc.mem.resident']),
-                                     ("structure.disk.usage", ['proc.disk.writes.mb', 'proc.disk.reads.mb']),
-                                     ("structure.net.usage", ['proc.net.tcp.in.mb', 'proc.net.tcp.out.mb']),
-                                     ("structure.energy.usage", ['structure.energy.usage'])
-                                     ]
+                                     ("structure.energy.usage", ['sys.cpu.energy'])]
 
-        self.METRICS_TO_CHECK_FOR_MISSING_DATA = [('structure.cpu.current', 'structure'), ('proc.cpu.user', 'host'),
+        # self.METRICS_TO_CHECK_FOR_MISSING_DATA = [('structure.cpu.current', 'structure'), ('proc.cpu.user', 'host'),
+        #                                           ('proc.cpu.kernel', 'host'),
+        #                                           ('structure.mem.current', 'structure'), ('proc.mem.resident', 'host'),
+        #                                           ('structure.energy.usage', 'structure')
+        #                                           ,('structure.energy.max', 'structure'),
+        #                                           ]
+
+        self.METRICS_TO_CHECK_FOR_MISSING_DATA = [('structure.cpu.current', 'structure'),
+                                                  ('proc.cpu.user', 'host'),
                                                   ('proc.cpu.kernel', 'host'),
-                                                  ('structure.mem.current', 'structure'), ('proc.mem.resident', 'host'),
-                                                  ('structure.energy.usage', 'structure')
-                                                  # ,('structure.energy.max', 'structure'),
-                                                  ]
+                                                  ('structure.energy.usage', 'structure')]
+
+        # self.METRICS_FOR_OVERHEAD_REPORT = [("cpu used", "structure.cpu.usage"),
+        #                                     ("cpu allocated", "structure.cpu.current"),
+        #                                     ("mem used", "structure.mem.usage"),
+        #                                     ("mem allocated", "structure.mem.current"),
+        #                                     ("energy allowed", "structure.energy.max"),
+        #                                     ("energy used", "structure.energy.usage")]
+
+        self.METRICS_FOR_OVERHEAD_REPORT = [("cpu used", "structure.cpu.usage"),
+                                            ("cpu allocated", "structure.cpu.current"),
+                                            ("energy allowed", "structure.energy.max"),
+                                            ("energy used", "structure.energy.usage")]
 
         self.PRINT_TEST_BASIC_INFORMATION = ENV["PRINT_TEST_BASIC_INFORMATION"] == "true"
         self.NODES_LIST = ENV["NODES_LIST"].rstrip('"').lstrip('"').split(",")

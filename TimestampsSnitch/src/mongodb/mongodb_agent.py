@@ -16,11 +16,13 @@ headers = {'content-type': 'application/json'}
 
 default_mongodb_port = 8000
 default_mongodb_ip = "mongodb"
+default_mongodb_user = "root"
 default_tests_database_name = "tests"
 default_experiments_database_name = "experiments"
 
 MONGODB_IP_OS_VARNAME = "MONGODB_IP"
 MONGODB_PORT_OS_VARNAME = "MONGODB_PORT"
+MONGODB_USER_VARNAME = "MONGODB_USER"
 TESTS_POST_ENDPOINT_OS_VARNAME = "TESTS_POST_ENDPOINT"
 EXPERIMENTS_POST_ENDPOINT_OS_VARNAME = "EXPERIMENTS_POST_ENDPOINT"
 post_doc_buffer_length = 1
@@ -40,6 +42,7 @@ class MongoDBTimestampAgent:
             except ValueError:
                 eprint("Invalid port configuration, using default '" + str(default_mongodb_port) + "'")
                 self.mongodb_port = str(default_mongodb_port)
+                self.username = os.getenv(MONGODB_USER_VARNAME, default_mongodb_user)
         else:
             try:
                 self.tests_post_endpoint = os_env[TESTS_POST_ENDPOINT_OS_VARNAME]
@@ -57,6 +60,10 @@ class MongoDBTimestampAgent:
                 self.mongodb_port = str(int(os_env[MONGODB_PORT_OS_VARNAME]))
             except (ValueError, KeyError):
                 self.mongodb_port = str(default_mongodb_port)
+            try:
+                self.username = str(os_env[MONGODB_USER_VARNAME])
+            except KeyError:
+                self.username = str(default_mongodb_user)
 
         self.tests_full_endpoint = "http://{0}:{1}/{2}".format(self.mongodb_ip, self.mongodb_port,
                                                                self.tests_post_endpoint)
@@ -249,7 +256,8 @@ class MongoDBTimestampAgent:
         last_page = False
         all_experiments = list()
         host_endpoint = "http://{0}:{1}".format(self.mongodb_ip, self.mongodb_port)
-        endpoint = "{0}/{1}".format(host_endpoint, self.tests_post_endpoint)
+        endpoint = "{0}/{1}".format(host_endpoint, self.tests_post_endpoint) + \
+                   "/?where={\"username\":\"{0}\"}".format(self.username)
         while not last_page:
             data = self.get_paginated_docs(endpoint)
             if not data:
@@ -265,12 +273,11 @@ class MongoDBTimestampAgent:
         return all_experiments
 
     def get_experiment_tests(self, experiment_id):
-
         last_page = False
         all_tests = list()
         host_endpoint = "http://{0}:{1}".format(self.mongodb_ip, self.mongodb_port)
-        endpoint = "{0}/{1}".format(host_endpoint, self.tests_post_endpoint) + '/?where={"experiment_id":"' + \
-                   experiment_id + '"}'
+        endpoint = "{0}/{1}".format(host_endpoint, self.tests_post_endpoint) + \
+                   '/?where={"experiment_id":"' + experiment_id + '", "username":"' + self.username + '"}'
         while not last_page:
             data = self.get_paginated_docs(endpoint)
             if not data:

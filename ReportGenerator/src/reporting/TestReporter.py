@@ -8,10 +8,10 @@ from ReportGenerator.src.reporting.latex_output import latex_print, print_latex_
 
 from ReportGenerator.src.plotting.barplots import plot_tests_resource_usage, plot_tests_times, \
     plot_tests_times_with_stepping, plot_tests_resource_usage_with_stepping
-from ReportGenerator.src.plotting.timeseries_plots import get_plots, plot_structure
+from ReportGenerator.src.plotting.timeseries_plots import get_plots, plot_document
 
 from ReportGenerator.src.reporting.utils import generate_duration, translate_metric, format_metric, flush_table, \
-    print_basic_doc_info, some_test_has_missing_aggregate_information, get_test_type
+    print_basic_doc_info, some_test_has_missing_aggregate_information, get_test_type, generate_resources_timeseries
 
 
 def eprint(*args, **kwargs):
@@ -25,112 +25,7 @@ class TestReporter():
 
     def process_test(self, test):
         test = generate_duration(test)
-        test = self.generate_test_resources_timeseries(test)
-        return test
-
-    def generate_test_resources_timeseries(self, test):
-        #  Check that the needed start and end time are present, otherwise abort
-        if "end_time" not in test or "start_time" not in test:
-            test["resource_aggregates"] = "n/a"
-            return test
-
-        # Initialize variables
-        test["resource_aggregates"], test["resources"] = dict(), dict()
-        start, end = test["start_time"], test["end_time"]
-
-        # Retrieve the timeseries from OpenTSDB and perform the per-structure aggregations
-        # Slow loop due to network call
-        for node_name in self.cfg.NODES_LIST:
-            test["resources"][node_name] = \
-                self.cfg.bdwatchdog_handler.get_structure_timeseries(node_name, start, end,
-                                                                     self.cfg.BDWATCHDOG_NODE_METRICS)
-
-            metrics_to_agregate = test["resources"][node_name]
-            test["resource_aggregates"][node_name] = \
-                self.cfg.bdwatchdog_handler.perform_structure_metrics_aggregations(start, end, metrics_to_agregate)
-
-        # Generate the per-node time series 'usage' metrics (e.g., structure.cpu.usage)
-        for node_name in self.cfg.NODES_LIST:
-            for agg_metric in self.cfg.USAGE_METRICS_SOURCE:
-                agg_metric_name, metric_list = agg_metric
-                metrics_to_agregate = test["resources"][node_name]
-
-                # Initialize
-                if agg_metric_name not in metrics_to_agregate:
-                    metrics_to_agregate[agg_metric_name] = dict()
-
-                # Get the first metric as the time reference, considering that all metrics should have
-                # the same timestamps
-                first_metric = metrics_to_agregate[metric_list[0]]
-                for time_point in first_metric:
-                    # Iterate through the metrics
-                    for metric in metric_list:
-                        # Initialize
-                        if time_point not in metrics_to_agregate[agg_metric_name]:
-                            metrics_to_agregate[agg_metric_name][time_point] = 0
-
-                        # Sum
-                        metrics_to_agregate[agg_metric_name][time_point] += \
-                            metrics_to_agregate[metric][time_point]
-
-        # Generate the per-node aggregated 'usage' metrics (e.g., structure.cpu.usage)
-        for node_name in self.cfg.NODES_LIST:
-            for agg_metric in self.cfg.USAGE_METRICS_SOURCE:
-                agg_metric_name, metrics_to_aggregate = agg_metric
-                aggregates = test["resource_aggregates"][node_name]
-
-                # Initialize
-                if agg_metric_name not in aggregates:
-                    aggregates[agg_metric_name] = {"SUM": 0, "AVG": 0}
-
-                # Add up to create the SUM
-                for metric in metrics_to_aggregate:
-                    aggregates[agg_metric_name]["SUM"] += aggregates[metric]["SUM"]
-
-                # Create the AVG from the SUM
-                aggregates[agg_metric_name]["AVG"] = aggregates[agg_metric_name]["SUM"] / test["duration"]
-
-        # Generate the aggregated ALL pseudo-metrics for the overall application (all the container nodes)
-        test["resource_aggregates"]["ALL"] = dict()
-        for node_name in self.cfg.NODES_LIST:
-            for metric in test["resource_aggregates"][node_name]:
-                # Initialize
-                if metric not in test["resource_aggregates"]["ALL"]:
-                    test["resource_aggregates"]["ALL"][metric] = dict()
-
-                metric_global_aggregates = test["resource_aggregates"]["ALL"][metric]
-                node_agg_metric = test["resource_aggregates"][node_name][metric]
-
-                for aggregation in node_agg_metric:
-                    # Initialize
-                    if aggregation not in metric_global_aggregates:
-                        metric_global_aggregates[aggregation] = 0
-
-                    # Add up
-                    metric_global_aggregates[aggregation] += node_agg_metric[aggregation]
-
-        # TODO This should be done dynamically, retrieve the "application" structures and
-        # using its container list, create the aggregates
-        # or get the data directly thanks to the refeeder
-        # Retrieve and add the "app1" metrics
-        test["resources"]["aux_user0"] = \
-            self.cfg.bdwatchdog_handler.get_structure_timeseries("aux_user0", start, end, self.cfg.BDWATCHDOG_APP_METRICS)
-        test["resources"]["pre_user0"] = \
-            self.cfg.bdwatchdog_handler.get_structure_timeseries("pre_user0", start, end, self.cfg.BDWATCHDOG_APP_METRICS)
-        test["resources"]["comp_user0"] = \
-            self.cfg.bdwatchdog_handler.get_structure_timeseries("comp_user0", start, end, self.cfg.BDWATCHDOG_APP_METRICS)
-
-        test["resource_aggregates"]["aux_user0"] = \
-            self.cfg.bdwatchdog_handler.perform_structure_metrics_aggregations(start, end, test["resources"]["aux_user0"])
-        test["resource_aggregates"]["pre_user0"] = \
-            self.cfg.bdwatchdog_handler.perform_structure_metrics_aggregations(start, end, test["resources"]["pre_user0"])
-        test["resource_aggregates"]["comp_user0"] = \
-            self.cfg.bdwatchdog_handler.perform_structure_metrics_aggregations(start, end, test["resources"]["comp_user0"])
-
-        # This metric is manually added because container structures do not have it, only application structures
-        # test["resource_aggregates"]["ALL"]["structure.energy.max"] = \
-        #     test["resource_aggregates"]["app1"]["structure.energy.max"]
-
+        test = generate_resources_timeseries(test, self.cfg)
         return test
 
     def generate_test_resource_plot(self, tests):
@@ -143,15 +38,15 @@ class TestReporter():
 
             if self.cfg.GENERATE_NODES_PLOTS:
                 for node in self.cfg.NODES_LIST:
-                    test_plots = plots["node"]["serverless"]
+                    test_plots = plots["node"]["energy"]
                     structure = (node, "node")
-                    plot_structure(test, test["test_name"], structure, test_plots, start, end)
+                    plot_document(test, structure, test_plots, start, end)
 
             if self.cfg.GENERATE_APP_PLOTS:
                 for app in self.cfg.APPS_LIST:
-                    app_plots = plots["app"]["serverless"]
+                    app_plots = plots["app"]["energy"]
                     structure = (app, "app")
-                    plot_structure(test, test["test_name"], structure, app_plots, start, end)
+                    plot_document(test, structure, app_plots, start, end)
 
     # PRINT TEST RESOURCE USAGES
     def print_test_resources(self, test, structures_list):
@@ -163,8 +58,7 @@ class TestReporter():
         headers, rows, remaining_data, num_columns = ["structure", "aggregation"], dict(), False, 0
         for metric_name in self.cfg.PRINTED_METRICS:
             headers.append(translate_metric(metric_name))
-            for structure in structures_list:
-                structure_name = structure[2]
+            for structure_name in structures_list:
 
                 # Initialize
                 if structure_name not in rows:
@@ -173,8 +67,13 @@ class TestReporter():
                 for agg in ["SUM", "AVG"]:
                     if agg not in rows[structure_name]:
                         rows[structure_name][agg] = [structure_name, agg]
-                    rows[structure_name][agg].append(
-                        format_metric(test["resource_aggregates"][structure_name][metric_name][agg], metric_name, agg))
+
+                    try:
+                        rows[structure_name][agg].append(
+                            format_metric(test["resource_aggregates"][structure_name][metric_name][agg], metric_name,
+                                          agg))
+                    except KeyError:
+                        rows[structure_name][agg].append("n/a")
 
             num_columns += 1
             remaining_data = True
@@ -191,52 +90,10 @@ class TestReporter():
             final_rows += list(rows[row].values())
         flush_table(final_rows, headers, table_caption)
 
-    def print_tests_resource_hysteresis_report(self, tests):
-        max_columns = self.cfg.MAX_COLUMNS["print_tests_resource_hysteresis_report"]
-        table_caption = "TESTs resource hysteresis"
-
-        headers, rows, num_columns, remaining_data = list(), dict(), 0, False
-        headers.append("resource")
-
-        if some_test_has_missing_aggregate_information(tests):
-            return
-
-        for test in tests:
-            headers.append(test["test_name"])
-
-            for resource_tuple in [("cpu", "proc.cpu.user"), ("mem", "proc.mem.resident")]:
-                resource, usage = resource_tuple
-
-                if resource not in rows:
-                    rows[resource] = [resource]
-
-                hysteresis = 0
-                for structure in test["resources"]:
-                    if structure.startswith("node"):
-                        structure_timeseries = test["resources"][structure][usage]
-                        hysteresis += self.cfg.bdwatchdog_handler.perform_hysteresis_aggregation(
-                            structure_timeseries) / 1000
-
-                rows[resource].append(hysteresis)
-
-            num_columns += 1
-            remaining_data = True
-            if num_columns >= max_columns:
-                flush_table(rows.values(), headers, table_caption)
-                table_caption = None
-                headers, rows, num_columns, remaining_data = list(), dict(), 0, False
-                headers.append("resource")
-
-        if remaining_data:
-            flush_table(rows.values(), headers, table_caption)
-
     # PRINT TEST RESOURCE OVERHEAD
     def print_tests_resource_overhead_report_with_stepping(self, tests, num_base_experiments=3):
         max_columns = self.cfg.MAX_COLUMNS["print_tests_resource_overhead_report_with_stepping"]
-        resource_tuples = [("cpu used", "structure.cpu.usage"), ("cpu allocated", "structure.cpu.current"),
-                           ("mem used", "structure.mem.usage"), ("mem allocated", "structure.mem.current")
-                           # ,("energy", "structure.energy.usage")
-                           ]
+        resource_tuples = self.cfg.METRICS_FOR_OVERHEAD_REPORT
 
         overheads, base_values, headers, num_columns, remaining_data = dict(), dict(), ["resource"], 0, False
 
@@ -295,10 +152,7 @@ class TestReporter():
     def print_tests_resource_overhead_report(self, tests, num_base_experiments=3, print_with_stepping=True):
         table_caption = "TESTs resource overhead"
         max_columns = self.cfg.MAX_COLUMNS["print_tests_resource_overhead_report"]
-        resource_tuples = [("cpu used", "structure.cpu.usage"), ("cpu allocated", "structure.cpu.current"),
-                           ("mem used", "structure.mem.usage"), ("mem allocated", "structure.mem.current"),
-                           ("energy", "structure.energy.usage")
-                           ]
+        resource_tuples = self.cfg.METRICS_FOR_OVERHEAD_REPORT
 
         overheads, base_values, headers, num_columns, remaining_data = dict(), dict(), ["resource"], 0, False
 
@@ -419,14 +273,17 @@ class TestReporter():
                 if test["resource_aggregates"] == "n/a":
                     rows[resource].append("n/a")
                 else:
-                    available = test["resource_aggregates"]["ALL"][current]["SUM"]
-                    used = test["resource_aggregates"]["ALL"][usage]["SUM"]
-                    if available <= 0:
+                    try:
+                        available = test["resource_aggregates"]["ALL"][current]["SUM"]
+                        used = test["resource_aggregates"]["ALL"][usage]["SUM"]
+                        if available <= 0:
+                            raise KeyError
+                        else:
+                            rows[resource].append(str(int(100 * used / available) - 1) + '%')
+                    except KeyError:
                         eprint("Resource utilization for '{0}' skipped as no value for applied resource limits are "
                                "present and thus not utilization ratio can be computed".format(resource))
                         continue
-                    else:
-                        rows[resource].append(str(int(100 * used / available) - 1) + '%')
 
             num_columns += 1
             remaining_data = True
@@ -449,7 +306,10 @@ class TestReporter():
             for metric in self.cfg.METRICS_TO_CHECK_FOR_MISSING_DATA:
                 metric_name = metric[0]
                 for structure in structures_list:
-                    timeseries = test["resources"][structure][metric_name]
+                    if metric_name in test["resources"][structure]:
+                        timeseries = test["resources"][structure][metric_name]
+                    else:
+                        timeseries = None
                     if bool(timeseries):
                         structure_misses_list = self.cfg.bdwatchdog_handler.perform_check_for_missing_metric_info(
                             timeseries)
@@ -497,9 +357,11 @@ class TestReporter():
         headers, rows, num_columns, remaining_data = ["resource", "aggregation"], dict(), 0, False
         for test in tests:
             headers.append(test["test_name"])
-            for resource in ["structure.cpu.current", "structure.cpu.usage", "structure.mem.current",
-                             "structure.mem.usage", "structure.energy.usage"]:
-                # , "structure.energy.usage"]:
+            metrics = list()
+            for t in self.cfg.RESOURCE_UTILIZATION_TUPLES:
+                metrics.append(t[1])
+                metrics.append(t[2])
+            for resource in metrics:
                 if resource not in rows:
                     rows[resource] = dict()
 
@@ -510,8 +372,11 @@ class TestReporter():
                     if test["resource_aggregates"] == "n/a":
                         rows[resource][agg].append("n/a")
                     else:
-                        rows[resource][agg].append(
-                            format_metric(test["resource_aggregates"]["ALL"][resource][agg], resource, agg))
+                        try:
+                            rows[resource][agg].append(
+                                format_metric(test["resource_aggregates"]["ALL"][resource][agg], resource, agg))
+                        except KeyError:
+                            rows[resource][agg].append("n/a")
 
             num_columns += 1
             remaining_data = True
@@ -532,11 +397,11 @@ class TestReporter():
             if print_node_info:
                 structures_list = list()
                 for node in self.cfg.NODES_LIST:
-                    structures_list.append(("container", "host", node))
+                    structures_list.append(node)
                 self.print_test_resources(test, structures_list)
                 print("")
 
-            structures_list = [("container", "structure", "ALL")]
+            structures_list = ["ALL", "aux_user0", "pre_user0", "comp_user0"]
             self.print_test_resources(test, structures_list)
             print("")
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-source /home/jonatan/development/bdwatchdog/set_pythonpath.sh
+source $HOME/development/BDWatchdog/set_pythonpath.sh
 export REPORT_GENERATOR_PATH=$BDWATCHDOG_PATH/ReportGenerator
 
 echo "Generating report for experiment $1"

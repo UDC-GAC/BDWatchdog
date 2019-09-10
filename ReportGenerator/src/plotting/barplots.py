@@ -4,7 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from ReportGenerator.src.plotting.plot_utils import translate_test_run_name_by_conf_number, \
-    FIGURE_SIZE, OVERHEAD_VALUE_SIZE, save_figure, get_y_limit
+    BARPLOTS_FIGURE_SIZE, OVERHEAD_VALUE_SIZE, save_figure, get_y_limit
 from ReportGenerator.src.reporting.config import ReporterConfig
 from ReportGenerator.src.reporting.utils import translate_metric, some_test_has_missing_aggregate_information
 
@@ -163,7 +163,7 @@ def plot_tests_resource_usage_with_stepping(tests, num_base_experiments):
         ax = df.plot.bar(
             rot=0,
             title="",
-            figsize=FIGURE_SIZE,
+            figsize=BARPLOTS_FIGURE_SIZE,
             legend=True)
 
         # Set the labels
@@ -280,7 +280,7 @@ def plot_tests_times_with_stepping(tests, num_base_experiments, basetime):
     ax = df.plot.bar(
         rot=0,
         title="",
-        figsize=FIGURE_SIZE,
+        figsize=BARPLOTS_FIGURE_SIZE,
         legend=False)
 
     # Set the labels

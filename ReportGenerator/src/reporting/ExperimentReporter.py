@@ -3,12 +3,14 @@ from __future__ import print_function
 import sys
 import time
 
+from ReportGenerator.src.plotting.timeseries_plots import plot_document, get_plots
 from ReportGenerator.src.reporting.config import ReporterConfig, MongoDBConfig
 
 from ReportGenerator.src.reporting.latex_output import print_latex_section
 from ReportGenerator.src.reporting.TestReporter import TestReporter
 from TimestampsSnitch.src.mongodb.mongodb_agent import MongoDBTimestampAgent
-from ReportGenerator.src.reporting.utils import generate_duration, print_basic_doc_info, split_tests_by_test_type
+from ReportGenerator.src.reporting.utils import generate_duration, print_basic_doc_info, split_tests_by_test_type, \
+    generate_resources_timeseries
 
 
 def eprint(*args, **kwargs):
@@ -23,6 +25,7 @@ class ExperimentReporter():
 
     def process_experiment(self, exp):
         exp = generate_duration(exp)
+        exp = generate_resources_timeseries(exp, self.cfg)
         return exp
 
     def print_experiment_report(self, exp):
@@ -49,8 +52,8 @@ class ExperimentReporter():
             ("Tests durations and overheads", testRepo.print_summarized_tests_info, [self.cfg.NUM_BASE_EXPERIMENTS],
              False),
             ("Resource overheads", testRepo.print_tests_resource_overhead_report, [self.cfg.NUM_BASE_EXPERIMENTS],
-             False and self.cfg.NUM_BASE_EXPERIMENTS != 0),
-            ("Resource hysteresis", testRepo.print_tests_resource_hysteresis_report, [], False)]
+             False and self.cfg.NUM_BASE_EXPERIMENTS != 0)]
+            #("Resource hysteresis", testRepo.print_tests_resource_hysteresis_report, [], False)]
 
         for test_type in benchmarks:
             for report in test_reports:
@@ -97,10 +100,24 @@ class ExperimentReporter():
         testRepo = TestReporter()
 
         # GENERATE ALL ADDED INFO ABOUT EXPERIMENT
-        processed_experiment = self.process_experiment(exp)
+        experiment = self.process_experiment(exp)
+        if self.cfg.GENERATE_EXPERIMENT_PLOT:
+            start, end = experiment["start_time"], experiment["end_time"]
+            if self.cfg.GENERATE_NODES_PLOTS:
+                for node in self.cfg.NODES_LIST:
+                    test_plots = get_plots()["node"]["energy"]
+                    structure = (node, "node")
+                    plot_document(experiment, structure, test_plots, start, end)
+
+            if self.cfg.GENERATE_APP_PLOTS:
+                for app in self.cfg.APPS_LIST:
+                    app_plots = get_plots()["app"]["energy"]
+                    structure = (app, "app")
+                    plot_document(experiment, structure, app_plots, start, end)
+
 
         # GENERATE ALL ADDED INFO ABOUT TESTS
-        tests = self.timestampingAgent.get_experiment_tests(processed_experiment["experiment_id"])
+        tests = self.timestampingAgent.get_experiment_tests(experiment["experiment_id"])
 
         processed_tests = list()
         for test in tests:
@@ -108,7 +125,7 @@ class ExperimentReporter():
 
         # PRINT BASIC EXPERIMENT INFO
         eprint("Generating experiment info at {0}".format(time.strftime("%D %H:%M:%S", time.localtime())))
-        self.print_experiment_report(processed_experiment)
+        self.print_experiment_report(experiment)
 
         report_type = "serverless"
         report_type = "energy"

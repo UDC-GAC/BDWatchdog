@@ -5,7 +5,9 @@ import pathlib
 from ReportGenerator.src.reporting.config import ReporterConfig
 
 OVERHEAD_VALUE_SIZE = 10
-FIGURE_SIZE = (6, 4)
+BARPLOTS_FIGURE_SIZE = (6, 4)
+TIMESERIES_FIGURE_SIZE = (14, 3)
+EXPERIMENT_TIMESERIES_FIGURE_SIZE = (20, 3)
 
 # Get the config
 cfg = ReporterConfig()
@@ -42,13 +44,14 @@ line_marker = {"cpu": {
 }
 
 dashes_dict = {"-": (1, 0), "--": (5, 7)}
-line_style = {"cpu": {
-    "structure.cpu.current": "-",
-    "structure.cpu.usage": "-",
-    "limit.cpu.lower": "--",
-    "limit.cpu.upper": "--",
-    "proc.cpu.user": "-",
-    "proc.cpu.kernel": "-"},
+line_style = {
+    "cpu": {
+        "structure.cpu.current": "-",
+        "structure.cpu.usage": "-",
+        "limit.cpu.lower": "--",
+        "limit.cpu.upper": "--",
+        "proc.cpu.user": "-",
+        "proc.cpu.kernel": "-"},
     "mem": {
         "structure.mem.current": "-",
         "structure.mem.usage": "-",
@@ -88,6 +91,7 @@ def translate_test_run_name_by_conf_number(conf_number, benchmark_type):
 
 
 def get_x_limit(plotting_method, max_x_limit, benchmark_type=None, static_limits=False):
+    left, right = (-30, max_x_limit)
     if static_limits:
         if plotting_method == "plot_structure":
             left, right = -30, 1000
@@ -97,9 +101,9 @@ def get_x_limit(plotting_method, max_x_limit, benchmark_type=None, static_limits
                 left, right = (left, 1200)
             elif benchmark_type == "fixwindow":
                 left, right = (left, 1000)
-            return left, right
+            elif benchmark_type == "EXPERIMENT":
+                pass
 
-    left, right = (-30, max_x_limit)
     return left, right
 
 
@@ -157,6 +161,8 @@ def translate_plot_name_to_ylabel(plot_name):
         return "CPU (shares)"
     elif plot_name == "mem":
         return "Memory (GiB)"
+    elif plot_name == "energy":
+        return "Energy (W·s)"
     else:
         return plot_name
 
@@ -169,11 +175,3 @@ def save_figure(figure_filepath_directory, figure_name, figure, format="svg"):
 
 def create_output_directory(figure_filepath_directory):
     pathlib.Path(figure_filepath_directory).mkdir(parents=True, exist_ok=True)
-
-
-def get_plots():
-    plots = dict()
-    plots["app"] = dict()
-    plots["app"]["serverless"] = {"cpu": [], "mem": []}
-    plots["node"]["serverless"] = {"cpu": [], "mem": []}
-    return plots
