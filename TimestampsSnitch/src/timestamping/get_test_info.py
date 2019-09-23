@@ -36,7 +36,7 @@ def eprint(*args, **kwargs):
 
 def print_test(test_data):
     doc_to_dump = {"type": "test", "info": {}}
-    for field in ["username", "start_time", "end_time", "experiment_id", "test_id"]:
+    for field in ["username", "start_time", "end_time", "experiment_id", "test_id", "test_name"]:
         if field not in test_data:
             eprint("Field {0} missing from test {1}".format(field, test_data["test_id"]))
         else:

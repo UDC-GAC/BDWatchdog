@@ -27,13 +27,16 @@ function convert {
 	done
 }
 
+function folder_convert {
+    for d in $1_*/ ; do
+        echo "Converting figures in $d to $DPI dpi"
+        cd $d
+        convert
+        cd ..
+    done
 
+}
 
-for d in fixwindow_*/ ; do
-    echo "Converting figures in $d to $DPI dpi"
-    cd $d
-    convert
-    cd ..
-done
+folder_convert pagerank
 
 echo "FINISHED"

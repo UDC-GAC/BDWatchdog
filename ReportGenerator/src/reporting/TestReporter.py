@@ -25,22 +25,23 @@ from __future__ import print_function
 
 import sys
 
+from ReportGenerator.src.plotting.utils import get_plots
 from ReportGenerator.src.reporting.config import ReporterConfig
 from ReportGenerator.src.reporting.latex_output import latex_print, print_latex_stress
 
 from ReportGenerator.src.plotting.barplots import plot_tests_resource_usage, plot_tests_times, \
     plot_tests_times_with_stepping, plot_tests_resource_usage_with_stepping
-from ReportGenerator.src.plotting.timeseries_plots import get_plots, plot_document
+from ReportGenerator.src.plotting.timeseries_plots import plot_document
 
 from ReportGenerator.src.reporting.utils import generate_duration, translate_metric, format_metric, flush_table, \
-    print_basic_doc_info, some_test_has_missing_aggregate_information, get_test_type, generate_resources_timeseries
+    print_basic_doc_info, some_test_has_missing_aggregate_information, generate_resources_timeseries
 
 
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
 
-class TestReporter():
+class TestReporter:
     def __init__(self):
         # Get the config
         self.cfg = ReporterConfig()
@@ -51,6 +52,8 @@ class TestReporter():
         return test
 
     def generate_test_resource_plot(self, tests):
+        report_type = self.cfg.EXPERIMENT_TYPE
+
         for test in tests:
             if "end_time" not in test or "start_time" not in test:
                 return
@@ -60,15 +63,15 @@ class TestReporter():
 
             if self.cfg.GENERATE_NODES_PLOTS:
                 for node in self.cfg.NODES_LIST:
-                    test_plots = plots["node"]["energy"]
+                    test_plots = plots["node"][report_type]
                     structure = (node, "node")
-                    plot_document(test, structure, test_plots, start, end)
+                    plot_document(test, structure, test_plots, start, end, self.cfg.REPORTED_RESOURCES)
 
             if self.cfg.GENERATE_APP_PLOTS:
-                for app in self.cfg.APPS_LIST:
-                    app_plots = plots["app"]["energy"]
+                for app in self.cfg.APPS_LIST + ["ALL"]:
+                    app_plots = plots["app"][report_type]
                     structure = (app, "app")
-                    plot_document(test, structure, app_plots, start, end)
+                    plot_document(test, structure, app_plots, start, end, self.cfg.REPORTED_RESOURCES)
 
     # PRINT TEST RESOURCE USAGES
     def print_test_resources(self, test, structures_list):
@@ -423,7 +426,7 @@ class TestReporter():
                 self.print_test_resources(test, structures_list)
                 print("")
 
-            structures_list = ["ALL", "aux_user0", "pre_user0", "comp_user0"]
+            structures_list = ["ALL"] + self.cfg.APPS_LIST
             self.print_test_resources(test, structures_list)
             print("")
 

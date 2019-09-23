@@ -34,12 +34,20 @@ def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
 
-def get_int_value(d, key, default):
+def get_numeric_value(d, key, default, numeric_type):
     try:
-        return int(d[key])
+        return numeric_type(d[key])
     except KeyError:
         eprint("Invalid configuration for {0}, using default value '{1}'".format(key, default))
         return default
+
+
+def get_float_value(d, key, default):
+    return get_numeric_value(d, key, default, float)
+
+
+def get_int_value(d, key, default):
+    return get_numeric_value(d, key, default, int)
 
 
 # Generate the resource ifnormation of both tests and experiments
@@ -57,8 +65,7 @@ def generate_resources_timeseries(document, cfg):
     # Slow loop due to network call
     for node_name in cfg.NODES_LIST:
         document["resources"][node_name] = \
-            cfg.bdwatchdog_handler.get_structure_timeseries(node_name, start, end,
-                                                                 cfg.BDWATCHDOG_NODE_METRICS)
+            cfg.bdwatchdog_handler.get_structure_timeseries(node_name, start, end, cfg.BDWATCHDOG_NODE_METRICS)
 
         metrics_to_agregate = document["resources"][node_name]
         document["resource_aggregates"][node_name] = \
@@ -105,6 +112,22 @@ def generate_resources_timeseries(document, cfg):
             # Create the AVG from the SUM
             aggregates[agg_metric_name]["AVG"] = aggregates[agg_metric_name]["SUM"] / document["duration"]
 
+
+    # Generate the ALL pseudo-metrics for the overall application (all the container nodes)
+    document["resources"]["ALL"] = dict()
+    for node_name in cfg.NODES_LIST:
+        for metric in document["resources"][node_name]:
+            if metric not in document["resources"]["ALL"]:
+                document["resources"]["ALL"][metric] = document["resources"][node_name][metric]
+                continue
+
+            for time_point in document["resources"][node_name][metric]:
+                try:
+                    document["resources"]["ALL"][metric][time_point] += \
+                        document["resources"][node_name][metric][time_point]
+                except KeyError:
+                    pass
+
     # Generate the aggregated ALL pseudo-metrics for the overall application (all the container nodes)
     document["resource_aggregates"]["ALL"] = dict()
     for node_name in cfg.NODES_LIST:
@@ -132,12 +155,22 @@ def generate_resources_timeseries(document, cfg):
             cfg.bdwatchdog_handler.perform_structure_metrics_aggregations(start, end, document["resources"][app])
 
     # This metric is manually added because container structures do not have it, only application structures
-    document["resource_aggregates"]["ALL"]["structure.energy.max"] = {"SUM": 0, "AVG": 0}
-    for app in cfg.APPS_LIST:
-        document["resource_aggregates"]["ALL"]["structure.energy.max"]["SUM"] += \
-            document["resource_aggregates"][app]["structure.energy.max"]["SUM"]
-        document["resource_aggregates"]["ALL"]["structure.energy.max"]["AVG"] += \
-            document["resource_aggregates"][app]["structure.energy.max"]["AVG"]
+    if "energy" in cfg.REPORTED_RESOURCES:
+        document["resource_aggregates"]["ALL"]["structure.energy.max"] = {"SUM": 0, "AVG": 0}
+        document["resources"]["ALL"]["structure.energy.max"] = {}
+        for app in cfg.APPS_LIST:
+            for time_point in document["resources"][app]["structure.energy.max"]:
+                try:
+                    document["resources"]["ALL"]["structure.energy.max"][time_point] += \
+                        document["resources"][app]["structure.energy.max"][time_point]
+                except KeyError:
+                    document["resources"]["ALL"]["structure.energy.max"][time_point] = \
+                        document["resources"][app]["structure.energy.max"][time_point]
+
+            document["resource_aggregates"]["ALL"]["structure.energy.max"]["SUM"] += \
+                document["resource_aggregates"][app]["structure.energy.max"]["SUM"]
+            document["resource_aggregates"]["ALL"]["structure.energy.max"]["AVG"] += \
+                document["resource_aggregates"][app]["structure.energy.max"]["AVG"]
 
     return document
 

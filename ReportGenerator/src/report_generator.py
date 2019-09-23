@@ -52,14 +52,11 @@ def report_all_experiments():
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
-        print("Must specicy an experiment name or ALL")
+        print("Must specify an experiment name")
     else:
         experiment_name = sys.argv[1]
-        if experiment_name == "ALL":
-            report_all_experiments()
+        experiment = timestampingAgent.get_experiment(experiment_name)
+        if experiment:
+            experimentRepo.report_experiment(experiment)
         else:
-            experiment = timestampingAgent.get_experiment(experiment_name)
-            if experiment:
-                experimentRepo.report_experiment(experiment)
-            else:
-                eprint("No experiment '{0}' found".format(experiment_name))
+            eprint("No experiment '{0}' found".format(experiment_name))

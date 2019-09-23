@@ -64,7 +64,7 @@ class MongoDBTimestampAgent:
             except ValueError:
                 eprint("Invalid port configuration, using default '" + str(default_mongodb_port) + "'")
                 self.mongodb_port = str(default_mongodb_port)
-                self.username = os.getenv(MONGODB_USER_VARNAME, default_mongodb_user)
+            self.username = os.getenv(MONGODB_USER_VARNAME, default_mongodb_user)
         else:
             try:
                 self.tests_post_endpoint = os_env[TESTS_POST_ENDPOINT_OS_VARNAME]

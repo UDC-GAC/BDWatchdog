@@ -28,7 +28,7 @@ from ReportGenerator.src.reporting.config import ReporterConfig
 
 OVERHEAD_VALUE_SIZE = 10
 BARPLOTS_FIGURE_SIZE = (6, 4)
-TIMESERIES_FIGURE_SIZE = (14, 3)
+TIMESERIES_FIGURE_SIZE = (8, 3)
 EXPERIMENT_TIMESERIES_FIGURE_SIZE = (20, 3)
 
 # Get the config
@@ -129,8 +129,7 @@ def get_x_limit(plotting_method, max_x_limit, benchmark_type=None, static_limits
     return left, right
 
 
-def get_y_limit(plotting_method, max_y_limit, benchmark_type=None, resource_label=None, structure_type=None,
-                static_limits=False):
+def get_y_limit(plotting_method, max_y_limit, benchmark_type=None, resource_label=None, static_limits=False):
     if static_limits:
         if plotting_method == "resource_usage_with_stepping":
             top, bottom = 100, 100
@@ -158,20 +157,6 @@ def get_y_limit(plotting_method, max_y_limit, benchmark_type=None, resource_labe
             elif benchmark_type == "fixwindow":
                 top, bottom = (20, 0)
             return top, bottom
-        elif plotting_method == "plot_structure":
-            top, bottom = 100, 100
-            if structure_type == "node":
-                if resource_label == "cpu":
-                    return 210, 0
-                elif resource_label == "mem":
-                    return 11, 0
-            elif structure_type == "app":
-                if resource_label == "cpu":
-                    return 3000, 0
-                elif resource_label == "mem":
-                    return 130, 0
-            else:
-                return top, bottom
 
     limit = max_y_limit * cfg.Y_AMPLIFICATION_FACTOR
     top, bottom = (limit, 0)
@@ -197,3 +182,69 @@ def save_figure(figure_filepath_directory, figure_name, figure, format="svg"):
 
 def create_output_directory(figure_filepath_directory):
     pathlib.Path(figure_filepath_directory).mkdir(parents=True, exist_ok=True)
+
+
+def get_plots():
+    plots = dict()
+    plots["app"] = dict()
+
+    plots["app"]["untreated"] = {"cpu": [], "mem": [], "disk": [], "net": [], "energy": []}
+    plots["app"]["serverless"] = {"cpu": [], "mem": [], "disk": [], "net": [], "energy": []}
+    plots["app"]["energy"] = {"cpu": [], "mem": [], "disk": [], "net": [], "energy": []}
+
+    plots["app"]["untreated"]["cpu"] = [('structure.cpu.current', 'structure'), ('structure.cpu.usage', 'structure')]
+    plots["app"]["serverless"]["cpu"] = plots["app"]["untreated"]["cpu"]
+    plots["app"]["energy"]["cpu"] = plots["app"]["untreated"]["cpu"]
+
+    plots["app"]["untreated"]["mem"] = [('structure.mem.current', 'structure'), ('structure.mem.usage', 'structure')]
+    plots["app"]["serverless"]["mem"] = plots["app"]["untreated"]["mem"]
+    plots["app"]["energy"]["mem"] = plots["app"]["untreated"]["mem"]
+
+    plots["app"]["untreated"]["disk"] = [('structure.disk.current', 'structure'), ('structure.disk.usage', 'structure')]
+    plots["app"]["serverless"]["disk"] = plots["app"]["untreated"]["disk"]
+    plots["app"]["energy"]["disk"] = plots["app"]["untreated"]["disk"]
+
+    plots["app"]["untreated"]["net"] = [('structure.net.current', 'structure'), ('structure.net.usage', 'structure')]
+    plots["app"]["serverless"]["net"] = plots["app"]["untreated"]["net"]
+    plots["app"]["energy"]["net"] = plots["app"]["untreated"]["net"]
+
+    if cfg.PRINT_ENERGY_MAX:
+        plots["app"]["untreated"]["energy"] = [('structure.energy.max', 'structure')]
+    plots["app"]["untreated"]["energy"].append(('structure.energy.usage', 'structure'))
+    plots["app"]["serverless"]["energy"] = plots["app"]["untreated"]["energy"]
+    plots["app"]["energy"]["energy"] = plots["app"]["untreated"]["energy"]
+
+    plots["node"] = dict()
+    plots["node"]["untreated"] = {"cpu": [], "mem": [], "disk": [], "net": [], "energy": []}
+    plots["node"]["untreated"] = {"cpu": [], "mem": [], "disk": [], "net": [], "energy": []}
+    plots["node"]["serverless"] = {"cpu": [], "mem": [], "disk": [], "net": [], "energy": []}
+    plots["node"]["energy"] = {"cpu": [], "mem": [], "disk": [], "net": [], "energy": []}
+
+    plots["node"]["untreated"]["cpu"] = [('structure.cpu.current', 'structure'), ('structure.cpu.usage', 'structure')
+                                         # ('proc.cpu.user', 'host'),('proc.cpu.kernel', 'host')
+                                         ]
+    plots["node"]["serverless"]["cpu"] = [('structure.cpu.current', 'structure'), ('structure.cpu.usage', 'structure'),
+                                          # ('proc.cpu.user', 'host'),('proc.cpu.kernel', 'host'),
+                                          ('limit.cpu.lower', 'structure'), ('limit.cpu.upper', 'structure')]
+    plots["node"]["energy"]["cpu"] = plots["node"]["untreated"]["cpu"]
+
+    plots["node"]["untreated"]["mem"] = [('structure.mem.current', 'structure'), ('structure.mem.usage', 'structure')]
+    # ('proc.mem.resident', 'host')]
+    plots["node"]["serverless"]["mem"] = [('structure.mem.current', 'structure'), ('structure.mem.usage', 'structure'),
+                                          ('limit.mem.lower', 'structure'), ('limit.mem.upper', 'structure')]
+    # ('proc.mem.resident', 'host'),
+    plots["node"]["energy"]["mem"] = plots["node"]["untreated"]["mem"]
+
+    plots["node"]["untreated"]["disk"] = [('structure.disk.current', 'structure'), ('proc.disk.reads.mb', 'host'),
+                                          ('proc.disk.writes.mb', 'host')]
+    plots["node"]["serverless"]["disk"] = plots["node"]["untreated"]["disk"]
+    plots["node"]["energy"]["disk"] = plots["node"]["untreated"]["disk"]
+
+    plots["node"]["untreated"]["net"] = [('structure.net.current', 'structure'), ('proc.net.tcp.in.mb', 'host'),
+                                         ('proc.net.tcp.out.mb', 'host')]
+    plots["node"]["serverless"]["net"] = plots["node"]["untreated"]["net"]
+    plots["node"]["energy"]["net"] = plots["node"]["untreated"]["net"]
+
+    plots["node"]["energy"]["energy"] = [('structure.energy.usage', 'structure')]
+
+    return plots

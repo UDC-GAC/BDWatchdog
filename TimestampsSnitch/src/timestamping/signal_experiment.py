@@ -62,16 +62,16 @@ if __name__ == '__main__':
     parser.add_argument('experiment_name', metavar='experiment_name', type=str,
                         help='The name of the experiment that encompasses this test')
     parser.add_argument('--time', type=str, default=None,
-                        help="A time string in the form 'yy/mm/dd HH:MM:SS'")
+                        help="A time string in the form 'yyyy/mm/dd-HH:MM:SS' (e.g., '2018/06/01-12:34:36')")
     args = parser.parse_args()
 
     timestamp = None
     if args.time:
         try:
-            ts = datetime.datetime.strptime(args.time, "%y/%m/%d %H:%M:%S")
+            ts = datetime.datetime.strptime(args.time, "%Y/%m/%d-%H:%M:%S")
             timestamp = int(time.mktime(ts.timetuple()))
         except ValueError:
-            eprint("Bad time format, it should follow the format 'yy/mm/dd HH:MM:SS' (e.g., '18/06/01 12:34:36')")
+            eprint("Bad time format, it should follow the format 'yyyy/mm/dd HH:MM:SS' (e.g., '2018/06/01-12:34:36')")
             exit(1)
     else:
         timestamp = int(time.time())

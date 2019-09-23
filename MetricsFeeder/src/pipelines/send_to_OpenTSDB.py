@@ -1,8 +1,8 @@
-# Copyright (c) 2019 Universidade da Coruña
+# Copyright (c) 2019 Universidade da Coruna
 # Authors:
 #     - Jonatan Enes [main](jonatan.enes@udc.es, jonatan.enes.alvarez@gmail.com)
-#     - Roberto R. Expósito
-#     - Juan Touriño
+#     - Roberto R. Exposito
+#     - Juan Tourino
 #
 # This file is part of the ServerlessContainers framework, from
 # now on referred to as ServerlessContainers.
