@@ -28,18 +28,22 @@ from ReportGenerator.src.reporting.config import ReporterConfig
 
 OVERHEAD_VALUE_SIZE = 10
 BARPLOTS_FIGURE_SIZE = (6, 4)
-TIMESERIES_FIGURE_SIZE = (8, 3)
+TIMESERIES_FIGURE_SIZE = (8, 2.5)
 EXPERIMENT_TIMESERIES_FIGURE_SIZE = (20, 3)
 
 # Get the config
 cfg = ReporterConfig()
 
-line_marker = {"cpu": {
-    "structure.cpu.current": "x",
-    "structure.cpu.usage": "o",
-    "limit.cpu.lower": "v",
-    "limit.cpu.upper": "^",
-    "proc.cpu.user": "*", "proc.cpu.kernel": "*"},
+line_marker = {
+    "cpu": {
+        "user.cpu.current": "x",
+        "user.cpu.usage": "o",
+        "structure.cpu.current": "x",
+        "structure.cpu.usage": "o",
+        "limit.cpu.lower": "v",
+        "limit.cpu.upper": "^",
+        "proc.cpu.user": "*",
+        "proc.cpu.kernel": "*"},
     "mem": {
         "structure.mem.current": "x",
         "structure.mem.usage": "o",
@@ -47,27 +51,32 @@ line_marker = {"cpu": {
         "limit.mem.upper": "^",
         "proc.mem.resident": "o"},
     "disk": {
-        "structure.disk.current": "X",
+        "structure.disk.current": "x",
         "structure.disk.usage": "*",
         "limit.disk.lower": "v",
         "limit.disk.upper": "^",
         "proc.disk.writes.mb": "*",
         "proc.disk.reads.mb": "*"},
     "net": {
-        "structure.net.current": "X",
+        "structure.net.current": "x",
         "structure.net.usage": "*",
         "limit.net.lower": "v",
         "limit.net.upper": "^",
         "proc.net.tcp.in.mb": "*",
         "proc.net.tcp.out.mb": "*"},
     "energy": {
-        "structure.energy.max": "X",
-        "structure.energy.usage": "*"}
+        "structure.energy.max": "x",
+        "structure.energy.usage": "o",
+        "user.energy.max": "x",
+        "user.energy.used": "o"
+    }
 }
 
 dashes_dict = {"-": (1, 0), "--": (5, 7)}
 line_style = {
     "cpu": {
+        "user.cpu.usage": "-",
+        "user.cpu.current": "-",
         "structure.cpu.current": "-",
         "structure.cpu.usage": "-",
         "limit.cpu.lower": "--",
@@ -96,7 +105,10 @@ line_style = {
         "proc.net.tcp.out.mb": "-"},
     "energy": {
         "structure.energy.max": "-",
-        "structure.energy.usage": "-"}
+        "structure.energy.usage": "-",
+        "user.energy.max": "-",
+        "user.energy.used": "-"
+    }
 }
 
 
@@ -169,7 +181,7 @@ def translate_plot_name_to_ylabel(plot_name):
     elif plot_name == "mem":
         return "Memory (GiB)"
     elif plot_name == "energy":
-        return "Energy (W·s)"
+        return "Energy (J)"
     else:
         return plot_name
 
@@ -177,7 +189,9 @@ def translate_plot_name_to_ylabel(plot_name):
 def save_figure(figure_filepath_directory, figure_name, figure, format="svg"):
     figure_filepath = "{0}/{1}".format(figure_filepath_directory, figure_name)
     create_output_directory(figure_filepath_directory)
-    figure.savefig(figure_filepath, bbox_inches="tight", format=format)
+    # figure.savefig(figure_filepath, transparent=True, bbox_inches='tight', pad_inches=0, format=format)
+    # figure.savefig(figure_filepath, transparent=True, bbox_inches='tight', pad_inches=0, format=format)
+    figure.savefig(figure_filepath, bbox_inches='tight', pad_inches=0, format=format)
 
 
 def create_output_directory(figure_filepath_directory):
@@ -186,6 +200,20 @@ def create_output_directory(figure_filepath_directory):
 
 def get_plots():
     plots = dict()
+    plots["user"] = dict()
+
+    plots["user"]["untreated"] = {"cpu": [], "energy": []}
+    plots["user"]["energy"] = {"cpu": [], "energy": []}
+    plots["user"]["serverless"] = {"cpu": [], "energy": []}
+
+    plots["user"]["untreated"]["cpu"] = [('user.cpu.current', 'structure'), ('user.cpu.usage', 'structure')]
+    plots["user"]["serverless"]["cpu"] = plots["user"]["untreated"]["cpu"]
+    plots["user"]["energy"]["cpu"] = plots["user"]["untreated"]["cpu"]
+
+    plots["user"]["untreated"]["energy"] = [('user.energy.max', 'user'), ('user.energy.used', 'user')]
+    plots["user"]["serverless"]["energy"] = plots["user"]["untreated"]["energy"]
+    plots["user"]["energy"]["energy"] = plots["user"]["untreated"]["energy"]
+
     plots["app"] = dict()
 
     plots["app"]["untreated"] = {"cpu": [], "mem": [], "disk": [], "net": [], "energy": []}

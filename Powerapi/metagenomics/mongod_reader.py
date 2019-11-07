@@ -37,13 +37,16 @@ missed_data = 0
 total_data = 0
 partial_data = 0
 anomalous_data = 0
+num_docs = 0
+clipped_docs = 0
 
-MAX_POWER_CAP = 200
+MAX_POWER_CAP = 70
+MAX_TOTAL_POWER_CAP = 100
 
 
 def main():
     def dump_target(target):
-        global missed_data, total_data, partial_data, anomalous_data
+        global missed_data, total_data, partial_data, anomalous_data, num_docs, clipped_docs
 
         total_data += 1
         posts = collection.find(
@@ -60,19 +63,31 @@ def main():
             #    "[....] {0} posts retrieved at {1} for {2}".format(posts.count(), datetime.fromtimestamp(time.time()),
             #                                                   target))
         power = 0
-        num_docs = 0
+        average = 5
         for post in posts:
             # pprint.pprint(post)
             if post["metadata"]["scope"] == "cpu":
-                power += post["power"]
                 num_docs += 1
-            collection.delete_one({"_id": post['_id']})
-        power /= window_size
+                if post["power"] >= MAX_POWER_CAP:
+                    average -= 1
+                    clipped_docs += 1
+                    eprint("Value: for container {0} is too large".format(target))
+                    eprint(post)
+                else:
+                    power += post["power"]
 
-        if power > MAX_POWER_CAP:
+            collection.delete_one({"_id": post['_id']})
+
+        if average <= 0:
+            missed_data += 1
+            return
+
+        power /= average
+
+        if power > MAX_TOTAL_POWER_CAP:
             # eprint("Value: {0} for container {1} is too large".format(power_string, target))
             anomalous_data += 1
-            power = MAX_POWER_CAP
+            power = MAX_TOTAL_POWER_CAP
 
         doc = dict()
         power_string = str(round(power, 2))
@@ -134,12 +149,14 @@ def main():
         if end_date >= time_now - TWO_HOURS - delay:
             eprint("Data points accounting is [total | partial | anomalous | missed ] " +
                    " {0},{1},{2},{3} ".format(total_data, partial_data, anomalous_data, missed_data) +
-                   "ratios are [{0},{1},{2}]".format(
+                   "ratios are [{0},{1},{2}] || ".format(
                        str(int(100 * partial_data / total_data)),
                        str(int(100 * anomalous_data / total_data)),
                        str(int(100 * missed_data / total_data))
-                   )
-                   )
+                   ) +
+                   "Clipped documents are {0},{1} ratio is {2}".format(num_docs, clipped_docs,
+                                                                       str(int(100 * clipped_docs / num_docs))))
+
             time.sleep(window_size)
 
 

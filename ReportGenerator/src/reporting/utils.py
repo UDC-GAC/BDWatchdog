@@ -58,14 +58,19 @@ def generate_resources_timeseries(document, cfg):
         return document
 
     # Initialize variables
-    document["resource_aggregates"], document["resources"] = dict(), dict()
+    document["resource_aggregates"], document["resources"], document["users"] = dict(), dict(), dict()
     start, end = document["start_time"], document["end_time"]
+
+    for user in cfg.USERS_LIST:
+        document["users"][user] = \
+            cfg.bdwatchdog_handler.get_structure_timeseries(user, start, end, cfg.BDWATCHDOG_USER_METRICS, downsample=cfg.DOWNSAMPLE)
+        #TODO rename this function or create a get_user_timeseries
 
     # Retrieve the timeseries from OpenTSDB and perform the per-structure aggregations
     # Slow loop due to network call
     for node_name in cfg.NODES_LIST:
         document["resources"][node_name] = \
-            cfg.bdwatchdog_handler.get_structure_timeseries(node_name, start, end, cfg.BDWATCHDOG_NODE_METRICS)
+            cfg.bdwatchdog_handler.get_structure_timeseries(node_name, start, end, cfg.BDWATCHDOG_NODE_METRICS, downsample=cfg.DOWNSAMPLE)
 
         metrics_to_agregate = document["resources"][node_name]
         document["resource_aggregates"][node_name] = \
@@ -112,7 +117,6 @@ def generate_resources_timeseries(document, cfg):
             # Create the AVG from the SUM
             aggregates[agg_metric_name]["AVG"] = aggregates[agg_metric_name]["SUM"] / document["duration"]
 
-
     # Generate the ALL pseudo-metrics for the overall application (all the container nodes)
     document["resources"]["ALL"] = dict()
     for node_name in cfg.NODES_LIST:
@@ -149,7 +153,7 @@ def generate_resources_timeseries(document, cfg):
 
     for app in cfg.APPS_LIST:
         document["resources"][app] = \
-            cfg.bdwatchdog_handler.get_structure_timeseries(app, start, end, cfg.BDWATCHDOG_APP_METRICS)
+            cfg.bdwatchdog_handler.get_structure_timeseries(app, start, end, cfg.BDWATCHDOG_APP_METRICS, downsample=cfg.DOWNSAMPLE)
 
         document["resource_aggregates"][app] = \
             cfg.bdwatchdog_handler.perform_structure_metrics_aggregations(start, end, document["resources"][app])
@@ -260,13 +264,36 @@ def translate_metric(metric):
     resource = metric_fields[1]
     measure_kind = metric_fields[2]
 
-    if metric_type == "structure":
-        if measure_kind == "usage":
-            translated_metric.append("{0} used".format(resource))
+    if metric_type == "user":
+        if measure_kind == "used":
+            # translated_metric.append("{0} used".format(resource))
+            translated_metric.append("Used".format(resource))
         elif measure_kind == "current":
-            translated_metric.append("{0} allocated".format(resource))
+            # translated_metric.append("{0} allocated".format(resource))
+            translated_metric.append("Allocated".format(resource))
         elif measure_kind == "max":
-            translated_metric.append("{0} reserved".format(resource))
+            # TODO Hotfix
+            if metric == "user.energy.max":
+                translated_metric.append("Power budget".format(resource))
+            else:
+                # translated_metric.append("{0} reserved".format(resource))
+                translated_metric.append("Reserved".format(resource))
+        else:
+            translated_metric.append(measure_kind)
+    elif metric_type == "structure":
+        if measure_kind == "usage":
+            # translated_metric.append("{0} used".format(resource))
+            translated_metric.append("Used".format(resource))
+        elif measure_kind == "current":
+            # translated_metric.append("{0} allocated".format(resource))
+            translated_metric.append("Allocated".format(resource))
+        elif measure_kind == "max":
+            # TODO Hotfix
+            if metric == "structure.energy.max":
+                translated_metric.append("Power budget".format(resource))
+            else:
+                # translated_metric.append("{0} reserved".format(resource))
+                translated_metric.append("Reserved".format(resource))
         else:
             translated_metric.append(measure_kind)
 

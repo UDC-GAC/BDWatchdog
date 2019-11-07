@@ -34,6 +34,7 @@ from ReportGenerator.src.opentsdb import bdwatchdog
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
+
 class MongoDBConfig:
     __base_path = os.path.dirname(os.path.abspath(__file__))
     __config_path = "../../conf/timestamping_config.ini"
@@ -88,9 +89,11 @@ class ReporterConfig:
         "GENERATE_APP_PLOTS",
         "GENERATE_NODES_PLOTS",
         "GENERATE_EXPERIMENT_PLOT",
+        "GENERATE_USER_PLOTS",
         "PLOTTING_FORMATS",
         "NODES_LIST",
         "APPS_LIST",
+        "USERS_LIST",
         "NUM_BASE_EXPERIMENTS",
         "TEST_TYPE_STEPPING",
         "PRINT_TEST_BASIC_INFORMATION",
@@ -101,7 +104,8 @@ class ReporterConfig:
         "XTICKS_STEP",
         "REPORTED_RESOURCES",
         "EXPERIMENT_TYPE",
-        "PRINT_ENERGY_MAX"
+        "PRINT_ENERGY_MAX",
+        "DOWNSAMPLE"
     ]
     __default_environment_values = {
         "NUM_BASE_EXPERIMENTS": 3,
@@ -111,11 +115,13 @@ class ReporterConfig:
         "GENERATE_APP_PLOTS": "true",
         "GENERATE_NODES_PLOTS": "true",
         "GENERATE_EXPERIMENT_PLOT": "false",
+        "GENERATE_USER_PLOTS": "false",
         "PLOTTING_FORMATS": "svg",
         "TEST_TYPE_STEPPING": 3,
         "PRINT_TEST_BASIC_INFORMATION": "false",
         "STATIC_LIMITS": "true",
         "NODES_LIST": "node1,node2,node3,node4,node5,node6,node7,node8,node9",
+        "USERS_LIST": "user0",
         "APPS_LIST": "app1",
         "Y_AMPLIFICATION_FACTOR": 1.2,
         "XLIM": 2000,
@@ -123,7 +129,8 @@ class ReporterConfig:
         "XTICKS_STEP": 100,
         "REPORTED_RESOURCES": "cpu,mem",
         "EXPERIMENT_TYPE": "serverless",
-        "PRINT_ENERGY_MAX": "true"
+        "PRINT_ENERGY_MAX": "true",
+        "DOWNSAMPLE": 5
     }
 
     __ALLOWED_EXPERIMENT_TYPES = ["serverless", "untreated", "energy"]
@@ -165,6 +172,14 @@ class ReporterConfig:
         self.EXPERIMENT_TYPE = ENV["EXPERIMENT_TYPE"]
         if self.EXPERIMENT_TYPE not in self.__ALLOWED_EXPERIMENT_TYPES:
             self.EXPERIMENT_TYPE = self.__DEFAULT_EXPERIMENT_TYPE
+
+        self.BDWATCHDOG_USER_METRICS = list()
+        if "cpu" in self.REPORTED_RESOURCES:
+            self.BDWATCHDOG_USER_METRICS.append(('user.cpu.current', 'user'))
+            self.BDWATCHDOG_USER_METRICS.append(('user.cpu.usage', 'user'))
+        if "energy" in self.REPORTED_RESOURCES:
+            self.BDWATCHDOG_USER_METRICS.append(('user.energy.max', 'user'))
+            self.BDWATCHDOG_USER_METRICS.append(('user.energy.used', 'user'))
 
         self.BDWATCHDOG_APP_METRICS = list()
         if "cpu" in self.REPORTED_RESOURCES:
@@ -239,7 +254,15 @@ class ReporterConfig:
         self.Y_AMPLIFICATION_FACTOR = get_float_value(ENV, "Y_AMPLIFICATION_FACTOR",
                                                       self.__default_environment_values["Y_AMPLIFICATION_FACTOR"])
 
-        self.XLIM = get_int_value(ENV, "XLIM", self.__default_environment_values["XLIM"])
+        #self.XLIM = get_int_value(ENV, "XLIM", self.__default_environment_values["XLIM"])
+
+        self.XLIM = {"default": 1000}
+        for pair in ENV["XLIM"].rstrip('"').lstrip('"').split(","):
+            structure_name, limit = pair.split(":")
+            try:
+                self.XLIM[structure_name] = int(limit)
+            except ValueError:
+                pass
 
         self.YLIM = dict()
         for pair in ENV["YLIM"].rstrip('"').lstrip('"').split(","):
@@ -259,6 +282,7 @@ class ReporterConfig:
         self.GENERATE_APP_PLOTS = ENV["GENERATE_APP_PLOTS"] == "true"
         self.GENERATE_NODES_PLOTS = ENV["GENERATE_NODES_PLOTS"] == "true"
         self.GENERATE_EXPERIMENT_PLOT = ENV["GENERATE_EXPERIMENT_PLOT"] == "true"
+        self.GENERATE_USER_PLOTS= ENV["GENERATE_USER_PLOTS"] == "true"
 
         self.PLOTTING_FORMATS = list()
         plotting_formats = ENV["PLOTTING_FORMATS"].rstrip('"').lstrip('"').split(",")
@@ -273,6 +297,8 @@ class ReporterConfig:
         self.TEST_TYPE_STEPPING = get_int_value(ENV, "TEST_TYPE_STEPPING",
                                                 self.__default_environment_values["TEST_TYPE_STEPPING"])
         self.bdwatchdog_handler = bdwatchdog.BDWatchdog()
+        self.DOWNSAMPLE = get_int_value(ENV, "DOWNSAMPLE", self.__default_environment_values["DOWNSAMPLE"])
+
 
         self.RESOURCE_UTILIZATION_TUPLES = list()
         if "cpu" in self.REPORTED_RESOURCES:
@@ -323,3 +349,5 @@ class ReporterConfig:
         self.NODES_LIST = ENV["NODES_LIST"].rstrip('"').lstrip('"').split(",")
 
         self.APPS_LIST = ENV["APPS_LIST"].rstrip('"').lstrip('"').split(",")
+
+        self.USERS_LIST = ENV["USERS_LIST"].rstrip('"').lstrip('"').split(",")

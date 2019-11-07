@@ -25,7 +25,7 @@ from __future__ import print_function
 import sys
 import time
 
-from ReportGenerator.src.plotting.timeseries_plots import plot_document
+from ReportGenerator.src.plotting.timeseries_plots import plot_document, plot_user
 from ReportGenerator.src.plotting.utils import get_plots
 from ReportGenerator.src.reporting.config import ReporterConfig, MongoDBConfig
 
@@ -143,6 +143,14 @@ class ExperimentReporter():
                     app_plots = plots["app"][report_type]
                     structure = (app, "app")
                     plot_document(experiment, structure, app_plots, start, end, self.cfg.REPORTED_RESOURCES)
+
+            if self.cfg.GENERATE_USER_PLOTS:
+                for user in self.cfg.USERS_LIST:
+                    user_plots = plots["user"][report_type]
+                    plot_user(experiment, user, user_plots, start, end, self.cfg.REPORTED_RESOURCES)
+
+
+
 
         # GENERATE ALL ADDED INFO ABOUT TESTS
         tests = self.timestampingAgent.get_experiment_tests(experiment["experiment_id"])
