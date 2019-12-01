@@ -35,9 +35,6 @@ import logging
 
 import requests
 
-# AutomaticRescaler
-from src.StateDatabase import couchdb as couchDB
-from src.MyUtils import MyUtils as MyUtils
 
 _base_path = os.path.dirname(os.path.abspath(__file__))
 
@@ -80,6 +77,9 @@ class MonitoringDaemon:
         self.dumper_thread = thread
 
     def beat(self):
+        # Serverless Containers
+        from src.StateDatabase import couchdb as couchDB
+        from src.MyUtils import MyUtils as MyUtils
         self.logger.info("Starting heartbeat of " + self.SERVICE_NAME)
         db_handler = couchDB.CouchDBServer()
         while True:

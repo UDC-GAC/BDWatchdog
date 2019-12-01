@@ -28,8 +28,13 @@ import sys
 import json
 import requests
 import gzip
+
 # TODO FIX, this should support python3
-import StringIO
+try:
+    import StringIO  # for Python 2
+except ImportError:
+    from io import StringIO  # for Python 3
+
 import time
 import os
 
@@ -57,6 +62,7 @@ post_send_docs_failed_tries = int(os.getenv(POST_SEND_DOCS_FAILED_TRIES, 3))
 def send_json_documents(json_documents, requests_Session=None):
     headers = {"Content-Type": "application/json", "Content-Encoding": "gzip"}
 
+    #TODO Test this does not break with Python3
     out = StringIO.StringIO()
     with gzip.GzipFile(fileobj=out, mode="w") as f:
         f.write(json.dumps(json_documents))
@@ -73,7 +79,7 @@ def send_json_documents(json_documents, requests_Session=None):
         else:
             if r.status_code == 400:
                 return True, {}
-                #return False, {"error": r.json()}
+                # return False, {"error": r.json()}
             return True, {}
     except ReadTimeout:
         return False, {"error": "Server timeout"}
@@ -83,7 +89,7 @@ def send_json_documents(json_documents, requests_Session=None):
 
 def behave_like_pipeline():
     # PROGRAM VARIABLES #
-    last_timestamp = time.time() - post_doc_buffer_timeout +1
+    last_timestamp = time.time() - post_doc_buffer_timeout + 1
     failed_connections = 0
     fails = 0
     MAX_FAILS = 10
@@ -94,7 +100,7 @@ def behave_like_pipeline():
         # for line in sys.stdin:
         while True:
             line = sys.stdin.readline()
-        #for line in fileinput.input():
+            # for line in fileinput.input():
             try:
                 new_doc = json.loads(line)
                 json_documents = json_documents + [new_doc]

@@ -25,10 +25,10 @@ from __future__ import print_function
 
 import fileinput
 import sys
-import turbostat_to_csv as turbostat_to_csv
+import MetricsFeeder.src.turbostat.turbostat_to_csv as turbostat_to_csv
 
-from src.pipelines import csv_to_json as csv_to_json
-from src.pipelines import json_to_TSDB_json as json_to_TSDB_json
+from MetricsFeeder.src.pipelines import csv_to_json as csv_to_json
+from MetricsFeeder.src.pipelines import json_to_TSDB_json as json_to_TSDB_json
 
 
 def eprint(*args, **kwargs):

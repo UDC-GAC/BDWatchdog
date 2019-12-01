@@ -26,6 +26,14 @@ function getReportDictByNum(report_number) {
     return reports_dict[reportID]
 }
 
+export function increase_report_counter(){
+    report_counter = report_counter + 1
+}
+
+export function decrease_report_counter(){
+    report_counter = report_counter - 1
+}
+
 export function addReport(metrics) {
     "use strict"
     //Generate the ID string of the graph
@@ -42,7 +50,7 @@ export function addReport(metrics) {
     report_info.data.labels = []
 
     //Increment the counter of graphs displayed
-    report_counter = report_counter + 1
+    increase_report_counter()
 }
 
 function tabulate(data, columns, report_number) {

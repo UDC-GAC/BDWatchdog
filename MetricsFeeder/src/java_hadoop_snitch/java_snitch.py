@@ -111,47 +111,52 @@ def dump_all(java_dict):
         dump_process_pids_to_file(key, java_dict[key])
 
 
-time_to_dump_counter = 0
-print("[HADOOP JAVA SNITCH] Going to monitor hadoop java process every '" + str(
-    java_snitch_polling_seconds) + "' seconds dumping every '" + str(
-    java_snitch_polling_seconds * time_to_dump_counter_max) + "' seconds")
+def main():
 
-while True:
-    java_proc_dict = dict()
-    try:
-        # lineas = run_command('jps')[0].strip().split('\n')
-        cmd = "ps h -eo pid,cmd | " + pipes_folder_path + "java_ps.py"
-        ps = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        lines = ps.communicate()[0].strip().split('\n')
-        for line in lines:
-            if line == "":
-                continue
-            pid_command = line.split(" ")
-            pid = pid_command[0]
-            command = pid_command[1]
-            if command.strip() in process_names:
-                try:
-                    pid_list = java_proc_dict[command]
-                    pid_list.append(int(pid))
-                except KeyError:
-                    java_proc_dict[command] = [int(pid)]
-            else:
-                try:
-                    pid_list = java_proc_dict["OTHER"]
-                    pid_list.append(int(pid))
-                except KeyError:
-                    java_proc_dict["OTHER"] = [int(pid)]
+    time_to_dump_counter = 0
+    print("[HADOOP JAVA SNITCH] Going to monitor hadoop java process every '" + str(
+        java_snitch_polling_seconds) + "' seconds dumping every '" + str(
+        java_snitch_polling_seconds * time_to_dump_counter_max) + "' seconds")
 
-        time_to_dump_counter += 1
+    while True:
+        java_proc_dict = dict()
+        try:
+            # lineas = run_command('jps')[0].strip().split('\n')
+            cmd = "ps h -eo pid,cmd | " + pipes_folder_path + "java_ps.py"
+            ps = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            lines = ps.communicate()[0].strip().split('\n')
+            for line in lines:
+                if line == "":
+                    continue
+                pid_command = line.split(" ")
+                pid = pid_command[0]
+                command = pid_command[1]
+                if command.strip() in process_names:
+                    try:
+                        pid_list = java_proc_dict[command]
+                        pid_list.append(int(pid))
+                    except KeyError:
+                        java_proc_dict[command] = [int(pid)]
+                else:
+                    try:
+                        pid_list = java_proc_dict["OTHER"]
+                        pid_list.append(int(pid))
+                    except KeyError:
+                        java_proc_dict["OTHER"] = [int(pid)]
 
-        time.sleep(java_snitch_polling_seconds)
+            time_to_dump_counter += 1
 
-        if time_to_dump_counter >= time_to_dump_counter_max:
-            time_to_dump_counter = 0
+            time.sleep(java_snitch_polling_seconds)
+
+            if time_to_dump_counter >= time_to_dump_counter_max:
+                time_to_dump_counter = 0
+                dump_all(java_proc_dict)
+                java_proc_dict = dict()
+
+        except KeyboardInterrupt:
             dump_all(java_proc_dict)
             java_proc_dict = dict()
+            exit(0)
 
-    except KeyboardInterrupt:
-        dump_all(java_proc_dict)
-        java_proc_dict = dict()
-        exit(0)
+if __name__ == "__main__":
+    main()

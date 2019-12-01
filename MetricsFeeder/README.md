@@ -131,15 +131,15 @@ bash scripts/draw_all.sh
 ```
 * Examples of all the metrics plots for a slave host running a short batch of Hadoop MapReduce task (TeraGen,TeraSort, TeraValidate and Pi)are shown below:
 
-![alt tag](https://s3-eu-west-1.amazonaws.com/jonatan.enes.udc/cpu_timeseries.png)
-![alt tag](https://s3-eu-west-1.amazonaws.com/jonatan.enes.udc/mem_timeseries.png)
-![alt tag](https://s3-eu-west-1.amazonaws.com/jonatan.enes.udc/disk_timeseries.png)
-![alt tag](https://s3-eu-west-1.amazonaws.com/jonatan.enes.udc/net_timeseries.png)
+![alt tag](https://s3-eu-west-1.amazonaws.com/jonatan.enes.udc/bdwatchdog_website/cpu_timeseries.png)
+![alt tag](https://s3-eu-west-1.amazonaws.com/jonatan.enes.udc/bdwatchdog_website/mem_timeseries.png)
+![alt tag](https://s3-eu-west-1.amazonaws.com/jonatan.enes.udc/bdwatchdog_website/disk_timeseries.png)
+![alt tag](https://s3-eu-west-1.amazonaws.com/jonatan.enes.udc/bdwatchdog_website/net_timeseries.png)
 
 * Examples of measurements of a server and its power and temperature are show below:
 
-![alt tag](https://s3-eu-west-1.amazonaws.com/jonatan.enes.udc/temp_timeseries.png)
-![alt tag](https://s3-eu-west-1.amazonaws.com/jonatan.enes.udc/power_timeseries.png)
+![alt tag](https://s3-eu-west-1.amazonaws.com/jonatan.enes.udc/bdwatchdog_website/temp_timeseries.png)
+![alt tag](https://s3-eu-west-1.amazonaws.com/jonatan.enes.udc/bdwatchdog_website/power_timeseries.png)
 
 ### Atop (System resource metrics)
 * Running atop raw, the ouput would look something like this (output was reduced, lines were omitted):

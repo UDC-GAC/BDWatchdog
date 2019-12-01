@@ -1,2 +1,10 @@
-requests
+certifi
+chardet
 configparser
+docutils
+idna
+lockfile
+pkg-resources
+python-daemon
+request
+urllib3

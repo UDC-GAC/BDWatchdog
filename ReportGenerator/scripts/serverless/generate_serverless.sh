@@ -6,7 +6,7 @@ cp conf/templates/serverless_revision/microbenchmarks/timestamping_config.ini co
 #bash scripts/generate_report.sh 01:00_PR
 #bash scripts/generate_report.sh 03:00_PR
 bash scripts/generate_report.sh 02:00_PR #CHOSEN
-exit 0
+
 cp conf/templates/serverless_revision/streaming/report_generator_config.ini conf/report_generator_config.ini
 cp conf/templates/serverless_revision/streaming/timestamping_config.ini conf/timestamping_config.ini
 #bash scripts/generate_report.sh 00:00_FW

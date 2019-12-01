@@ -79,6 +79,6 @@ bash draw.sh 1491650215 1491650518
 ```
 
 * This example shows an execution of a Hadoop MapReduce Pi test
-[Open interactively](https://s3-eu-west-1.amazonaws.com/jonatan.enes.udc/flamegraph.svg)
-![alt tag](https://s3-eu-west-1.amazonaws.com/jonatan.enes.udc/flamegraph.svg)
+[Open interactively](https://s3-eu-west-1.amazonaws.com/jonatan.enes.udc/bdwatchdog_website/flamegraph.svg)
+![alt tag](https://s3-eu-west-1.amazonaws.com/jonatan.enes.udc/bdwatchdog_website/flamegraph.svg)
 
