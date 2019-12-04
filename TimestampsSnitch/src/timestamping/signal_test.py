@@ -23,73 +23,91 @@
 
 from __future__ import print_function
 
-import datetime
 import time
 import json
-import os
 import sys
-import pwd
 import argparse
 
 from TimestampsSnitch.src.mongodb.mongodb_agent import MongoDBTimestampAgent
+from TimestampsSnitch.src.timestamping.utils import get_username, get_timestamp
 
 
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
 
-def get_username():
-    return pwd.getpwuid(os.getuid())[0]
-
-
-def signal_test(experiment_id, username, test_name, timestamp, time_signal_field, tags=None):
+def signal_test(experiment_id, test_name, username, signal, timestamp):
     d = dict()
     info = dict()
     info["experiment_id"] = experiment_id
     info["username"] = username
     info["test_name"] = test_name
     info["test_id"] = experiment_id + "_" + test_name
-    if tags:
-        info["tags"] = tags
     d["info"] = info
     d["type"] = "test"
     if not timestamp:
         timestamp = int(time.time())
-    d["info"]["{0}_time".format(time_signal_field)] = timestamp
+    d["info"]["{0}_time".format(signal)] = timestamp
     print(json.dumps(d))
+
+
+def print_test(test_data):
+    doc_to_dump = {"type": "test", "info": {}}
+    for field in ["username", "start_time", "end_time", "experiment_id", "test_id", "test_name"]:
+        if field not in test_data:
+            eprint("Field {0} missing from test {1}".format(field, test_data["test_id"]))
+        else:
+            doc_to_dump["info"][field] = test_data[field]
+    print(json.dumps(doc_to_dump))
+
+
+def get_test_info(experiment_name, test_name, username):
+    if not mongodb_agent.experiment_exists(experiment_name, username):
+        eprint("Couldn't find experiment with id {0}".format(experiment_name))
+        exit(0)
+
+    if not test_name or test_name == "ALL":
+        tests = mongodb_agent.get_experiment_tests(experiment_name, username)
+    else:
+        test = mongodb_agent.get_test(experiment_name, test_name, username)
+        if not test:
+            tests = []
+        else:
+            tests = [test]
+
+    if not tests:
+        eprint("Couldn't find tests for experiment {0}".format(experiment_name))
+        exit(0)
+
+    for test in tests:
+        print_test(test)
+
 
 if __name__ == '__main__':
     mongodb_agent = MongoDBTimestampAgent()
 
     parser = argparse.ArgumentParser(description='Signal for the start, end times or for the deletion of a test.')
     parser.add_argument('option', metavar='option', type=str,
-                        help='an operation option "start", "end" or "delete"')
+                        help='an operation option "info", "start", "end" or "delete"')
     parser.add_argument('experiment_name', metavar='experiment_name', type=str,
                         help='The name of the experiment that encompasses this test')
     parser.add_argument('test_name', metavar='test_name', type=str,
                         help='The name of the test')
     parser.add_argument('--time', type=str, default=None,
                         help="A time string in the form 'yyyy/mm/dd-HH:MM:SS' (e.g., '2018/06/01-12:34:36')")
-    parser.add_argument('--tags', type=str, default=None, nargs='+',
-                        help="A list of tags")
+    parser.add_argument('--username', type=str, default=None,
+                        help="The username")
 
     args = parser.parse_args()
 
-    if args.option == "start" or args.option == "end":
-        timestamp = None
-        if args.time:
-            try:
-                ts = datetime.datetime.strptime(args.time, "%Y/%m/%d-%H:%M:%S")
-                timestamp = int(time.mktime(ts.timetuple()))
-            except ValueError:
-                eprint("Bad time format, it should follow the format 'yyyy/mm/dd-HH:MM:SS' (e.g., '2018/06/01-12:34:36')")
-                exit(1)
-        else:
-            timestamp = args.time
+    username = get_username(args)
 
-        signal_test(args.experiment_name, get_username(), args.test_name, timestamp, args.option, args.tags)
+    if args.option == "start" or args.option == "end":
+        signal_test(args.experiment_name, args.test_name, username, args.option, get_timestamp(args))
     elif args.option == "delete":
-        mongodb_agent.delete_test(args.experiment_name, args.test_name)
+        mongodb_agent.delete_test(args.experiment_name, args.test_name, username)
+    elif args.option == "info":
+        get_test_info(args.experiment_name, args.test_name, username)
     else:
         eprint("Bad option")
         exit(1)

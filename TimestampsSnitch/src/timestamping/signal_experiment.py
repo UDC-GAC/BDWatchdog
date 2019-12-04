@@ -24,33 +24,57 @@
 from __future__ import print_function
 
 import argparse
-import datetime
-import time
 import json
-import os
 import sys
-import pwd
 
 from TimestampsSnitch.src.mongodb.mongodb_agent import MongoDBTimestampAgent
+from TimestampsSnitch.src.timestamping.utils import get_username, get_timestamp
 
 
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
 
-def get_username():
-    return pwd.getpwuid(os.getuid())[0]
-
-
-def signal_experiment(experiment_id, username, time_signal_field, timestamp):
+def signal_experiment(experiment_id, username, signal, timestamp):
     d = dict()
     info = dict()
     info["experiment_id"] = experiment_id
     info["username"] = username
     d["info"] = info
     d["type"] = "experiment"
-    d["info"]["{0}_time".format(time_signal_field)] = timestamp
+    d["info"]["{0}_time".format(signal)] = timestamp
     print(json.dumps(d))
+
+
+def print_experiment(experiment_data):
+    doc_to_dump = {"type": "experiment", "info": {}}
+    for field in ["username", "start_time", "end_time", "experiment_id"]:
+        if field not in experiment_data:
+            eprint("Field {0} missing from experiment {1}".format(field, experiment_data["experiment_id"]))
+        else:
+            doc_to_dump["info"][field] = experiment_data[field]
+    print(json.dumps(doc_to_dump))
+
+
+def get_experiment_info(experiment_name, username):
+    if experiment_name == "ALL":
+        data = mongodb_agent.get_all_experiments(username)
+        if not data:
+            eprint("Couldn't find experiment data, maybe there is none?")
+            exit(0)
+    else:
+        data = mongodb_agent.get_experiment(experiment_name, username)
+        if not data:
+            eprint("Couldn't find experiment with id {0}".format(experiment_name))
+            exit(0)
+
+    if type(data) == type(dict()):
+        print_experiment(data)
+    elif type(data) == type(list()):
+        for experiment in data:
+            print_experiment(experiment)
+    else:
+        print_experiment(data)
 
 
 if __name__ == '__main__':
@@ -58,29 +82,23 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Signal for the start, end times or for the deletion of a test.')
     parser.add_argument('option', metavar='option', type=str,
-                        help='an operation option "start", "end" or "delete"')
+                        help='an operation option "info", "start", "end" or "delete"')
     parser.add_argument('experiment_name', metavar='experiment_name', type=str,
                         help='The name of the experiment that encompasses this test')
     parser.add_argument('--time', type=str, default=None,
                         help="A time string in the form 'yyyy/mm/dd-HH:MM:SS' (e.g., '2018/06/01-12:34:36')")
+    parser.add_argument('--username', type=str, default=None,
+                        help="The username")
     args = parser.parse_args()
 
-    timestamp = None
-    if args.time:
-        try:
-            ts = datetime.datetime.strptime(args.time, "%Y/%m/%d-%H:%M:%S")
-            timestamp = int(time.mktime(ts.timetuple()))
-        except ValueError:
-            eprint("Bad time format, it should follow the format 'yyyy/mm/dd HH:MM:SS' (e.g., '2018/06/01-12:34:36')")
-            exit(1)
-    else:
-        timestamp = int(time.time())
-
+    username = get_username(args)
 
     if args.option == "start" or args.option == "end":
-        signal_experiment(args.experiment_name, get_username(), args.option, timestamp)
+        signal_experiment(args.experiment_name, username, args.option, get_timestamp(args))
     elif args.option == "delete":
-        mongodb_agent.delete_experiment(args.experiment_name)
+        mongodb_agent.delete_experiment(args.experiment_name, username)
+    elif args.option == "info":
+        get_experiment_info(args.experiment_name, username)
     else:
         eprint("Bad option")
         exit(1)

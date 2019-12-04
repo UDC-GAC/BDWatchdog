@@ -2,8 +2,7 @@
 
 ![Logo](img/logo.png){: style="height:150px;width:100px;"} 
 
-The **BDWatchdog** framework has been developed at Univerisade da Coruña, in Spain, as part of a PhD thesis from the candidate [Jonatan Enes](http://jonatanenes.com/).
-
+The **BDWatchdog** framework has been developed at Universidade da Coruña (Spain), as part of a PhD thesis from the candidate [Jonatan Enes](http://jonatanenes.com/).
 
 In this page all the documentation is presented for the several modules and utilities that compose the framework.
 
@@ -19,5 +18,5 @@ The documentation has been structured as following:
 
 2. [Usage](usage.md): In this section it is described how to deploy the services as well as the framework overall. Some guidelines are also provided.
 
-3. [Source Code](code/src/index.html): If you are interested on the low-level code and code documentation. 
+3. [Source Code](code/index.html): If you are interested on the low-level code and code documentation. 
 
