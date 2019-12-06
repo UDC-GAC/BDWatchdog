@@ -72,6 +72,9 @@ class MongoDBConfig:
                 config_dict[key] = self.__default_config_values[key]
         return config_dict
 
+    def get_username(self):
+        return self.config["MONGODB_USER"]
+
     def __init__(self):
         self.config = self.read_config()
 

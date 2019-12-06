@@ -63,14 +63,16 @@ def generate_resources_timeseries(document, cfg):
 
     for user in cfg.USERS_LIST:
         document["users"][user] = \
-            cfg.bdwatchdog_handler.get_structure_timeseries(user, start, end, cfg.BDWATCHDOG_USER_METRICS, downsample=cfg.DOWNSAMPLE)
-        #TODO rename this function or create a get_user_timeseries
+            cfg.bdwatchdog_handler.get_structure_timeseries(user, start, end, cfg.BDWATCHDOG_USER_METRICS,
+                                                            downsample=cfg.DOWNSAMPLE)
+        # TODO rename this function or create a get_user_timeseries
 
     # Retrieve the timeseries from OpenTSDB and perform the per-structure aggregations
     # Slow loop due to network call
     for node_name in cfg.NODES_LIST:
         document["resources"][node_name] = \
-            cfg.bdwatchdog_handler.get_structure_timeseries(node_name, start, end, cfg.BDWATCHDOG_NODE_METRICS, downsample=cfg.DOWNSAMPLE)
+            cfg.bdwatchdog_handler.get_structure_timeseries(node_name, start, end, cfg.BDWATCHDOG_NODE_METRICS,
+                                                            downsample=cfg.DOWNSAMPLE)
 
         metrics_to_agregate = document["resources"][node_name]
         document["resource_aggregates"][node_name] = \
@@ -92,6 +94,10 @@ def generate_resources_timeseries(document, cfg):
             for time_point in first_metric:
                 # Iterate through the metrics
                 for metric in metric_list:
+                    # Timestamp from the first 'reference' metric is not present in other metric,
+                    # this may be due to the head and tail data points of the time series
+                    if time_point not in metrics_to_agregate[metric]:
+                        continue
                     # Initialize
                     if time_point not in metrics_to_agregate[agg_metric_name]:
                         metrics_to_agregate[agg_metric_name][time_point] = 0
@@ -153,7 +159,8 @@ def generate_resources_timeseries(document, cfg):
 
     for app in cfg.APPS_LIST:
         document["resources"][app] = \
-            cfg.bdwatchdog_handler.get_structure_timeseries(app, start, end, cfg.BDWATCHDOG_APP_METRICS, downsample=cfg.DOWNSAMPLE)
+            cfg.bdwatchdog_handler.get_structure_timeseries(app, start, end, cfg.BDWATCHDOG_APP_METRICS,
+                                                            downsample=cfg.DOWNSAMPLE)
 
         document["resource_aggregates"][app] = \
             cfg.bdwatchdog_handler.perform_structure_metrics_aggregations(start, end, document["resources"][app])

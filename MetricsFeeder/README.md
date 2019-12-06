@@ -8,19 +8,19 @@ Using a linux pipeline approach metrics can be collected, processed and optional
 
 ## Requirements
 
-### System
+#### System
 In order to install some of these tools, such as atop, or to later use them, some basic packages are needed. These packages have not been included in the installation scripts to avoid installing or upgrading unwanted packages, as they are used by many other programs and system utilities. Currently, they are:
 * A python flavor or a python running environment overall
 * Basic development and building tools such as make or gcc. In ubuntu, these are grouped together in the build-essential package.
 
-### [atop](http://www.atoptool.nl/downloadatop.php)
+#### [atop](http://www.atoptool.nl/downloadatop.php)
 To collect system resource metrics, atop is used.
 * To atop, you can use the 'install-atop' script
 * The scripts have been tested with atop 2.3.0 on several *Ubuntu 16.04 LTS* Linux flavours and on *CentOS 7 1511* 
 
 :exclamation: _**When installed, the atop source code is compiled against the currently used kernel headers. If the kernel is updated, you may need to reinstall atop.**_ :exclamation:
 
-### [netatop](http://www.atoptool.nl/downloadnetatop.php) [Optional]
+#### [netatop](http://www.atoptool.nl/downloadnetatop.php) (Optional)
 In order to have per-process network metrics, the netatop module is needed.
 * To install this module, you can use the 'install-netatop' script
 * If no metrics are shown but netatop was previously installed and working, make sure the module is loaded with
@@ -33,7 +33,7 @@ sudo modprobe netatop
 
 :exclamation: _**When installed, the netatop source code is compiled against the currently used kernel headers. If the kernel is updated, you may need to reinstall atop.**_ :exclamation:
 
-### [turbostat](https://github.com/torvalds/linux/blob/master/tools/power/x86/turbostat/turbostat.c)
+#### [turbostat](https://github.com/torvalds/linux/blob/master/tools/power/x86/turbostat/turbostat.c)
 To collect system power and temperature metrics, turbostat is needed.
 * To install turbostat, you can use the 'install-turbostat' script
 * The scripts have been tested with turbostat 4.12 on several flavors of Ubuntu 16.04 LTS Linux.
@@ -43,46 +43,37 @@ To collect system power and temperature metrics, turbostat is needed.
 * :exclamation: _**Turbostat only works in newer cpus that support the RAPL library, mainly Intel cpus newer than Sandy Bridge. Consult (http://web.eece.maine.edu/~vweaver/projects/rapl/rapl_support.html)**_ :exclamation:
 
 
-### [OpenTSDB](https://github.com/OpenTSDB/opentsdb/releases)
+#### [OpenTSDB](https://github.com/OpenTSDB/opentsdb/releases)
 To store the metrics, a timeseries database is used, currently OpenTSDB version 2.3.0. 
 </br>
 Configure the daemon with the atop_config.ini file to send the metrics to the appropiate database endpoint
 
 ## Download and install
 ```
-git clone https://github.com/JonatanEnes/metrics-to-time-series
-cd metrics-to-time-series
+git clone https://github.com/JonatanEnes/BDWatchdog
+cd BDWatchdog/MetricsFeeder
 ```
-* On Ubuntu 16.04:
+* On Ubuntu 16.04 and 18.04:
 ```
-bash install_in_ubuntu.sh
+bash scripts/installation/install_in_ubuntu.sh
 ```
 
 * On CentOS 7:
 ```
-bash install_in_centos7.sh
+bash scripts/installation/install_in_centos7.sh
 ```
 
 ## Usage
 
 Most of the scripts can be used by piping them, some examples of linux pipelines are found in the scripts folder, but for user convenience an orquestrator daemon is provided.
 
-### Atop (system resource metrics)
+#### Atop (system resource metrics)
 
-#### Run raw pipes (content of script run_atop_stream.sh):
+To run the general resource system metric monitoring, you can start the atop daemon with: 
 ```
-atop 5 -P CPU,cpu,MEM,SWP,DSK,NET,PRC,PRM,PRD,PRN | ./pipes/atop_to_csv.py | ./pipes/field_filter.py \
-| ./pipes/validator.py | ./pipes/custom_filter.py | ./pipes/field_translator.py | ./pipes/value_filter.py \
-| ./pipes/csv_to_json.py | ./pipes/json_to_TSDB_json.py | ./pipes/send_to_OpenTSDB.py
+python3 src/daemons/atop.py start
 ```
 
-#### Run with daemon (atop_feeder_daemon.py):
-```
-python atop_feeder_daemon.py start
-```
-Logs are available in the logs folder
-
-#### Daemon configuration
 Daemon configuration is stored in the conf/atop_conf.ini with a .ini format. 
 </br>
 Currently the most important configuration parameters to run the atop daemon are:
@@ -91,25 +82,16 @@ POST_ENDPOINT_PATH : REST endpoint to be used to send data to the OpenTSDB datab
 METRICS : metrics to be samples from atop [CPU,cpu,MEM,SWP,DSK,NET,PRC,PRM,PRD,PRN]
 ATOP_SAMPLING_FREQUENCY : atop sampling, the number of seconds between polling [5]
 POST_DOC_BUFFER_TIMEOUT : timeout to send metrics (max time to wait before sending docs) [10]
-POST_DOC_BUFFER_LENGTH : size of metrics buffer (number of metrics to hold before sending them) [1000]
 JAVA_TRANSLATION_ENABLED: whether to use Java translation or not for the java running machines that appear as "(java)" processes. [false]
 ```
 These parameters can be tuned to select the number and size of data to be collected (metrics and polling time) and to choose between pushing for a more real-time or batch scenario (polling time and metrics timeout/buffer). They acan also be used to turn on or off the Java translation capabilities.
 
-### Turbostat (System power consumption and temperature)
+#### Turbostat (System power consumption and temperature)
+To run the processor energy and temperature measurement with Turbostat, you can run the daemon with:
+```
+python3 src/daemons/turbostat.py start
+```
 
-#### Run raw pipes (content of script run_turbostat_stream.sh):
-```
-turbostat --interval 2 --debug --processor 2>/dev/null | sed -u -e 's/^[ \t]*//' | sed -u -e "s/[[:space:]]\+/,/g" | python turbostat_to_csv.py | python ./pipes/csv_to_json.py | ./pipes/json_to_TSDB_json.py | ./pipes/send_to_OpenTSDB.py
-```
-
-#### Run with daemon (turbostat_feeder_daemon.py):
-```
-python turbostat_feeder_daemon.py start
-```
-Logs are available in the logs folder
-
-#### Daemon configuration
 Daemon configuration is stored in the conf/turbostat_conf.ini with a .ini format. 
 </br>
 Currently the most important configuration parameters to run the turbostat daemon are:
@@ -117,7 +99,6 @@ Currently the most important configuration parameters to run the turbostat daemo
 POST_ENDPOINT_PATH : REST endpoint to be used to send data to the OpenTSDB database [http://opentsdb:4242/api/put]
 TURBOSTAT_SAMPLING_FREQUENCY : turbostat sampling, the number of seconds between polling [5]
 POST_DOC_BUFFER_TIMEOUT : timeout to send metrics (max time to wait before sending docs) [10]
-POST_DOC_BUFFER_LENGTH : size of metrics buffer (number of metrics to hold before sending them) [1000]
 ```
 Like with the atop daemon, these parameters target a more real-time scenario or a batch oriented one.
 

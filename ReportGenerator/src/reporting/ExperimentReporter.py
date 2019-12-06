@@ -70,8 +70,6 @@ class ExperimentReporter():
             ("Missing information report", testRepo.report_resources_missing_data, [],
              self.cfg.PRINT_MISSING_INFO_REPORT),
             ("Resource utilization", testRepo.print_tests_resource_utilization, [], True),
-
-            ("Resource utilization with stepping", testRepo.print_tests_resource_utilization_with_stepping, [], False),
             ("Tests durations and overheads", testRepo.print_summarized_tests_info, [self.cfg.NUM_BASE_EXPERIMENTS],
              False),
             ("Resource overheads", testRepo.print_tests_resource_overhead_report, [self.cfg.NUM_BASE_EXPERIMENTS],
@@ -149,11 +147,8 @@ class ExperimentReporter():
                     user_plots = plots["user"][report_type]
                     plot_user(experiment, user, user_plots, start, end, self.cfg.REPORTED_RESOURCES)
 
-
-
-
         # GENERATE ALL ADDED INFO ABOUT TESTS
-        tests = self.timestampingAgent.get_experiment_tests(experiment["experiment_id"])
+        tests = self.timestampingAgent.get_experiment_tests(experiment["experiment_id"], experiment["username"])
 
         processed_tests = list()
         for test in tests:

@@ -1,7 +1,7 @@
 # Timeseries Viewer
 This repository provides with a web interface to easily plot resource 
 time series and profiling flame graphs. You can try a version of it in 
-http://bdwatchdog.dec.udc.es/monitoring/metrics-and-profiling-viewer/
+this [website](http://bdwatchdog.dec.udc.es/TimeseriesViewer_DEMO/).
 
 ## Download and install
 ```

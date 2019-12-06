@@ -30,7 +30,7 @@ from ReportGenerator.src.reporting.config import ReporterConfig
 from ReportGenerator.src.reporting.latex_output import latex_print, print_latex_stress
 
 from ReportGenerator.src.plotting.barplots import plot_tests_resource_usage, plot_tests_times, \
-    plot_tests_times_with_stepping, plot_tests_resource_usage_with_stepping
+    plot_tests_times_with_stepping
 from ReportGenerator.src.plotting.timeseries_plots import plot_document
 
 from ReportGenerator.src.reporting.utils import generate_duration, translate_metric, format_metric, flush_table, \
@@ -116,64 +116,6 @@ class TestReporter:
         flush_table(final_rows, headers, table_caption)
 
     # PRINT TEST RESOURCE OVERHEAD
-    def print_tests_resource_overhead_report_with_stepping(self, tests, num_base_experiments=3):
-        max_columns = self.cfg.MAX_COLUMNS["print_tests_resource_overhead_report_with_stepping"]
-        resource_tuples = self.cfg.METRICS_FOR_OVERHEAD_REPORT
-
-        overheads, base_values, headers, num_columns, remaining_data = dict(), dict(), ["resource"], 0, False
-
-        if some_test_has_missing_aggregate_information(tests):
-            return
-
-        # Compute the overheads for the baseline tests
-        for resource_tuple in resource_tuples:
-            resource, usage_metric = resource_tuple
-            # Initialize
-            if resource not in overheads:
-                overheads[resource] = [resource]
-                base_values[resource] = 0
-            for test in tests[:num_base_experiments]:
-                base_values[resource] += test["resource_aggregates"]["ALL"][usage_metric]["SUM"]
-
-            base_values[resource] = base_values[resource] / num_base_experiments
-            overheads[resource].append("---")
-
-        # Create the stepping header
-        from_string = tests[0]["test_name"]
-        to_string = tests[num_base_experiments - 1]["test_name"].split("_")[1]
-        headers.append("{0} to {1}".format(from_string, to_string))
-
-        num_columns += 1
-
-        # Compute the overheads for the remaining tests using the step (number of same configuration tests)
-        index = num_base_experiments
-        step = self.cfg.TEST_TYPE_STEPPING
-        while index < len(tests):
-            for resource_tuple in resource_tuples:
-                resource, usage_metric = resource_tuple
-                summary = 0
-                for test in tests[index:index + step]:
-                    summary += test["resource_aggregates"]["ALL"][usage_metric]["SUM"]
-                summary = summary / step
-                overhead = summary / (base_values[resource])
-                overheads[resource].append(str(int((overhead - 1) * 100)) + "%")
-
-            # Create the stepping header
-            from_string = tests[index]["test_name"]
-            to_string = tests[index + step - 1]["test_name"].split("_")[1]
-            headers.append("{0} to {1}".format(from_string, to_string))
-
-            index += step
-
-            num_columns += 1
-            remaining_data = True
-            if num_columns >= max_columns:
-                flush_table(overheads.values(), headers)
-                overheads, headers, num_columns, remaining_data = dict(), ["resource"], 0, False
-
-        if remaining_data:
-            flush_table(overheads.values(), headers)
-
     def print_tests_resource_overhead_report(self, tests, num_base_experiments=3, print_with_stepping=True):
         table_caption = "TESTs resource overhead"
         max_columns = self.cfg.MAX_COLUMNS["print_tests_resource_overhead_report"]
@@ -226,62 +168,7 @@ class TestReporter:
 
         plot_tests_resource_usage(tests)
 
-        if print_with_stepping:
-            self.print_tests_resource_overhead_report_with_stepping(tests, num_base_experiments)
-            plot_tests_resource_usage_with_stepping(tests, num_base_experiments)
-
     # PRINT TEST RESOURCE UTILIZATION
-    def print_tests_resource_utilization_with_stepping(self, tests):
-        max_columns = self.cfg.MAX_COLUMNS["print_tests_resource_utilization_with_stepping"]
-        headers, rows, num_columns, remaining_data = ["resource"], dict(), 0, False
-
-        if some_test_has_missing_aggregate_information(tests):
-            return
-
-        # Set step to baseline number of tests or to the experimentation number of tests if the first is unavailable
-        index = 0
-        if self.cfg.NUM_BASE_EXPERIMENTS == 0:
-            step = self.cfg.TEST_TYPE_STEPPING
-        else:
-            step = self.cfg.NUM_BASE_EXPERIMENTS
-
-        # Process all the step subgroups
-        while index < len(tests):
-            for resource_tuple in self.cfg.RESOURCE_UTILIZATION_TUPLES:
-                resource, current, usage = resource_tuple
-                utilization_acum = 0
-                # Initialize
-                if resource not in rows:
-                    rows[resource] = [resource]
-                # For the inside step tests perform the aggregation
-                for test in tests[index:index + step]:
-                    available = test["resource_aggregates"]["ALL"][current]["SUM"]
-                    used = test["resource_aggregates"]["ALL"][usage]["SUM"]
-                    utilization = int(100 * used / available) - 1
-                    utilization_acum += utilization
-
-                rows[resource].append(str(int(utilization_acum / step)) + '%')
-
-            # Create the stepping header
-            from_string = tests[index]["test_name"]
-            to_string = tests[index + step - 1]["test_name"].split("_")[1]
-            headers.append("{0} to {1}".format(from_string, to_string))
-
-            # Increase the index
-            index += step
-
-            # Set the step to the tests step
-            step = self.cfg.TEST_TYPE_STEPPING
-
-            num_columns += 1
-            remaining_data = True
-            if num_columns >= max_columns:
-                flush_table(rows.values(), headers)
-                headers, rows, num_columns, remaining_data = ["resource"], dict(), 0, False
-
-        if remaining_data:
-            flush_table(rows.values(), headers)
-
     def print_tests_resource_utilization(self, tests):
         max_columns = self.cfg.MAX_COLUMNS["print_tests_resource_utilization_report"]
         table_caption = "TESTs resource utilization"
@@ -430,46 +317,6 @@ class TestReporter:
             self.print_test_resources(test, structures_list)
             print("")
 
-    # PRINT SUMMARIZED TESTS DURATIONS AND OVERHEADS
-    def print_summarized_tests_info_with_stepping(self, tests, num_base_experiments, basetime):
-        max_columns = 6
-        headers, overheads, num_columns, remaining_data = [], ["overhead"], 0, False
-
-        if some_test_has_missing_aggregate_information(tests):
-            return
-
-        # BASETIME
-        headers.append(tests[0]["test_name"] + " to " + tests[num_base_experiments - 1]["test_name"].split("_")[1])
-        overheads.append("---")
-
-        num_columns += 1
-
-        index = num_base_experiments
-        while index < len(tests):
-            duration = 0
-            for test in tests[index:index + self.cfg.TEST_TYPE_STEPPING]:
-                duration += test["duration"]
-            # The average overhead
-            overhead = duration / (self.cfg.TEST_TYPE_STEPPING * basetime)
-            overhead = str(int((overhead - 1) * 100)) + "%"
-            overheads.append(overhead)
-
-            # Create the stepping header
-            from_string = tests[index]["test_name"]
-            to_string = tests[index + self.cfg.TEST_TYPE_STEPPING - 1]["test_name"].split("_")[1]
-            headers.append("{0} to {1}".format(from_string, to_string))
-
-            index += self.cfg.TEST_TYPE_STEPPING
-
-            num_columns += 1
-            remaining_data = True
-            if num_columns >= max_columns:
-                flush_table([overheads], headers)
-                headers, overheads, num_columns, remaining_data = [], ["overhead"], 0, False
-
-        if remaining_data:
-            flush_table([overheads], headers)
-
     def print_tests_times(self, tests):
         max_columns = self.cfg.MAX_COLUMNS["print_summarized_tests_info"]
         table_caption = "TESTs durations and time benchmarking "
@@ -552,7 +399,3 @@ class TestReporter:
             flush_table([durations_seconds, durations_minutes, overheads], headers, table_caption)
 
         plot_tests_times(tests)
-
-        if print_with_stepping:
-            self.print_summarized_tests_info_with_stepping(tests, num_base_experiments, basetime)
-            plot_tests_times_with_stepping(tests, num_base_experiments, basetime)

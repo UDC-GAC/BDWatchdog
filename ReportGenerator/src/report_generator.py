@@ -37,26 +37,28 @@ def eprint(*args, **kwargs):
 
 mongoDBConfig = MongoDBConfig()
 timestampingAgent = MongoDBTimestampAgent(mongoDBConfig.get_config_as_dict())
-experimentRepo = ExperimentReporter()
+experimentReporter = ExperimentReporter()
 
 
 def report_all_experiments():
-    experiments = timestampingAgent.get_all_experiments()
+    experiments = timestampingAgent.get_all_experiments(mongoDBConfig.get_username())
     if experiments:
         for exp in experiments:
             time_start = time.time()
-            experimentRepo.report_experiment(exp)
+            experimentReporter.report_experiment(exp)
             time_end = time.time()
             eprint("Reporting of experiment {0} took {1} seconds".format(exp["experiment_name"], time_end - time_start))
 
 
 if __name__ == '__main__':
+    eprint("[INFO] If you are running the 'generate_report.py', remember that the output is markdown for latex generation!!")
+    eprint("[INFO] To get a nice report in PDF format, run the script 'generate_report.sh' with the same input as this python")
     if len(sys.argv) < 2:
         print("Must specify an experiment name")
     else:
         experiment_name = sys.argv[1]
-        experiment = timestampingAgent.get_experiment(experiment_name)
+        experiment = timestampingAgent.get_experiment(experiment_name, mongoDBConfig.get_username())
         if experiment:
-            experimentRepo.report_experiment(experiment)
+            experimentReporter.report_experiment(experiment)
         else:
             eprint("No experiment '{0}' found".format(experiment_name))
