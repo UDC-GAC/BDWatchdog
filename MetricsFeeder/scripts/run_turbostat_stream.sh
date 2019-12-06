@@ -8,5 +8,7 @@ export TURBOSTAT_SAMPLING_FREQUENCY=5
 # The extra PYTHONUNBUFFERED is a fix for the G5000 infrastructure experiments where I do not known if I do not use it the python output is buffered
 tmux new -d -s "TURBOSTAT" "PYTHONUNBUFFERED='yes' && turbostat -i $TURBOSTAT_SAMPLING_FREQUENCY 2>/dev/null \
 | sed -u -e 's/^[ \t]*//' | sed -u -e 's/[[:space:]]\+/,/g' \
-| ./src/turbostat/turbostat_to_csv.py | ./src/pipelines/csv_to_json.py | ./src/pipelines/json_to_TSDB_json.py \
-| ./src/pipelines/send_to_OpenTSDB.py"
+| python3 ./src/turbostat/turbostat_to_csv.py \
+| python3 ./src/pipelines/csv_to_json.py \
+| python3 ./src/pipelines/json_to_TSDB_json.py \
+| python3 ./src/pipelines/send_to_OpenTSDB.py"

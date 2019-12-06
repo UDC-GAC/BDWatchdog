@@ -2,8 +2,8 @@
 export PYTHONUNBUFFERED="yes"
 export POST_DOC_BUFFER_TIMEOUT=10
 
-#METRIC="CPU,cpu,MEM,SWP,DSK,NET,PRC,PRM,PRD"
-METRIC="PRC,PRM,PRD"
+METRIC="CPU,cpu,MEM,SWP,DSK,NET,PRC,PRM,PRD"
+#METRIC="PRC,PRM,PRD"
 
 source ../../set_pythonpath.sh
 
@@ -18,5 +18,5 @@ source ../../set_pythonpath.sh
 
 #atop 5 -P $METRIC | python -m cProfile -o "`hostname`_profiling_processer.txt" ./src/atop/atop_to_json.py | python -m cProfile -o "`hostname`_profiling_sender.txt" ./src/pipelines/send_to_OpenTSDB.py
 #atop 5 -P $METRIC | strace -T -ttt -o strace_`hostname`_processer.out python ./src/atop/atop_to_json.py | strace -T -ttt -o strace_`hostname`_sender.out python ./src/pipelines/send_to_OpenTSDB.py
-tmux new -s "ATOP" "atop 5 -a -P $METRIC | python3.6 ./src/atop/atop_to_json.py | python2.7 ./src/pipelines/send_to_OpenTSDB.py"
+tmux new -s "ATOP" "atop 5 -a -P $METRIC | python3 ./src/atop/atop_to_json.py | python3 ./src/pipelines/send_to_OpenTSDB.py"
 

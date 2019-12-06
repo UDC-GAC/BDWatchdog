@@ -14,4 +14,4 @@ if [ ! -d "$NETHOGS_DIR" ]; then
     exit 1
 fi
 
-tmux new -s "NETHOGS" "bash ./src/nethogs/run_nethogs.sh $NETHOGS_SAMPLING_FREQUENCY | src/nethogs/filter_raw_output.py | src/nethogs/nethogs_to_json.py | ./src/pipelines/send_to_OpenTSDB.py"
+tmux new -s "NETHOGS" "bash ./src/nethogs/run_nethogs.sh $NETHOGS_SAMPLING_FREQUENCY | python3 ./src/nethogs/filter_raw_output.py | python3 ./src/nethogs/nethogs_to_json.py | python3 ./src/pipelines/send_to_OpenTSDB.py"

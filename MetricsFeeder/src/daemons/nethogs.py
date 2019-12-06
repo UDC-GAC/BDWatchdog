@@ -4,21 +4,21 @@
 #     - Roberto R. Expósito
 #     - Juan Touriño
 #
-# This file is part of the ServerlessContainers framework, from
-# now on referred to as ServerlessContainers.
+# This file is part of the BDWatchdog framework, from
+# now on referred to as BDWatchdog.
 #
-# ServerlessContainers is free software: you can redistribute it
+# BDWatchdog is free software: you can redistribute it
 # and/or modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation, either version 3
 # of the License, or (at your option) any later version.
 #
-# ServerlessContainers is distributed in the hope that it will be useful,
+# BDWatchdog is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with ServerlessContainers. If not, see <http://www.gnu.org/licenses/>.
+# along with BDWatchdog. If not, see <http://www.gnu.org/licenses/>.
 
 
 from __future__ import print_function
@@ -61,7 +61,7 @@ config_keys = [
 
 default_environment_values = {
     "NETHOGS_SAMPLING_FREQUENCY": "5",
-    "POST_ENDPOINT_PATH": "http://192.168.50.100:4242/api/put",
+    "POST_ENDPOINT_PATH": "http://opentsdb:4242/api/put",
     "POST_DOC_BUFFER_TIMEOUT": "5",
     "PYTHONUNBUFFERED": "yes",
     "TEMPLATE_PATH": os.path.join(_base_path, "../pipelines/templates/"),
@@ -73,7 +73,7 @@ default_environment_values = {
     "POST_SEND_DOCS_TIMEOUT": "5",
     "POST_SEND_DOCS_FAILED_TRIES": "6",
     "JAVA_TRANSLATION_ENABLED": "false",
-    "JAVA_MAPPINGS_FOLDER_PATH": os.path.join(_base_path, "../pipelines/java_mappings/"),
+    "JAVA_MAPPINGS_FOLDER_PATH": os.path.join(_base_path, "../java_mappings/"),
     "JAVA_TRANSLATOR_MAX_TRIES": "4",
     "JAVA_TRANSLATOR_WAIT_TIME": "3",
     "HADOOP_SNITCH_FOLDER_PATH": os.path.join(_base_path, "../java_hadoop_snitch/"),
@@ -104,13 +104,13 @@ class Nethogs(MonitoringDaemon):
 
         # Create the data source
         nethogs = subprocess.Popen(
-            [os.path.join(_base_path, "../nethogs/run_nethogs.sh"), self.environment["NETHOGS_SAMPLING_FREQUENCY"]],
+            ["bash", os.path.join(_base_path, "../nethogs/run_nethogs.sh"), self.environment["NETHOGS_SAMPLING_FREQUENCY"]],
             env=self.environment, stdout=subprocess.PIPE)
         processes_list.append(nethogs)
 
         # Create the data pipeline
         filtered_nethogs_output = self.create_pipe(
-            [os.path.join(_base_path, "../nethogs/filter_raw_output.py")], self.environment,
+            ["python3", os.path.join(_base_path, "../nethogs/filter_raw_output.py")], self.environment,
             nethogs.stdout,
             subprocess.PIPE)
         processes_list.append(filtered_nethogs_output)
@@ -118,17 +118,17 @@ class Nethogs(MonitoringDaemon):
         if self.environment["JAVA_TRANSLATION_ENABLED"] == "true":
             # With JAVA mapping
             nethogs_to_json = self.create_pipe(
-                [os.path.join(_base_path, "../nethogs/nethogs_to_json_with_java_translation.py")], self.environment,
+                ["python3", os.path.join(_base_path, "../nethogs/nethogs_to_json_with_java_translation.py")], self.environment,
                 filtered_nethogs_output.stdout,
                 subprocess.PIPE)
         else:
             # Without JAVA mapping
             nethogs_to_json = self.create_pipe(
-                [os.path.join(_base_path, "../nethogs/nethogs_to_json.py")], self.environment,
+                ["python3", os.path.join(_base_path, "../nethogs/nethogs_to_json.py")], self.environment,
                 filtered_nethogs_output.stdout,
                 subprocess.PIPE)
 
-        send_to_opentsdb = self.create_pipe([os.path.join(_base_path, "../pipelines/send_to_OpenTSDB.py")],
+        send_to_opentsdb = self.create_pipe(["python3", os.path.join(_base_path, "../pipelines/send_to_OpenTSDB.py")],
                                             self.environment, nethogs_to_json.stdout, subprocess.PIPE)
         processes_list.append(send_to_opentsdb)
 

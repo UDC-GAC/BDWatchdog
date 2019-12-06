@@ -30,21 +30,21 @@
 #     - Roberto R. Expósito
 #     - Juan Touriño
 #
-# This file is part of the ServerlessContainers framework, from
-# now on referred to as ServerlessContainers.
+# This file is part of the BDWatchdog framework, from
+# now on referred to as BDWatchdog.
 #
-# ServerlessContainers is free software: you can redistribute it
+# BDWatchdog is free software: you can redistribute it
 # and/or modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation, either version 3
 # of the License, or (at your option) any later version.
 #
-# ServerlessContainers is distributed in the hope that it will be useful,
+# BDWatchdog is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with ServerlessContainers. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+# along with BDWatchdog. If not, see &lt;http://www.gnu.org/licenses/&gt;.
 
 from __future__ import print_function
 import sys
@@ -76,7 +76,6 @@ config_keys = [
     &#34;JAVA_MAPPINGS_FOLDER_PATH&#34;,
     &#34;JAVA_TRANSLATOR_MAX_TRIES&#34;,
     &#34;JAVA_TRANSLATOR_WAIT_TIME&#34;,
-    &#34;HADOOP_SNITCH_FOLDER_PATH&#34;,
     &#34;JAVA_TRANSLATION_ENABLED&#34;,
     &#34;HEARTBEAT_ENABLED&#34;
 ]
@@ -92,10 +91,9 @@ default_environment_values = {
     &#34;POST_DOC_BUFFER_LENGTH&#34;: &#34;1000&#34;,  # Don&#39;t go over 1500 or post packet will be too large and may cause error
     &#34;POST_SEND_DOCS_TIMEOUT&#34;: &#34;30&#34;,
     &#34;POST_SEND_DOCS_FAILED_TRIES&#34;: &#34;6&#34;,
-    &#34;JAVA_MAPPINGS_FOLDER_PATH&#34;: os.path.join(_base_path, &#34;../pipelines/java_mappings/&#34;),
+    &#34;JAVA_MAPPINGS_FOLDER_PATH&#34;: os.path.join(_base_path, &#34;../java_hadoop_snitch/java_mappings/&#34;),
     &#34;JAVA_TRANSLATOR_MAX_TRIES&#34;: &#34;4&#34;,
     &#34;JAVA_TRANSLATOR_WAIT_TIME&#34;: &#34;3&#34;,
-    &#34;HADOOP_SNITCH_FOLDER_PATH&#34;: os.path.join(_base_path, &#34;../java_hadoop_snitch/&#34;),
     &#34;JAVA_TRANSLATION_ENABLED&#34;: &#34;false&#34;,
     &#34;HEARTBEAT_ENABLED&#34;: &#34;false&#34;
 }
@@ -113,10 +111,6 @@ def atop_is_runnable(environment):
 class Atop(MonitoringDaemon):
 
     def run(self):
-        # Launch Java snitch if java translation is going to be used
-        # if self.environment[&#34;JAVA_TRANSLATION_ENABLED&#34;] == &#34;true&#34;:
-        #     self.snitcher = self.launch_java_snitch()
-
         self.launch_pipeline()
         self.launch_heartbeat()
         self.loop()
@@ -135,28 +129,32 @@ class Atop(MonitoringDaemon):
         if self.environment[&#34;JAVA_TRANSLATION_ENABLED&#34;] == &#34;true&#34;:
             # With JAVA mapping
             atop_to_json = self.create_pipe(
-                [os.path.join(_base_path, &#34;../atop/atop_to_json_with_java_translation.py&#34;)], self.environment,
+                [&#34;python3&#34;, os.path.join(_base_path, &#34;../atop/atop_to_json_with_java_translation.py&#34;)], self.environment,
                 atop.stdout,
                 subprocess.PIPE)
         else:
             # Without JAVA mapping
-            # TODO FIX, python version should not be hard-coded
             atop_to_json = self.create_pipe(
                 [&#34;python3&#34;, os.path.join(_base_path, &#34;../atop/atop_to_json.py&#34;)], self.environment,
                 atop.stdout,
                 subprocess.PIPE)
-        # TODO FIX, python version should not be hard-coded
-        send_to_opentsdb = self.create_pipe([&#34;python2&#34;, os.path.join(_base_path, &#34;../pipelines/send_to_OpenTSDB.py&#34;)],
+        send_to_opentsdb = self.create_pipe([&#34;python3&#34;, os.path.join(_base_path, &#34;../pipelines/send_to_OpenTSDB.py&#34;)],
                                             self.environment,
                                             atop_to_json.stdout, subprocess.PIPE)
         processes_list.append(send_to_opentsdb)
+
+        # Launch Java snitch if java translation is going to be used
+        if self.environment[&#34;JAVA_TRANSLATION_ENABLED&#34;] == &#34;true&#34;:
+            #self.snitcher = self.launch_java_snitch()
+            snitcher = self.launch_java_snitch()
+            processes_list.append(snitcher)
 
         return processes_list
 
     def launch_java_snitch(self):
         # Create the java snitch process
         java_snitch_process = subprocess.Popen(
-            [&#34;python&#34;, os.path.join(_base_path, &#34;../java_hadoop_snitch/java_snitch.py&#34;)],
+            [&#34;python3&#34;, os.path.join(_base_path, &#34;../java_hadoop_snitch/java_snitch.py&#34;)],
             env=self.environment, stdout=subprocess.PIPE)
         return java_snitch_process
 
@@ -234,10 +232,6 @@ if __name__ == &#39;__main__&#39;:
 <pre><code class="python">class Atop(MonitoringDaemon):
 
     def run(self):
-        # Launch Java snitch if java translation is going to be used
-        # if self.environment[&#34;JAVA_TRANSLATION_ENABLED&#34;] == &#34;true&#34;:
-        #     self.snitcher = self.launch_java_snitch()
-
         self.launch_pipeline()
         self.launch_heartbeat()
         self.loop()
@@ -256,28 +250,32 @@ if __name__ == &#39;__main__&#39;:
         if self.environment[&#34;JAVA_TRANSLATION_ENABLED&#34;] == &#34;true&#34;:
             # With JAVA mapping
             atop_to_json = self.create_pipe(
-                [os.path.join(_base_path, &#34;../atop/atop_to_json_with_java_translation.py&#34;)], self.environment,
+                [&#34;python3&#34;, os.path.join(_base_path, &#34;../atop/atop_to_json_with_java_translation.py&#34;)], self.environment,
                 atop.stdout,
                 subprocess.PIPE)
         else:
             # Without JAVA mapping
-            # TODO FIX, python version should not be hard-coded
             atop_to_json = self.create_pipe(
                 [&#34;python3&#34;, os.path.join(_base_path, &#34;../atop/atop_to_json.py&#34;)], self.environment,
                 atop.stdout,
                 subprocess.PIPE)
-        # TODO FIX, python version should not be hard-coded
-        send_to_opentsdb = self.create_pipe([&#34;python2&#34;, os.path.join(_base_path, &#34;../pipelines/send_to_OpenTSDB.py&#34;)],
+        send_to_opentsdb = self.create_pipe([&#34;python3&#34;, os.path.join(_base_path, &#34;../pipelines/send_to_OpenTSDB.py&#34;)],
                                             self.environment,
                                             atop_to_json.stdout, subprocess.PIPE)
         processes_list.append(send_to_opentsdb)
+
+        # Launch Java snitch if java translation is going to be used
+        if self.environment[&#34;JAVA_TRANSLATION_ENABLED&#34;] == &#34;true&#34;:
+            #self.snitcher = self.launch_java_snitch()
+            snitcher = self.launch_java_snitch()
+            processes_list.append(snitcher)
 
         return processes_list
 
     def launch_java_snitch(self):
         # Create the java snitch process
         java_snitch_process = subprocess.Popen(
-            [&#34;python&#34;, os.path.join(_base_path, &#34;../java_hadoop_snitch/java_snitch.py&#34;)],
+            [&#34;python3&#34;, os.path.join(_base_path, &#34;../java_hadoop_snitch/java_snitch.py&#34;)],
             env=self.environment, stdout=subprocess.PIPE)
         return java_snitch_process</code></pre>
 </details>
@@ -310,21 +308,25 @@ if __name__ == &#39;__main__&#39;:
     if self.environment[&#34;JAVA_TRANSLATION_ENABLED&#34;] == &#34;true&#34;:
         # With JAVA mapping
         atop_to_json = self.create_pipe(
-            [os.path.join(_base_path, &#34;../atop/atop_to_json_with_java_translation.py&#34;)], self.environment,
+            [&#34;python3&#34;, os.path.join(_base_path, &#34;../atop/atop_to_json_with_java_translation.py&#34;)], self.environment,
             atop.stdout,
             subprocess.PIPE)
     else:
         # Without JAVA mapping
-        # TODO FIX, python version should not be hard-coded
         atop_to_json = self.create_pipe(
             [&#34;python3&#34;, os.path.join(_base_path, &#34;../atop/atop_to_json.py&#34;)], self.environment,
             atop.stdout,
             subprocess.PIPE)
-    # TODO FIX, python version should not be hard-coded
-    send_to_opentsdb = self.create_pipe([&#34;python2&#34;, os.path.join(_base_path, &#34;../pipelines/send_to_OpenTSDB.py&#34;)],
+    send_to_opentsdb = self.create_pipe([&#34;python3&#34;, os.path.join(_base_path, &#34;../pipelines/send_to_OpenTSDB.py&#34;)],
                                         self.environment,
                                         atop_to_json.stdout, subprocess.PIPE)
     processes_list.append(send_to_opentsdb)
+
+    # Launch Java snitch if java translation is going to be used
+    if self.environment[&#34;JAVA_TRANSLATION_ENABLED&#34;] == &#34;true&#34;:
+        #self.snitcher = self.launch_java_snitch()
+        snitcher = self.launch_java_snitch()
+        processes_list.append(snitcher)
 
     return processes_list</code></pre>
 </details>
@@ -341,7 +343,7 @@ if __name__ == &#39;__main__&#39;:
 <pre><code class="python">def launch_java_snitch(self):
     # Create the java snitch process
     java_snitch_process = subprocess.Popen(
-        [&#34;python&#34;, os.path.join(_base_path, &#34;../java_hadoop_snitch/java_snitch.py&#34;)],
+        [&#34;python3&#34;, os.path.join(_base_path, &#34;../java_hadoop_snitch/java_snitch.py&#34;)],
         env=self.environment, stdout=subprocess.PIPE)
     return java_snitch_process</code></pre>
 </details>
@@ -356,10 +358,6 @@ if __name__ == &#39;__main__&#39;:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def run(self):
-    # Launch Java snitch if java translation is going to be used
-    # if self.environment[&#34;JAVA_TRANSLATION_ENABLED&#34;] == &#34;true&#34;:
-    #     self.snitcher = self.launch_java_snitch()
-
     self.launch_pipeline()
     self.launch_heartbeat()
     self.loop()</code></pre>

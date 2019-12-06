@@ -4,44 +4,48 @@
 #     - Roberto R. Expósito
 #     - Juan Touriño
 #
-# This file is part of the ServerlessContainers framework, from
-# now on referred to as ServerlessContainers.
+# This file is part of the BDWatchdog framework, from
+# now on referred to as BDWatchdog.
 #
-# ServerlessContainers is free software: you can redistribute it
+# BDWatchdog is free software: you can redistribute it
 # and/or modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation, either version 3
 # of the License, or (at your option) any later version.
 #
-# ServerlessContainers is distributed in the hope that it will be useful,
+# BDWatchdog is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with ServerlessContainers. If not, see <http://www.gnu.org/licenses/>.
-
+# along with BDWatchdog. If not, see <http://www.gnu.org/licenses/>.
+import socket
 import subprocess
 import time
 import pickle
 import os
 import errno
 
-JAVA_MAPPINGS_FOLDER_PATH = "JAVA_MAPPINGS_FOLDER_PATH"
-JAVA_SNITCH_POLLING_SECONDS = "JAVA_SNITCH_POLLING_SECONDS"
-HADOOP_SNITCH_FOLDER_PATH = "HADOOP_SNITCH_FOLDER_PATH"
-JAVA_SNITCH_TIME_TO_DUMP_COUNTER_MAX = "JAVA_SNITCH_TIME_TO_DUMP_COUNTER_MAX"
-
 _base_path = os.path.dirname(os.path.abspath(__file__))
+VAR_JAVA_MAPPINGS_FOLDER = "JAVA_MAPPINGS_FOLDER_PATH"
+DEFAULT_JAVA_MAPPINGS_FOLDER = "java_mappings"
+VAR_JAVA_SNITCH_POLLING_SECONDS = "JAVA_SNITCH_POLLING_SECONDS"
+DEFAULT_JAVA_SNITCH_POLLING_SECONDS = 3
+VAR_JAVA_SNITCH_TIME_TO_DUMP = "JAVA_SNITCH_TIME_TO_DUMP_COUNTER_MAX"
+DEFAULT_JAVA_SNITCH_TIME_TO_DUMP = 2
 
-java_mappings_folder_path = os.getenv(JAVA_MAPPINGS_FOLDER_PATH, os.path.join(_base_path, "../pipelines/java_mappings/"))
-java_snitch_polling_seconds = int(os.getenv(JAVA_SNITCH_POLLING_SECONDS, 3))
-pipes_folder_path = os.getenv(HADOOP_SNITCH_FOLDER_PATH, os.path.join(_base_path, "../java_hadoop_snitch/"))
-time_to_dump_counter_max = int(os.getenv(JAVA_SNITCH_TIME_TO_DUMP_COUNTER_MAX, 2))
+java_mappings_folder_path = os.getenv(VAR_JAVA_MAPPINGS_FOLDER, os.path.join(_base_path, DEFAULT_JAVA_MAPPINGS_FOLDER))
+java_snitch_polling_seconds = int(os.getenv(VAR_JAVA_SNITCH_POLLING_SECONDS, DEFAULT_JAVA_SNITCH_POLLING_SECONDS))
+time_to_dump_counter_max = int(os.getenv(VAR_JAVA_SNITCH_TIME_TO_DUMP, DEFAULT_JAVA_SNITCH_TIME_TO_DUMP))
 
 process_names = ["NameNode", "SecondaryNameNode", "DataNode", "ResourceManager", "NodeManager", "YarnChild",
                  "MRAppMaster", "CoarseGrainedExecutorBackend"]
 process_files = ["NameNode", "SecondaryNameNode", "DataNode", "ResourceManager", "NodeManager", "YarnChild",
                  "MRAppMaster", "CoarseGrainedExecutorBackend", "OTHER"]
+
+
+def get_filepath(process_name):
+    return "{0}/{1}.{2}.p".format(java_mappings_folder_path, process_name, socket.gethostname())
 
 
 def run_command(c):
@@ -62,11 +66,22 @@ def check_path_existence_and_create(path):
 
 def read_process_pids_from_file(process_name):
     try:
-        with open(java_mappings_folder_path + process_name + '.txt', 'r') as content_file:
+        filename = get_filepath(process_name)
+        with open(filename, 'rb') as content_file:
             itemlist = pickle.load(content_file)
         return [int(x) for x in itemlist]
-    except IOError:
+    except (IOError, EOFError):
         return []
+
+
+def dump_process_pids_to_file(process_name, pidlist):
+    try:
+        filename = get_filepath(process_name)
+        with open(filename, 'wb') as f1:
+            pickle.dump([int(x) for x in pidlist], f1)
+    except IOError:
+        # mapping folder doesn't exist, create it for next time
+        check_path_existence_and_create(java_mappings_folder_path)
 
 
 def read_all():
@@ -77,13 +92,12 @@ def read_all():
     return proc_dict
 
 
-def dump_process_pids_to_file(process_name, pidlist):
-    try:
-        with open(java_mappings_folder_path + process_name + '.txt', 'w+') as f1:
-            pickle.dump([int(x) for x in pidlist], f1)
-    except IOError:
-        # mapping folder doesn't exist, create it for next time
-        check_path_existence_and_create(java_mappings_folder_path)
+def process_line(line):
+    fields = line.strip().split(" ")
+    pid = fields[0]
+    for field in fields:
+        if field.startswith("org.apache.hadoop.") or field.startswith("org.apache.spark."):
+            return pid + " " + field.strip().split(".")[-1]
 
 
 def merge_lists(l1, l2):
@@ -111,38 +125,55 @@ def dump_all(java_dict):
         dump_process_pids_to_file(key, java_dict[key])
 
 
-def main():
+def run_ps():
+    lines = list()
+    cmd = ["ps", "h", "-eo", "pid,cmd"]
+    ps = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    while True:
+        line = ps.stdout.readline()
+        if line == b'' and ps.poll() is not None:
+            break
+        lines.append(line.decode('utf-8').strip("\n"))
+    output = ps.communicate()[0]
+    return lines
 
+
+def remove_files():
+    for process_name in process_files:
+        try:
+            filename = get_filepath(process_name)
+            os.remove(filename)
+        except (IOError, EOFError):
+            pass
+
+
+def main():
     time_to_dump_counter = 0
     print("[HADOOP JAVA SNITCH] Going to monitor hadoop java process every '" + str(
         java_snitch_polling_seconds) + "' seconds dumping every '" + str(
         java_snitch_polling_seconds * time_to_dump_counter_max) + "' seconds")
 
+    java_proc_dict = dict()
+    remove_files()
     while True:
-        java_proc_dict = dict()
         try:
-            # lineas = run_command('jps')[0].strip().split('\n')
-            cmd = "ps h -eo pid,cmd | " + pipes_folder_path + "java_ps.py"
-            ps = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-            lines = ps.communicate()[0].strip().split('\n')
+            lines = run_ps()
             for line in lines:
-                if line == "":
+                line = process_line(line)
+                if not line or line == "":
                     continue
                 pid_command = line.split(" ")
-                pid = pid_command[0]
-                command = pid_command[1]
+                pid, command = pid_command[0], pid_command[1]
+
                 if command.strip() in process_names:
-                    try:
-                        pid_list = java_proc_dict[command]
-                        pid_list.append(int(pid))
-                    except KeyError:
-                        java_proc_dict[command] = [int(pid)]
+                    proc_dict_key = command
                 else:
-                    try:
-                        pid_list = java_proc_dict["OTHER"]
-                        pid_list.append(int(pid))
-                    except KeyError:
-                        java_proc_dict["OTHER"] = [int(pid)]
+                    proc_dict_key = "OTHER"
+
+                try:
+                    java_proc_dict[proc_dict_key].append(int(pid))
+                except KeyError:
+                    java_proc_dict[proc_dict_key] = [int(pid)]
 
             time_to_dump_counter += 1
 
@@ -155,8 +186,8 @@ def main():
 
         except KeyboardInterrupt:
             dump_all(java_proc_dict)
-            java_proc_dict = dict()
             exit(0)
+
 
 if __name__ == "__main__":
     main()

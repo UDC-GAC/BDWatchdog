@@ -30,37 +30,47 @@
 #     - Roberto R. Expósito
 #     - Juan Touriño
 #
-# This file is part of the ServerlessContainers framework, from
-# now on referred to as ServerlessContainers.
+# This file is part of the BDWatchdog framework, from
+# now on referred to as BDWatchdog.
 #
-# ServerlessContainers is free software: you can redistribute it
+# BDWatchdog is free software: you can redistribute it
 # and/or modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation, either version 3
 # of the License, or (at your option) any later version.
 #
-# ServerlessContainers is distributed in the hope that it will be useful,
+# BDWatchdog is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with ServerlessContainers. If not, see &lt;http://www.gnu.org/licenses/&gt;.
-
+# along with BDWatchdog. If not, see &lt;http://www.gnu.org/licenses/&gt;.
 
 import pickle
+import os
+import socket
+from MetricsFeeder.src.java_hadoop_snitch.java_snitch import process_files
 
-process_files = [&#34;NameNode&#34;, &#34;SecondaryNameNode&#34;, &#34;DataNode&#34;, &#34;ResourceManager&#34;, &#34;NodeManager&#34;, &#34;YarnChild&#34;,
-                 &#34;MRAppMaster&#34;]
+_base_path = os.path.dirname(os.path.abspath(__file__))
+VAR_JAVA_MAPPINGS_FOLDER = &#34;JAVA_MAPPINGS_FOLDER_PATH&#34;
+DEFAULT_JAVA_MAPPINGS_FOLDER = &#34;java_mappings&#34;
+
+java_mappings_folder_path = os.getenv(VAR_JAVA_MAPPINGS_FOLDER, os.path.join(_base_path, DEFAULT_JAVA_MAPPINGS_FOLDER))
+
+
+def get_filepath(process_name):
+    return &#34;{0}/{1}.{2}.p&#34;.format(java_mappings_folder_path, process_name, socket.gethostname())
 
 def main():
-
-    for f in process_files:
+    for process_name in process_files:
         try:
-            with open(&#39;../pipelines/java_mappings/&#39; + f + &#39;.txt&#39;, &#39;rb&#39;) as fp:
+            filename = get_filepath(process_name)
+            with open(filename, &#39;rb&#39;) as fp:
                 itemlist = pickle.load(fp)
-            print(f + &#34;-&gt;&#34; + str([int(x) for x in itemlist]))
-        except IOError:
+            print(process_name + &#34;-&gt;&#34; + str([int(x) for x in itemlist]))
+        except (IOError, EOFError):
             pass
+
 
 if __name__ == &#34;__main__&#34;:
     main()</code></pre>
@@ -73,6 +83,19 @@ if __name__ == &#34;__main__&#34;:
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="src.java_hadoop_snitch.read_java_maps.get_filepath"><code class="name flex">
+<span>def <span class="ident">get_filepath</span></span>(<span>process_name)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_filepath(process_name):
+    return &#34;{0}/{1}.{2}.p&#34;.format(java_mappings_folder_path, process_name, socket.gethostname())</code></pre>
+</details>
+</dd>
 <dt id="src.java_hadoop_snitch.read_java_maps.main"><code class="name flex">
 <span>def <span class="ident">main</span></span>(<span>)</span>
 </code></dt>
@@ -83,13 +106,13 @@ if __name__ == &#34;__main__&#34;:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def main():
-
-    for f in process_files:
+    for process_name in process_files:
         try:
-            with open(&#39;../pipelines/java_mappings/&#39; + f + &#39;.txt&#39;, &#39;rb&#39;) as fp:
+            filename = get_filepath(process_name)
+            with open(filename, &#39;rb&#39;) as fp:
                 itemlist = pickle.load(fp)
-            print(f + &#34;-&gt;&#34; + str([int(x) for x in itemlist]))
-        except IOError:
+            print(process_name + &#34;-&gt;&#34; + str([int(x) for x in itemlist]))
+        except (IOError, EOFError):
             pass</code></pre>
 </details>
 </dd>
@@ -112,6 +135,7 @@ if __name__ == &#34;__main__&#34;:
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="src.java_hadoop_snitch.read_java_maps.get_filepath" href="#src.java_hadoop_snitch.read_java_maps.get_filepath">get_filepath</a></code></li>
 <li><code><a title="src.java_hadoop_snitch.read_java_maps.main" href="#src.java_hadoop_snitch.read_java_maps.main">main</a></code></li>
 </ul>
 </li>

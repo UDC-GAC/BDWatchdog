@@ -16,13 +16,6 @@ if [ ! -d "$NETHOGS_DIR" ]; then
     exit 1
 fi
 
-tmux new -s "NETHOGS" "bash ./src/nethogs/run_nethogs.sh $NETHOGS_SAMPLING_FREQUENCY | ./src/nethogs/nethogs_to_json_with_java_translation.py | ./src/pipelines/send_to_OpenTSDB.py"
+tmux new -s "NETHOGS" "bash ./src/nethogs/run_nethogs.sh $NETHOGS_SAMPLING_FREQUENCY | python3 ./src/nethogs/filter_raw_output.py | python3 ./src/nethogs/nethogs_to_json_with_java_translation.py | python3 ./src/pipelines/send_to_OpenTSDB.py"
 
-#bash ./src/nethogs/run_nethogs.sh $NETHOGS_SAMPLING_FREQUENCY \
-#    | ./src/nethogs/nethogs_to_csv.py \
-#	| ./src/pipelines/field_translator.py \
-#	| ./src/pipelines/hadoop_java_translator.py \
-#	| ./src/pipelines/csv_to_json.py \
-#	| ./src/pipelines/json_to_TSDB_json.py \
-#	| ./src/pipelines/send_to_OpenTSDB.py
 

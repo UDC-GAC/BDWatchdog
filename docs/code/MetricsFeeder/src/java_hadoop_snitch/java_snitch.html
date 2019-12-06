@@ -30,44 +30,48 @@
 #     - Roberto R. Expósito
 #     - Juan Touriño
 #
-# This file is part of the ServerlessContainers framework, from
-# now on referred to as ServerlessContainers.
+# This file is part of the BDWatchdog framework, from
+# now on referred to as BDWatchdog.
 #
-# ServerlessContainers is free software: you can redistribute it
+# BDWatchdog is free software: you can redistribute it
 # and/or modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation, either version 3
 # of the License, or (at your option) any later version.
 #
-# ServerlessContainers is distributed in the hope that it will be useful,
+# BDWatchdog is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with ServerlessContainers. If not, see &lt;http://www.gnu.org/licenses/&gt;.
-
+# along with BDWatchdog. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+import socket
 import subprocess
 import time
 import pickle
 import os
 import errno
 
-JAVA_MAPPINGS_FOLDER_PATH = &#34;JAVA_MAPPINGS_FOLDER_PATH&#34;
-JAVA_SNITCH_POLLING_SECONDS = &#34;JAVA_SNITCH_POLLING_SECONDS&#34;
-HADOOP_SNITCH_FOLDER_PATH = &#34;HADOOP_SNITCH_FOLDER_PATH&#34;
-JAVA_SNITCH_TIME_TO_DUMP_COUNTER_MAX = &#34;JAVA_SNITCH_TIME_TO_DUMP_COUNTER_MAX&#34;
-
 _base_path = os.path.dirname(os.path.abspath(__file__))
+VAR_JAVA_MAPPINGS_FOLDER = &#34;JAVA_MAPPINGS_FOLDER_PATH&#34;
+DEFAULT_JAVA_MAPPINGS_FOLDER = &#34;java_mappings&#34;
+VAR_JAVA_SNITCH_POLLING_SECONDS = &#34;JAVA_SNITCH_POLLING_SECONDS&#34;
+DEFAULT_JAVA_SNITCH_POLLING_SECONDS = 3
+VAR_JAVA_SNITCH_TIME_TO_DUMP = &#34;JAVA_SNITCH_TIME_TO_DUMP_COUNTER_MAX&#34;
+DEFAULT_JAVA_SNITCH_TIME_TO_DUMP = 2
 
-java_mappings_folder_path = os.getenv(JAVA_MAPPINGS_FOLDER_PATH, os.path.join(_base_path, &#34;../pipelines/java_mappings/&#34;))
-java_snitch_polling_seconds = int(os.getenv(JAVA_SNITCH_POLLING_SECONDS, 3))
-pipes_folder_path = os.getenv(HADOOP_SNITCH_FOLDER_PATH, os.path.join(_base_path, &#34;../java_hadoop_snitch/&#34;))
-time_to_dump_counter_max = int(os.getenv(JAVA_SNITCH_TIME_TO_DUMP_COUNTER_MAX, 2))
+java_mappings_folder_path = os.getenv(VAR_JAVA_MAPPINGS_FOLDER, os.path.join(_base_path, DEFAULT_JAVA_MAPPINGS_FOLDER))
+java_snitch_polling_seconds = int(os.getenv(VAR_JAVA_SNITCH_POLLING_SECONDS, DEFAULT_JAVA_SNITCH_POLLING_SECONDS))
+time_to_dump_counter_max = int(os.getenv(VAR_JAVA_SNITCH_TIME_TO_DUMP, DEFAULT_JAVA_SNITCH_TIME_TO_DUMP))
 
 process_names = [&#34;NameNode&#34;, &#34;SecondaryNameNode&#34;, &#34;DataNode&#34;, &#34;ResourceManager&#34;, &#34;NodeManager&#34;, &#34;YarnChild&#34;,
                  &#34;MRAppMaster&#34;, &#34;CoarseGrainedExecutorBackend&#34;]
 process_files = [&#34;NameNode&#34;, &#34;SecondaryNameNode&#34;, &#34;DataNode&#34;, &#34;ResourceManager&#34;, &#34;NodeManager&#34;, &#34;YarnChild&#34;,
                  &#34;MRAppMaster&#34;, &#34;CoarseGrainedExecutorBackend&#34;, &#34;OTHER&#34;]
+
+
+def get_filepath(process_name):
+    return &#34;{0}/{1}.{2}.p&#34;.format(java_mappings_folder_path, process_name, socket.gethostname())
 
 
 def run_command(c):
@@ -88,11 +92,22 @@ def check_path_existence_and_create(path):
 
 def read_process_pids_from_file(process_name):
     try:
-        with open(java_mappings_folder_path + process_name + &#39;.txt&#39;, &#39;r&#39;) as content_file:
+        filename = get_filepath(process_name)
+        with open(filename, &#39;rb&#39;) as content_file:
             itemlist = pickle.load(content_file)
         return [int(x) for x in itemlist]
-    except IOError:
+    except (IOError, EOFError):
         return []
+
+
+def dump_process_pids_to_file(process_name, pidlist):
+    try:
+        filename = get_filepath(process_name)
+        with open(filename, &#39;wb&#39;) as f1:
+            pickle.dump([int(x) for x in pidlist], f1)
+    except IOError:
+        # mapping folder doesn&#39;t exist, create it for next time
+        check_path_existence_and_create(java_mappings_folder_path)
 
 
 def read_all():
@@ -103,13 +118,12 @@ def read_all():
     return proc_dict
 
 
-def dump_process_pids_to_file(process_name, pidlist):
-    try:
-        with open(java_mappings_folder_path + process_name + &#39;.txt&#39;, &#39;w+&#39;) as f1:
-            pickle.dump([int(x) for x in pidlist], f1)
-    except IOError:
-        # mapping folder doesn&#39;t exist, create it for next time
-        check_path_existence_and_create(java_mappings_folder_path)
+def process_line(line):
+    fields = line.strip().split(&#34; &#34;)
+    pid = fields[0]
+    for field in fields:
+        if field.startswith(&#34;org.apache.hadoop.&#34;) or field.startswith(&#34;org.apache.spark.&#34;):
+            return pid + &#34; &#34; + field.strip().split(&#34;.&#34;)[-1]
 
 
 def merge_lists(l1, l2):
@@ -137,38 +151,55 @@ def dump_all(java_dict):
         dump_process_pids_to_file(key, java_dict[key])
 
 
-def main():
+def run_ps():
+    lines = list()
+    cmd = [&#34;ps&#34;, &#34;h&#34;, &#34;-eo&#34;, &#34;pid,cmd&#34;]
+    ps = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    while True:
+        line = ps.stdout.readline()
+        if line == b&#39;&#39; and ps.poll() is not None:
+            break
+        lines.append(line.decode(&#39;utf-8&#39;).strip(&#34;\n&#34;))
+    output = ps.communicate()[0]
+    return lines
 
+
+def remove_files():
+    for process_name in process_files:
+        try:
+            filename = get_filepath(process_name)
+            os.remove(filename)
+        except (IOError, EOFError):
+            pass
+
+
+def main():
     time_to_dump_counter = 0
     print(&#34;[HADOOP JAVA SNITCH] Going to monitor hadoop java process every &#39;&#34; + str(
         java_snitch_polling_seconds) + &#34;&#39; seconds dumping every &#39;&#34; + str(
         java_snitch_polling_seconds * time_to_dump_counter_max) + &#34;&#39; seconds&#34;)
 
+    java_proc_dict = dict()
+    remove_files()
     while True:
-        java_proc_dict = dict()
         try:
-            # lineas = run_command(&#39;jps&#39;)[0].strip().split(&#39;\n&#39;)
-            cmd = &#34;ps h -eo pid,cmd | &#34; + pipes_folder_path + &#34;java_ps.py&#34;
-            ps = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-            lines = ps.communicate()[0].strip().split(&#39;\n&#39;)
+            lines = run_ps()
             for line in lines:
-                if line == &#34;&#34;:
+                line = process_line(line)
+                if not line or line == &#34;&#34;:
                     continue
                 pid_command = line.split(&#34; &#34;)
-                pid = pid_command[0]
-                command = pid_command[1]
+                pid, command = pid_command[0], pid_command[1]
+
                 if command.strip() in process_names:
-                    try:
-                        pid_list = java_proc_dict[command]
-                        pid_list.append(int(pid))
-                    except KeyError:
-                        java_proc_dict[command] = [int(pid)]
+                    proc_dict_key = command
                 else:
-                    try:
-                        pid_list = java_proc_dict[&#34;OTHER&#34;]
-                        pid_list.append(int(pid))
-                    except KeyError:
-                        java_proc_dict[&#34;OTHER&#34;] = [int(pid)]
+                    proc_dict_key = &#34;OTHER&#34;
+
+                try:
+                    java_proc_dict[proc_dict_key].append(int(pid))
+                except KeyError:
+                    java_proc_dict[proc_dict_key] = [int(pid)]
 
             time_to_dump_counter += 1
 
@@ -181,8 +212,8 @@ def main():
 
         except KeyboardInterrupt:
             dump_all(java_proc_dict)
-            java_proc_dict = dict()
             exit(0)
+
 
 if __name__ == &#34;__main__&#34;:
     main()</code></pre>
@@ -240,11 +271,25 @@ if __name__ == &#34;__main__&#34;:
 </summary>
 <pre><code class="python">def dump_process_pids_to_file(process_name, pidlist):
     try:
-        with open(java_mappings_folder_path + process_name + &#39;.txt&#39;, &#39;w+&#39;) as f1:
+        filename = get_filepath(process_name)
+        with open(filename, &#39;wb&#39;) as f1:
             pickle.dump([int(x) for x in pidlist], f1)
     except IOError:
         # mapping folder doesn&#39;t exist, create it for next time
         check_path_existence_and_create(java_mappings_folder_path)</code></pre>
+</details>
+</dd>
+<dt id="src.java_hadoop_snitch.java_snitch.get_filepath"><code class="name flex">
+<span>def <span class="ident">get_filepath</span></span>(<span>process_name)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_filepath(process_name):
+    return &#34;{0}/{1}.{2}.p&#34;.format(java_mappings_folder_path, process_name, socket.gethostname())</code></pre>
 </details>
 </dd>
 <dt id="src.java_hadoop_snitch.java_snitch.main"><code class="name flex">
@@ -257,37 +302,32 @@ if __name__ == &#34;__main__&#34;:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def main():
-
     time_to_dump_counter = 0
     print(&#34;[HADOOP JAVA SNITCH] Going to monitor hadoop java process every &#39;&#34; + str(
         java_snitch_polling_seconds) + &#34;&#39; seconds dumping every &#39;&#34; + str(
         java_snitch_polling_seconds * time_to_dump_counter_max) + &#34;&#39; seconds&#34;)
 
+    java_proc_dict = dict()
+    remove_files()
     while True:
-        java_proc_dict = dict()
         try:
-            # lineas = run_command(&#39;jps&#39;)[0].strip().split(&#39;\n&#39;)
-            cmd = &#34;ps h -eo pid,cmd | &#34; + pipes_folder_path + &#34;java_ps.py&#34;
-            ps = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-            lines = ps.communicate()[0].strip().split(&#39;\n&#39;)
+            lines = run_ps()
             for line in lines:
-                if line == &#34;&#34;:
+                line = process_line(line)
+                if not line or line == &#34;&#34;:
                     continue
                 pid_command = line.split(&#34; &#34;)
-                pid = pid_command[0]
-                command = pid_command[1]
+                pid, command = pid_command[0], pid_command[1]
+
                 if command.strip() in process_names:
-                    try:
-                        pid_list = java_proc_dict[command]
-                        pid_list.append(int(pid))
-                    except KeyError:
-                        java_proc_dict[command] = [int(pid)]
+                    proc_dict_key = command
                 else:
-                    try:
-                        pid_list = java_proc_dict[&#34;OTHER&#34;]
-                        pid_list.append(int(pid))
-                    except KeyError:
-                        java_proc_dict[&#34;OTHER&#34;] = [int(pid)]
+                    proc_dict_key = &#34;OTHER&#34;
+
+                try:
+                    java_proc_dict[proc_dict_key].append(int(pid))
+                except KeyError:
+                    java_proc_dict[proc_dict_key] = [int(pid)]
 
             time_to_dump_counter += 1
 
@@ -300,7 +340,6 @@ if __name__ == &#34;__main__&#34;:
 
         except KeyboardInterrupt:
             dump_all(java_proc_dict)
-            java_proc_dict = dict()
             exit(0)</code></pre>
 </details>
 </dd>
@@ -339,6 +378,23 @@ if __name__ == &#34;__main__&#34;:
     return list(set(l1 + l2))</code></pre>
 </details>
 </dd>
+<dt id="src.java_hadoop_snitch.java_snitch.process_line"><code class="name flex">
+<span>def <span class="ident">process_line</span></span>(<span>line)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def process_line(line):
+    fields = line.strip().split(&#34; &#34;)
+    pid = fields[0]
+    for field in fields:
+        if field.startswith(&#34;org.apache.hadoop.&#34;) or field.startswith(&#34;org.apache.spark.&#34;):
+            return pid + &#34; &#34; + field.strip().split(&#34;.&#34;)[-1]</code></pre>
+</details>
+</dd>
 <dt id="src.java_hadoop_snitch.java_snitch.read_all"><code class="name flex">
 <span>def <span class="ident">read_all</span></span>(<span>)</span>
 </code></dt>
@@ -367,11 +423,30 @@ if __name__ == &#34;__main__&#34;:
 </summary>
 <pre><code class="python">def read_process_pids_from_file(process_name):
     try:
-        with open(java_mappings_folder_path + process_name + &#39;.txt&#39;, &#39;r&#39;) as content_file:
+        filename = get_filepath(process_name)
+        with open(filename, &#39;rb&#39;) as content_file:
             itemlist = pickle.load(content_file)
         return [int(x) for x in itemlist]
-    except IOError:
+    except (IOError, EOFError):
         return []</code></pre>
+</details>
+</dd>
+<dt id="src.java_hadoop_snitch.java_snitch.remove_files"><code class="name flex">
+<span>def <span class="ident">remove_files</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def remove_files():
+    for process_name in process_files:
+        try:
+            filename = get_filepath(process_name)
+            os.remove(filename)
+        except (IOError, EOFError):
+            pass</code></pre>
 </details>
 </dd>
 <dt id="src.java_hadoop_snitch.java_snitch.run_command"><code class="name flex">
@@ -389,6 +464,28 @@ if __name__ == &#34;__main__&#34;:
                             stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE,
                             stdin=subprocess.PIPE).communicate()</code></pre>
+</details>
+</dd>
+<dt id="src.java_hadoop_snitch.java_snitch.run_ps"><code class="name flex">
+<span>def <span class="ident">run_ps</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def run_ps():
+    lines = list()
+    cmd = [&#34;ps&#34;, &#34;h&#34;, &#34;-eo&#34;, &#34;pid,cmd&#34;]
+    ps = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    while True:
+        line = ps.stdout.readline()
+        if line == b&#39;&#39; and ps.poll() is not None:
+            break
+        lines.append(line.decode(&#39;utf-8&#39;).strip(&#34;\n&#34;))
+    output = ps.communicate()[0]
+    return lines</code></pre>
 </details>
 </dd>
 </dl>
@@ -413,12 +510,16 @@ if __name__ == &#34;__main__&#34;:
 <li><code><a title="src.java_hadoop_snitch.java_snitch.check_path_existence_and_create" href="#src.java_hadoop_snitch.java_snitch.check_path_existence_and_create">check_path_existence_and_create</a></code></li>
 <li><code><a title="src.java_hadoop_snitch.java_snitch.dump_all" href="#src.java_hadoop_snitch.java_snitch.dump_all">dump_all</a></code></li>
 <li><code><a title="src.java_hadoop_snitch.java_snitch.dump_process_pids_to_file" href="#src.java_hadoop_snitch.java_snitch.dump_process_pids_to_file">dump_process_pids_to_file</a></code></li>
+<li><code><a title="src.java_hadoop_snitch.java_snitch.get_filepath" href="#src.java_hadoop_snitch.java_snitch.get_filepath">get_filepath</a></code></li>
 <li><code><a title="src.java_hadoop_snitch.java_snitch.main" href="#src.java_hadoop_snitch.java_snitch.main">main</a></code></li>
 <li><code><a title="src.java_hadoop_snitch.java_snitch.merge_dicts" href="#src.java_hadoop_snitch.java_snitch.merge_dicts">merge_dicts</a></code></li>
 <li><code><a title="src.java_hadoop_snitch.java_snitch.merge_lists" href="#src.java_hadoop_snitch.java_snitch.merge_lists">merge_lists</a></code></li>
+<li><code><a title="src.java_hadoop_snitch.java_snitch.process_line" href="#src.java_hadoop_snitch.java_snitch.process_line">process_line</a></code></li>
 <li><code><a title="src.java_hadoop_snitch.java_snitch.read_all" href="#src.java_hadoop_snitch.java_snitch.read_all">read_all</a></code></li>
 <li><code><a title="src.java_hadoop_snitch.java_snitch.read_process_pids_from_file" href="#src.java_hadoop_snitch.java_snitch.read_process_pids_from_file">read_process_pids_from_file</a></code></li>
+<li><code><a title="src.java_hadoop_snitch.java_snitch.remove_files" href="#src.java_hadoop_snitch.java_snitch.remove_files">remove_files</a></code></li>
 <li><code><a title="src.java_hadoop_snitch.java_snitch.run_command" href="#src.java_hadoop_snitch.java_snitch.run_command">run_command</a></code></li>
+<li><code><a title="src.java_hadoop_snitch.java_snitch.run_ps" href="#src.java_hadoop_snitch.java_snitch.run_ps">run_ps</a></code></li>
 </ul>
 </li>
 </ul>

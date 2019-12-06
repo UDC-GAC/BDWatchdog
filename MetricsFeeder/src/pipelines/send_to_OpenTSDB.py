@@ -4,40 +4,33 @@
 #     - Roberto R. Exposito
 #     - Juan Tourino
 #
-# This file is part of the ServerlessContainers framework, from
-# now on referred to as ServerlessContainers.
+# This file is part of the BDWatchdog framework, from
+# now on referred to as BDWatchdog.
 #
-# ServerlessContainers is free software: you can redistribute it
+# BDWatchdog is free software: you can redistribute it
 # and/or modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation, either version 3
 # of the License, or (at your option) any later version.
 #
-# ServerlessContainers is distributed in the hope that it will be useful,
+# BDWatchdog is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with ServerlessContainers. If not, see <http://www.gnu.org/licenses/>.
+# along with BDWatchdog. If not, see <http://www.gnu.org/licenses/>.
 
 
 from __future__ import print_function
 
-import fileinput
 import sys
 import json
+import traceback
 import requests
 import gzip
-
-# TODO FIX, this should support python3
-try:
-    import StringIO  # for Python 2
-except ImportError:
-    from io import StringIO  # for Python 3
-
+from io import BytesIO
 import time
 import os
-
 from requests.exceptions import ReadTimeout
 
 
@@ -62,10 +55,9 @@ post_send_docs_failed_tries = int(os.getenv(POST_SEND_DOCS_FAILED_TRIES, 3))
 def send_json_documents(json_documents, requests_Session=None):
     headers = {"Content-Type": "application/json", "Content-Encoding": "gzip"}
 
-    #TODO Test this does not break with Python3
-    out = StringIO.StringIO()
-    with gzip.GzipFile(fileobj=out, mode="w") as f:
-        f.write(json.dumps(json_documents))
+    out = BytesIO()
+    with gzip.GzipFile(fileobj=out, mode="wb") as f:
+        f.write(json.dumps(json_documents).encode())
 
     try:
         if requests_Session:
@@ -106,8 +98,11 @@ def behave_like_pipeline():
                 json_documents = json_documents + [new_doc]
                 fails = 0
             except ValueError as e:
-                eprint("[TSDB SENDER] Error with document " + str(line))
-                eprint(e)
+                if not line:
+                    eprint("[TSDB SENDER] Empty line was received")
+                else:
+                    eprint("[TSDB SENDER] Error with document " + str(line))
+                    eprint(e)
                 fails += 1
                 if fails >= MAX_FAILS:
                     eprint("[TSDB SENDER] terminated due to too many read pipeline errors")
@@ -148,6 +143,8 @@ def behave_like_pipeline():
         pass
     except Exception as e:
         eprint("[TSDB SENDER] terminated with error: " + str(e))
+        track = traceback.format_exc()
+        eprint(track)
 
 
 def main():

@@ -4,21 +4,21 @@
 #     - Roberto R. Expósito
 #     - Juan Touriño
 #
-# This file is part of the ServerlessContainers framework, from
-# now on referred to as ServerlessContainers.
+# This file is part of the BDWatchdog framework, from
+# now on referred to as BDWatchdog.
 #
-# ServerlessContainers is free software: you can redistribute it
+# BDWatchdog is free software: you can redistribute it
 # and/or modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation, either version 3
 # of the License, or (at your option) any later version.
 #
-# ServerlessContainers is distributed in the hope that it will be useful,
+# BDWatchdog is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with ServerlessContainers. If not, see <http://www.gnu.org/licenses/>.
+# along with BDWatchdog. If not, see <http://www.gnu.org/licenses/>.
 
 
 from __future__ import print_function
@@ -91,38 +91,6 @@ class MongoDBTimestampAgent:
 
     def get_tests_endpoint(self):
         return self.tests_full_endpoint
-
-    def get_experiment(self, experiment_name, username):
-        query = '?where={"experiment_id": "' + experiment_name + '","username":"' + username + '"}'
-        endpoint = "{0}/{1}".format(self.experiments_full_endpoint, query)
-        tries = 0
-        while tries <= MAX_CONNECTION_TRIES:
-            status_code = None
-            try:
-                r = requests.get(endpoint)
-                if r.status_code == 200:
-                    experiments = r.json()["_items"]
-                    if experiments:
-                        return r.json()["_items"][0]
-                    else:
-                        return {}
-                elif r.status_code == 404:
-                    return {}
-                else:
-                    status_code = r.status_code
-            except requests.ConnectionError as error:
-                eprint("Error with request {0}".format(str(error)))
-            eprint("Couldn't get document {0}, trying again for the {1} time out of {2}".format(
-                experiment_name, tries, MAX_CONNECTION_TRIES))
-            if status_code:
-                eprint("Status code was {0}".format(str(status_code)))
-            tries += 1
-
-        if tries > MAX_CONNECTION_TRIES:
-            error_string = "Information retrieval for document {0} failed too many times, aborting".format(
-                experiment_name)
-            eprint(error_string)
-            raise requests.ConnectionError(error_string)
 
     @staticmethod
     def merge_data_from_existing_doc(old, new):
@@ -255,18 +223,16 @@ class MongoDBTimestampAgent:
             all_experiments += data["_items"]
         return all_experiments
 
-    def get_test(self, experiment_id, test_name, username):
-        query = '?where={"experiment_id": "' + experiment_id + '", "test_name":"' + test_name + '","username":"' + username + '"}'
-        endpoint = "{0}/{1}".format(self.tests_full_endpoint, query)
+    def get_doc(self, endpoint, doc_name):
         tries = 0
         while tries <= MAX_CONNECTION_TRIES:
             status_code = None
             try:
                 r = requests.get(endpoint)
                 if r.status_code == 200:
-                    tests = r.json()["_items"]
-                    if tests:
-                        return tests[0]
+                    experiments = r.json()["_items"]
+                    if experiments:
+                        return r.json()["_items"][0]
                     else:
                         return {}
                 elif r.status_code == 404:
@@ -276,15 +242,26 @@ class MongoDBTimestampAgent:
             except requests.ConnectionError as error:
                 eprint("Error with request {0}".format(str(error)))
             eprint("Couldn't get document {0}, trying again for the {1} time out of {2}".format(
-                test_name, tries, MAX_CONNECTION_TRIES))
+                doc_name, tries, MAX_CONNECTION_TRIES))
             if status_code:
                 eprint("Status code was {0}".format(str(status_code)))
             tries += 1
 
         if tries > MAX_CONNECTION_TRIES:
-            error_string = "Information retrieval for document {0} failed too many times, aborting"
+            error_string = "Information retrieval for document {0} failed too many times, aborting".format(
+                doc_name)
             eprint(error_string)
             raise requests.ConnectionError(error_string)
+
+    def get_experiment(self, experiment_name, username):
+        query = '?where={"experiment_id": "' + experiment_name + '","username":"' + username + '"}'
+        endpoint = "{0}/{1}".format(self.experiments_full_endpoint, query)
+        return self.get_doc(endpoint, experiment_name)
+
+    def get_test(self, experiment_id, test_name, username):
+        query = '?where={"experiment_id": "' + experiment_id + '", "test_name":"' + test_name + '","username":"' + username + '"}'
+        endpoint = "{0}/{1}".format(self.tests_full_endpoint, query)
+        return self.get_doc(endpoint, test_name)
 
     def get_experiment_tests(self, experiment_id, username):
         last_page = False

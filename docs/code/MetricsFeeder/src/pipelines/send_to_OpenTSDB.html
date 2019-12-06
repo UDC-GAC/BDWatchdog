@@ -30,40 +30,33 @@
 #     - Roberto R. Exposito
 #     - Juan Tourino
 #
-# This file is part of the ServerlessContainers framework, from
-# now on referred to as ServerlessContainers.
+# This file is part of the BDWatchdog framework, from
+# now on referred to as BDWatchdog.
 #
-# ServerlessContainers is free software: you can redistribute it
+# BDWatchdog is free software: you can redistribute it
 # and/or modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation, either version 3
 # of the License, or (at your option) any later version.
 #
-# ServerlessContainers is distributed in the hope that it will be useful,
+# BDWatchdog is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with ServerlessContainers. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+# along with BDWatchdog. If not, see &lt;http://www.gnu.org/licenses/&gt;.
 
 
 from __future__ import print_function
 
-import fileinput
 import sys
 import json
+import traceback
 import requests
 import gzip
-
-# TODO FIX, this should support python3
-try:
-    import StringIO  # for Python 2
-except ImportError:
-    from io import StringIO  # for Python 3
-
+from io import BytesIO
 import time
 import os
-
 from requests.exceptions import ReadTimeout
 
 
@@ -88,10 +81,9 @@ post_send_docs_failed_tries = int(os.getenv(POST_SEND_DOCS_FAILED_TRIES, 3))
 def send_json_documents(json_documents, requests_Session=None):
     headers = {&#34;Content-Type&#34;: &#34;application/json&#34;, &#34;Content-Encoding&#34;: &#34;gzip&#34;}
 
-    #TODO Test this does not break with Python3
-    out = StringIO.StringIO()
-    with gzip.GzipFile(fileobj=out, mode=&#34;w&#34;) as f:
-        f.write(json.dumps(json_documents))
+    out = BytesIO()
+    with gzip.GzipFile(fileobj=out, mode=&#34;wb&#34;) as f:
+        f.write(json.dumps(json_documents).encode())
 
     try:
         if requests_Session:
@@ -132,8 +124,11 @@ def behave_like_pipeline():
                 json_documents = json_documents + [new_doc]
                 fails = 0
             except ValueError as e:
-                eprint(&#34;[TSDB SENDER] Error with document &#34; + str(line))
-                eprint(e)
+                if not line:
+                    eprint(&#34;[TSDB SENDER] Empty line was received&#34;)
+                else:
+                    eprint(&#34;[TSDB SENDER] Error with document &#34; + str(line))
+                    eprint(e)
                 fails += 1
                 if fails &gt;= MAX_FAILS:
                     eprint(&#34;[TSDB SENDER] terminated due to too many read pipeline errors&#34;)
@@ -174,6 +169,8 @@ def behave_like_pipeline():
         pass
     except Exception as e:
         eprint(&#34;[TSDB SENDER] terminated with error: &#34; + str(e))
+        track = traceback.format_exc()
+        eprint(track)
 
 
 def main():
@@ -219,8 +216,11 @@ if __name__ == &#34;__main__&#34;:
                 json_documents = json_documents + [new_doc]
                 fails = 0
             except ValueError as e:
-                eprint(&#34;[TSDB SENDER] Error with document &#34; + str(line))
-                eprint(e)
+                if not line:
+                    eprint(&#34;[TSDB SENDER] Empty line was received&#34;)
+                else:
+                    eprint(&#34;[TSDB SENDER] Error with document &#34; + str(line))
+                    eprint(e)
                 fails += 1
                 if fails &gt;= MAX_FAILS:
                     eprint(&#34;[TSDB SENDER] terminated due to too many read pipeline errors&#34;)
@@ -260,7 +260,9 @@ if __name__ == &#34;__main__&#34;:
         # Exit silently
         pass
     except Exception as e:
-        eprint(&#34;[TSDB SENDER] terminated with error: &#34; + str(e))</code></pre>
+        eprint(&#34;[TSDB SENDER] terminated with error: &#34; + str(e))
+        track = traceback.format_exc()
+        eprint(track)</code></pre>
 </details>
 </dd>
 <dt id="src.pipelines.send_to_OpenTSDB.eprint"><code class="name flex">
@@ -301,10 +303,9 @@ if __name__ == &#34;__main__&#34;:
 <pre><code class="python">def send_json_documents(json_documents, requests_Session=None):
     headers = {&#34;Content-Type&#34;: &#34;application/json&#34;, &#34;Content-Encoding&#34;: &#34;gzip&#34;}
 
-    #TODO Test this does not break with Python3
-    out = StringIO.StringIO()
-    with gzip.GzipFile(fileobj=out, mode=&#34;w&#34;) as f:
-        f.write(json.dumps(json_documents))
+    out = BytesIO()
+    with gzip.GzipFile(fileobj=out, mode=&#34;wb&#34;) as f:
+        f.write(json.dumps(json_documents).encode())
 
     try:
         if requests_Session:

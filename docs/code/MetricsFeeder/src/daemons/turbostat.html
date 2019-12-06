@@ -30,21 +30,21 @@
 #     - Roberto R. Expósito
 #     - Juan Touriño
 #
-# This file is part of the ServerlessContainers framework, from
-# now on referred to as ServerlessContainers.
+# This file is part of the BDWatchdog framework, from
+# now on referred to as BDWatchdog.
 #
-# ServerlessContainers is free software: you can redistribute it
+# BDWatchdog is free software: you can redistribute it
 # and/or modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation, either version 3
 # of the License, or (at your option) any later version.
 #
-# ServerlessContainers is distributed in the hope that it will be useful,
+# BDWatchdog is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with ServerlessContainers. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+# along with BDWatchdog. If not, see &lt;http://www.gnu.org/licenses/&gt;.
 
 
 from __future__ import print_function
@@ -81,7 +81,7 @@ config_keys = [
 default_environment_values = {
     &#34;TURBOSTAT_SAMPLING_FREQUENCY&#34;: &#34;5&#34;,
     &#34;POST_ENDPOINT_PATH&#34;: &#34;http://opentsdb:4242/api/put&#34;,
-    &#34;POST_DOC_BUFFER_TIMEOUT&#34;: &#34;30&#34;,
+    &#34;POST_DOC_BUFFER_TIMEOUT&#34;: &#34;10&#34;,
     &#34;PYTHONUNBUFFERED&#34;: &#34;yes&#34;,
     &#34;TEMPLATE_PATH&#34;: os.path.join(_base_path, &#34;../pipelines/templates/&#34;),
     &#34;METRICS_PATH&#34;: os.path.join(_base_path, &#34;../pipelines/metrics/&#34;),
@@ -89,7 +89,7 @@ default_environment_values = {
     &#34;POST_DOC_BUFFER_LENGTH&#34;: &#34;1000&#34;,  # Don&#39;t go over 1500 or post packet will be too large and may cause error
     &#34;POST_SEND_DOCS_TIMEOUT&#34;: &#34;10&#34;,
     &#34;POST_SEND_DOCS_FAILED_TRIES&#34;: &#34;6&#34;,
-    &#34;HEARTBEAT_ENABLED&#34;: False
+    &#34;HEARTBEAT_ENABLED&#34;: &#34;false&#34;
 }
 
 
@@ -101,7 +101,6 @@ def turbostat_is_runnable(environment):
     # Run a bogus &#39;ls&#39; command with turbostat statistics
     # If the command doesn&#39;t fail, turbostat works
     return daemon_utils.command_is_runnable([&#39;turbostat&#39;, &#39;ls&#39;])
-
 
 
 class Turbostat(MonitoringDaemon):
@@ -119,40 +118,31 @@ class Turbostat(MonitoringDaemon):
             &#39;-i&#39;,
             self.environment[&#34;TURBOSTAT_SAMPLING_FREQUENCY&#34;],
             # &#39;--processor&#39; # variable not longer recognized although the manual still reports it in the latest versions
-            ],
+        ],
             stdout=subprocess.PIPE)
         processes_list.append(turbostat)
 
-        # Create the data pipeline
-        first_sed = self.create_pipe([
-            &#39;sed&#39;,
-            &#39;-u&#39;,
-            &#39;-e&#39;,
-            &#39;s/^[ \t]*//&#39;
-        ], self.environment, turbostat.stdout, subprocess.PIPE)
+        first_sed = self.create_pipe([&#39;sed&#39;, &#39;-u&#39;, &#39;-e&#39;, &#39;s/^[ \t]*//&#39;],
+                                     self.environment, turbostat.stdout, subprocess.PIPE)
         processes_list.append(first_sed)
 
-        second_sed = self.create_pipe([
-            &#39;sed&#39;,
-            &#39;-u&#39;,
-            &#39;-e&#39;,
-            &#39;s/[[:space:]]\+/,/g&#39;
-        ], self.environment, first_sed.stdout, subprocess.PIPE)
+        second_sed = self.create_pipe([&#39;sed&#39;, &#39;-u&#39;, &#39;-e&#39;, &#39;s/[[:space:]]\+/,/g&#39;],
+                                      self.environment, first_sed.stdout, subprocess.PIPE)
         processes_list.append(second_sed)
 
-        turbostat_to_csv = self.create_pipe([os.path.join(_base_path, &#34;../turbostat/turbostat_to_csv.py&#34;)],
+        turbostat_to_csv = self.create_pipe([&#34;python3&#34;, os.path.join(_base_path, &#34;../turbostat/turbostat_to_csv.py&#34;)],
                                             self.environment, second_sed.stdout, subprocess.PIPE)
         processes_list.append(turbostat_to_csv)
 
-        csv_to_json = self.create_pipe([os.path.join(_base_path, &#34;../pipelines/csv_to_json.py&#34;)],
+        csv_to_json = self.create_pipe([&#34;python3&#34;, os.path.join(_base_path, &#34;../pipelines/csv_to_json.py&#34;)],
                                        self.environment, turbostat_to_csv.stdout, subprocess.PIPE)
         processes_list.append(csv_to_json)
 
-        json_to_tsdb_json = self.create_pipe([os.path.join(_base_path, &#34;../pipelines/json_to_TSDB_json.py&#34;)],
+        json_to_tsdb_json = self.create_pipe([&#34;python3&#34;, os.path.join(_base_path, &#34;../pipelines/json_to_TSDB_json.py&#34;)],
                                              self.environment, csv_to_json.stdout, subprocess.PIPE)
         processes_list.append(json_to_tsdb_json)
 
-        send_to_opentsdb = self.create_pipe([os.path.join(_base_path, &#34;../pipelines/send_to_OpenTSDB.py&#34;)],
+        send_to_opentsdb = self.create_pipe([&#34;python3&#34;, os.path.join(_base_path, &#34;../pipelines/send_to_OpenTSDB.py&#34;)],
                                             self.environment, json_to_tsdb_json.stdout, subprocess.PIPE)
         processes_list.append(send_to_opentsdb)
 
@@ -248,40 +238,31 @@ if __name__ == &#39;__main__&#39;:
             &#39;-i&#39;,
             self.environment[&#34;TURBOSTAT_SAMPLING_FREQUENCY&#34;],
             # &#39;--processor&#39; # variable not longer recognized although the manual still reports it in the latest versions
-            ],
+        ],
             stdout=subprocess.PIPE)
         processes_list.append(turbostat)
 
-        # Create the data pipeline
-        first_sed = self.create_pipe([
-            &#39;sed&#39;,
-            &#39;-u&#39;,
-            &#39;-e&#39;,
-            &#39;s/^[ \t]*//&#39;
-        ], self.environment, turbostat.stdout, subprocess.PIPE)
+        first_sed = self.create_pipe([&#39;sed&#39;, &#39;-u&#39;, &#39;-e&#39;, &#39;s/^[ \t]*//&#39;],
+                                     self.environment, turbostat.stdout, subprocess.PIPE)
         processes_list.append(first_sed)
 
-        second_sed = self.create_pipe([
-            &#39;sed&#39;,
-            &#39;-u&#39;,
-            &#39;-e&#39;,
-            &#39;s/[[:space:]]\+/,/g&#39;
-        ], self.environment, first_sed.stdout, subprocess.PIPE)
+        second_sed = self.create_pipe([&#39;sed&#39;, &#39;-u&#39;, &#39;-e&#39;, &#39;s/[[:space:]]\+/,/g&#39;],
+                                      self.environment, first_sed.stdout, subprocess.PIPE)
         processes_list.append(second_sed)
 
-        turbostat_to_csv = self.create_pipe([os.path.join(_base_path, &#34;../turbostat/turbostat_to_csv.py&#34;)],
+        turbostat_to_csv = self.create_pipe([&#34;python3&#34;, os.path.join(_base_path, &#34;../turbostat/turbostat_to_csv.py&#34;)],
                                             self.environment, second_sed.stdout, subprocess.PIPE)
         processes_list.append(turbostat_to_csv)
 
-        csv_to_json = self.create_pipe([os.path.join(_base_path, &#34;../pipelines/csv_to_json.py&#34;)],
+        csv_to_json = self.create_pipe([&#34;python3&#34;, os.path.join(_base_path, &#34;../pipelines/csv_to_json.py&#34;)],
                                        self.environment, turbostat_to_csv.stdout, subprocess.PIPE)
         processes_list.append(csv_to_json)
 
-        json_to_tsdb_json = self.create_pipe([os.path.join(_base_path, &#34;../pipelines/json_to_TSDB_json.py&#34;)],
+        json_to_tsdb_json = self.create_pipe([&#34;python3&#34;, os.path.join(_base_path, &#34;../pipelines/json_to_TSDB_json.py&#34;)],
                                              self.environment, csv_to_json.stdout, subprocess.PIPE)
         processes_list.append(json_to_tsdb_json)
 
-        send_to_opentsdb = self.create_pipe([os.path.join(_base_path, &#34;../pipelines/send_to_OpenTSDB.py&#34;)],
+        send_to_opentsdb = self.create_pipe([&#34;python3&#34;, os.path.join(_base_path, &#34;../pipelines/send_to_OpenTSDB.py&#34;)],
                                             self.environment, json_to_tsdb_json.stdout, subprocess.PIPE)
         processes_list.append(send_to_opentsdb)
 
@@ -311,40 +292,31 @@ if __name__ == &#39;__main__&#39;:
         &#39;-i&#39;,
         self.environment[&#34;TURBOSTAT_SAMPLING_FREQUENCY&#34;],
         # &#39;--processor&#39; # variable not longer recognized although the manual still reports it in the latest versions
-        ],
+    ],
         stdout=subprocess.PIPE)
     processes_list.append(turbostat)
 
-    # Create the data pipeline
-    first_sed = self.create_pipe([
-        &#39;sed&#39;,
-        &#39;-u&#39;,
-        &#39;-e&#39;,
-        &#39;s/^[ \t]*//&#39;
-    ], self.environment, turbostat.stdout, subprocess.PIPE)
+    first_sed = self.create_pipe([&#39;sed&#39;, &#39;-u&#39;, &#39;-e&#39;, &#39;s/^[ \t]*//&#39;],
+                                 self.environment, turbostat.stdout, subprocess.PIPE)
     processes_list.append(first_sed)
 
-    second_sed = self.create_pipe([
-        &#39;sed&#39;,
-        &#39;-u&#39;,
-        &#39;-e&#39;,
-        &#39;s/[[:space:]]\+/,/g&#39;
-    ], self.environment, first_sed.stdout, subprocess.PIPE)
+    second_sed = self.create_pipe([&#39;sed&#39;, &#39;-u&#39;, &#39;-e&#39;, &#39;s/[[:space:]]\+/,/g&#39;],
+                                  self.environment, first_sed.stdout, subprocess.PIPE)
     processes_list.append(second_sed)
 
-    turbostat_to_csv = self.create_pipe([os.path.join(_base_path, &#34;../turbostat/turbostat_to_csv.py&#34;)],
+    turbostat_to_csv = self.create_pipe([&#34;python3&#34;, os.path.join(_base_path, &#34;../turbostat/turbostat_to_csv.py&#34;)],
                                         self.environment, second_sed.stdout, subprocess.PIPE)
     processes_list.append(turbostat_to_csv)
 
-    csv_to_json = self.create_pipe([os.path.join(_base_path, &#34;../pipelines/csv_to_json.py&#34;)],
+    csv_to_json = self.create_pipe([&#34;python3&#34;, os.path.join(_base_path, &#34;../pipelines/csv_to_json.py&#34;)],
                                    self.environment, turbostat_to_csv.stdout, subprocess.PIPE)
     processes_list.append(csv_to_json)
 
-    json_to_tsdb_json = self.create_pipe([os.path.join(_base_path, &#34;../pipelines/json_to_TSDB_json.py&#34;)],
+    json_to_tsdb_json = self.create_pipe([&#34;python3&#34;, os.path.join(_base_path, &#34;../pipelines/json_to_TSDB_json.py&#34;)],
                                          self.environment, csv_to_json.stdout, subprocess.PIPE)
     processes_list.append(json_to_tsdb_json)
 
-    send_to_opentsdb = self.create_pipe([os.path.join(_base_path, &#34;../pipelines/send_to_OpenTSDB.py&#34;)],
+    send_to_opentsdb = self.create_pipe([&#34;python3&#34;, os.path.join(_base_path, &#34;../pipelines/send_to_OpenTSDB.py&#34;)],
                                         self.environment, json_to_tsdb_json.stdout, subprocess.PIPE)
     processes_list.append(send_to_opentsdb)
 

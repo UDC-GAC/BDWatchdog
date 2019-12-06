@@ -3,6 +3,7 @@ export PYTHONUNBUFFERED="yes"
 export POST_DOC_BUFFER_TIMEOUT=10
 
 METRIC="CPU,cpu,MEM,SWP,DSK,NET,PRC,PRM,PRD"
+#METRIC="PRC,PRM,PRD"
 
 # Add PRN to support per-process network metrics using the netatop module if available
 
@@ -14,5 +15,4 @@ METRIC="CPU,cpu,MEM,SWP,DSK,NET,PRC,PRM,PRD"
 # bash allow_netatop.sh
 
 
-tmux new -s "ATOP" "atop 5 -P $METRIC | ./src/atop/atop_to_json_with_java_translation.py \
-| ./src/pipelines/send_to_OpenTSDB.py"
+tmux new -s "ATOP" "atop 5 -a -P $METRIC | python3 ./src/atop/atop_to_json_with_java_translation.py | python3 ./src/pipelines/send_to_OpenTSDB.py"

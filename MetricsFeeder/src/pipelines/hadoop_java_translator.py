@@ -4,21 +4,21 @@
 #     - Roberto R. Expósito
 #     - Juan Touriño
 #
-# This file is part of the ServerlessContainers framework, from
-# now on referred to as ServerlessContainers.
+# This file is part of the BDWatchdog framework, from
+# now on referred to as BDWatchdog.
 #
-# ServerlessContainers is free software: you can redistribute it
+# BDWatchdog is free software: you can redistribute it
 # and/or modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation, either version 3
 # of the License, or (at your option) any later version.
 #
-# ServerlessContainers is distributed in the hope that it will be useful,
+# BDWatchdog is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with ServerlessContainers. If not, see <http://www.gnu.org/licenses/>.
+# along with BDWatchdog. If not, see <http://www.gnu.org/licenses/>.
 
 
 from __future__ import print_function
@@ -28,16 +28,17 @@ import pickle
 from time import sleep
 import os
 
-JAVA_MAPPINGS_FOLDER_PATH = "JAVA_MAPPINGS_FOLDER_PATH"
+# JAVA_MAPPINGS_FOLDER_PATH = "JAVA_MAPPINGS_FOLDER_PATH"
 JAVA_TRANSLATOR_MAX_TRIES = "JAVA_TRANSLATOR_MAX_TRIES"
 JAVA_TRANSLATOR_WAIT_TIME = "JAVA_TRANSLATOR_WAIT_TIME"
-
-java_mappings_folder_path = os.getenv(JAVA_MAPPINGS_FOLDER_PATH, "./pipelines/java_mappings/")
+#
+# java_mappings_folder_path = os.getenv(JAVA_MAPPINGS_FOLDER_PATH, "./pipelines/java_mappings/")
 java_translator_max_tries = int(os.getenv(JAVA_TRANSLATOR_MAX_TRIES, 4))
 java_translator_wait_time = int(os.getenv(JAVA_TRANSLATOR_WAIT_TIME, 5))
-
-process_files = ["NameNode", "SecondaryNameNode", "DataNode", "ResourceManager", "NodeManager",
-                 "YarnChild", "MRAppMaster", "CoarseGrainedExecutorBackend", "OTHER"]
+#
+# process_files = ["NameNode", "SecondaryNameNode", "DataNode", "ResourceManager", "NodeManager",
+#                  "YarnChild", "MRAppMaster", "CoarseGrainedExecutorBackend", "OTHER"]
+from MetricsFeeder.src.java_hadoop_snitch.java_snitch import read_process_pids_from_file, process_files
 
 java_proc_dict = dict()
 unresolvable_pids = list()
@@ -45,17 +46,6 @@ unresolvable_pids = list()
 
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
-
-
-def read_process_pids_from_file(process_name):
-    try:
-        with open(java_mappings_folder_path + process_name + '.txt', 'r') as content_file:
-            itemlist = pickle.load(content_file)
-        itemlist = [int(x) for x in itemlist]
-        # print "Loaded list is: " + str(itemlist)
-        return itemlist
-    except IOError:
-        return []
 
 
 def read_all():
@@ -73,10 +63,11 @@ def process_java_doc(line, pid, number_of_tries):
         return line.strip()
 
     for process_name in process_files:
-        process_pids = java_proc_dict[process_name]
-        # print "Process pids for " + process_name + " are: " + str(process_pids) + " and pid is : " + str(pid)
-        if pid in process_pids:
-            return line.replace("(java)", process_name).strip()
+        if process_name in java_proc_dict:
+            process_pids = java_proc_dict[process_name]
+            # print "Process pids for " + process_name + " are: " + str(process_pids) + " and pid is : " + str(pid)
+            if pid in process_pids:
+                return line.replace("(java)", process_name).strip()
     # return line changed
     # Couldn't resolve this doc, wait, read map files and try again
     # Wait for a max of 60 seconds
@@ -89,9 +80,6 @@ def process_java_doc(line, pid, number_of_tries):
         eprint("[HADOOP JAVA TRANSLATOR PLUGIN] process java with pid " + str(pid) + " was unresolvable")
         unresolvable_pids.append(pid)
         return line.strip()
-
-
-read_all()
 
 
 def process_line(line):
@@ -120,7 +108,7 @@ def process_line(line):
 
 def behave_like_pipeline():
     try:
-        #for line in fileinput.input():
+        # for line in fileinput.input():
         while True:
             line = sys.stdin.readline()
             print(process_line(line))
