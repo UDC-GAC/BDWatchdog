@@ -63,6 +63,12 @@ bash scripts/installation/install_in_ubuntu.sh
 bash scripts/installation/install_in_centos7.sh
 ```
 
+* On both Ubuntu and CentOS 7:
+```
+pip3 install -r requirements.txt
+```
+
+
 ## Usage
 
 Most of the scripts can be used by piping them, some examples of linux pipelines are found in the scripts folder, but for user convenience an orquestrator daemon is provided.

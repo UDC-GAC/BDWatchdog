@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
-sudo yum install -y epel-release
-sudo yum install -y python3 python3-pip
-#sudo yum install -y python-daemon python-lockfile
+yum install -y epel-release
+yum install -y python3 python3-pip
+#yum install -y python3-daemon python3-lockfile
