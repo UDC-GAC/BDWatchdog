@@ -51,7 +51,9 @@ config_keys = [
     "JAVA_TRANSLATOR_MAX_TRIES",
     "JAVA_TRANSLATOR_WAIT_TIME",
     "JAVA_TRANSLATION_ENABLED",
-    "HEARTBEAT_ENABLED"
+    "HEARTBEAT_ENABLED",
+    "BDW_LOG_DIR",
+    "BDW_PID_DIR"
 ]
 default_environment_values = {
     "ATOP_SAMPLING_FREQUENCY": "10",
@@ -69,7 +71,9 @@ default_environment_values = {
     "JAVA_TRANSLATOR_MAX_TRIES": "4",
     "JAVA_TRANSLATOR_WAIT_TIME": "3",
     "JAVA_TRANSLATION_ENABLED": "false",
-    "HEARTBEAT_ENABLED": "false"
+    "HEARTBEAT_ENABLED": "false",
+    "BDW_LOG_DIR": os.path.join(_base_path, "logs/"),
+    "BDW_PID_DIR": os.path.join(_base_path, "logs/")
 }
 
 def eprint(*args, **kwargs):
@@ -91,6 +95,12 @@ class Atop(MonitoringDaemon):
 
     def create_pipeline(self):
         processes_list = []
+
+        # Launch Java snitch if java translation is going to be used
+        if self.environment["JAVA_TRANSLATION_ENABLED"] == "true":
+            #self.snitcher = self.launch_java_snitch()
+            snitcher = self.launch_java_snitch()
+            processes_list.append(snitcher)
 
         # Create the data source
         atop = subprocess.Popen(
@@ -116,12 +126,7 @@ class Atop(MonitoringDaemon):
                                             self.environment,
                                             atop_to_json.stdout, subprocess.PIPE)
         processes_list.append(send_to_opentsdb)
-
-        # Launch Java snitch if java translation is going to be used
-        if self.environment["JAVA_TRANSLATION_ENABLED"] == "true":
-            #self.snitcher = self.launch_java_snitch()
-            snitcher = self.launch_java_snitch()
-            processes_list.append(snitcher)
+        # Last process will have its output dumped
 
         return processes_list
 
@@ -134,11 +139,9 @@ class Atop(MonitoringDaemon):
 
 
 if __name__ == '__main__':
-    handler, logger = daemon_utils.configure_daemon_logs(SERVICE_NAME)
-
-    app = Atop(SERVICE_NAME, logger)
-    # FIXME As part of the environment initilization, set the pythonpath correctly
-    app.initialize_environment(config_path, config_keys, default_environment_values)
+    environment = daemon_utils.initialize_environment(config_path, config_keys, default_environment_values)
+    app = Atop(SERVICE_NAME, environment)
+    handler = app.get_handler()
     app.is_runnable = atop_is_runnable
     app.not_runnable_message = "Atop program is not runnable or it is installed, " \
                                "if installed run atop manually and check for errors"

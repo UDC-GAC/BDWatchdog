@@ -35,7 +35,6 @@ import logging
 
 import requests
 
-
 _base_path = os.path.dirname(os.path.abspath(__file__))
 
 
@@ -46,21 +45,25 @@ def eprint(*args, **kwargs):
 class MonitoringDaemon:
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, service_name, logger):
+    def __init__(self, service_name, environment):
         self.SERVICE_NAME = service_name
-        self.logger = logger
+        self.environment = environment
         self.stdin_path = '/dev/null'
-        self.stdout_path = os.path.join(_base_path, "logs/" + self.SERVICE_NAME + ".out")
-        self.stderr_path = os.path.join(_base_path, "logs/" + self.SERVICE_NAME + ".err")
-        self.pidfile_path = os.path.join(_base_path, "pids/" + self.SERVICE_NAME + ".pid")
+        self.stderr_path = os.path.join(self.environment["BDW_LOG_DIR"], self.SERVICE_NAME + ".err")
+        self.stdout_path = os.path.join(self.environment["BDW_LOG_DIR"], self.SERVICE_NAME + ".out")
+        self.log_path = os.path.join(self.environment["BDW_LOG_DIR"], self.SERVICE_NAME + ".log")
+        self.configure_daemon_log()
+        self.pidfile_path = os.path.join(self.environment["BDW_PID_DIR"], self.SERVICE_NAME + ".pid")
         self.pidfile_timeout = 5
         self.pipeline_tries = 0
         self.MAX_TRIES = 5
         self.processes_list = []
         self.dumper_thread = None
-        self.environment = dict()
         self.is_runnable = None
         self.not_runnable_message = None
+
+    def set_logger(self, logger):
+        self.logger = logger
 
     def reload_pipeline(self, _signo, _stack_frame):
         self.logger.info("Going to reload pipeline")
@@ -103,30 +106,11 @@ class MonitoringDaemon:
             heartbeat.daemon = True
             heartbeat.start()
 
-    def initialize_environment(self, config_path, config_keys, default_environment_values):
-        self.environment = self.create_environment(read_config(config_path, config_keys),
-                                                   config_keys,
-                                                   default_environment_values)
-
-
     @staticmethod
     def threaded_read_last_process_output(process):
         for line in process.stdout:
             print(line.strip())  # Dump to stdout of daemon
             sys.stdout.flush()
-
-    @staticmethod
-    def create_environment(config_dict, config_keys, default_environment_values):
-        custom_environment = os.environ.copy()
-
-        # FROM CONFIG FILE #
-        for key in config_keys:
-            if key in config_dict.keys():
-                custom_environment[key] = config_dict[key]
-            else:
-                custom_environment[key] = default_environment_values[key]
-
-        return custom_environment
 
     @staticmethod
     def good_finish():
@@ -191,6 +175,26 @@ class MonitoringDaemon:
             self.destroy_pipeline()
             self.good_finish()
 
+    def configure_daemon_log(self):
+        logger = logging.getLogger(self.SERVICE_NAME)
+        logger.setLevel(logging.INFO)
+        formatter = logging.Formatter("%(asctime)s - %(name)s - %(message)s")
+
+        log_path = self.environment["BDW_LOG_DIR"]
+        check_path_existance_and_create(log_path)
+        pids_path = self.environment["BDW_PID_DIR"]
+        check_path_existance_and_create(pids_path)
+
+        handler = logging.FileHandler(self.log_path)
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+
+        self.logger = logger
+        self.handler = handler
+
+    def get_handler(self):
+        return self.handler
+
     @abc.abstractmethod
     def create_pipeline(self):
         """Method documentation"""
@@ -206,6 +210,31 @@ def command_is_runnable(command_as_list):
     return True
 
 
+def initialize_environment(config_path, config_keys, default_environment_values):
+    environment = create_environment(read_config(config_path, config_keys),
+                                     config_keys,
+                                     default_environment_values)
+    return environment
+
+
+def create_environment(config_dict, config_keys, default_environment_values):
+    custom_environment = os.environ.copy()
+
+    for key in config_keys:
+        if key in custom_environment:
+            # Key has already been configured at the environment level
+            pass
+        elif key in config_dict.keys():
+            # Key has been read from config file
+            custom_environment[key] = config_dict[key]
+        else:
+            # Key was neither present at the environment level nor in the config file
+            # Take default value
+            custom_environment[key] = default_environment_values[key]
+
+    return custom_environment
+
+
 def read_config(config_path, config_keys):
     config_dict = {}
     config = configparser.ConfigParser()
@@ -214,7 +243,7 @@ def read_config(config_path, config_keys):
         try:
             config_dict[key] = config['DEFAULT'][key]
         except KeyError:
-            pass  # Key is not configure, take the default value
+            pass  # Key is not configured, take the default value
     return config_dict
 
 
@@ -234,20 +263,3 @@ def register_service(db_handler, service_name):
         type="service"
     )
     MyUtils.register_service(db_handler, service)
-
-
-def configure_daemon_logs(service_name):
-    logger = logging.getLogger(service_name)
-    logger.setLevel(logging.INFO)
-    formatter = logging.Formatter("%(asctime)s - %(name)s - %(message)s")
-
-    log_path = os.path.join(_base_path, "logs/")
-    check_path_existance_and_create(log_path)
-    pids_path = os.path.join(_base_path, "pids/")
-    check_path_existance_and_create(pids_path)
-
-    handler = logging.FileHandler(os.path.join(log_path, service_name + ".log"))
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-
-    return handler, logger

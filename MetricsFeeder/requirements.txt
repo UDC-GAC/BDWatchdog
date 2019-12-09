@@ -6,5 +6,5 @@ idna
 lockfile
 pkg-resources
 python-daemon
-request
+requests
 urllib3

@@ -56,7 +56,9 @@ config_keys = [
     "JAVA_TRANSLATOR_MAX_TRIES",
     "JAVA_TRANSLATOR_WAIT_TIME",
     "HADOOP_SNITCH_FOLDER_PATH",
-    "HEARTBEAT_ENABLED"
+    "HEARTBEAT_ENABLED",
+    "LOG_DIR",
+    "PID_DIR"
 ]
 
 default_environment_values = {
@@ -77,7 +79,9 @@ default_environment_values = {
     "JAVA_TRANSLATOR_MAX_TRIES": "4",
     "JAVA_TRANSLATOR_WAIT_TIME": "3",
     "HADOOP_SNITCH_FOLDER_PATH": os.path.join(_base_path, "../java_hadoop_snitch/"),
-    "HEARTBEAT_ENABLED": "false"
+    "HEARTBEAT_ENABLED": "false",
+    "LOG_DIR":os.path.join(_base_path, "logs/"),
+    "PID_DIR":os.path.join(_base_path, "logs/")
 }
 
 
@@ -136,16 +140,9 @@ class Nethogs(MonitoringDaemon):
 
 
 if __name__ == '__main__':
-    environment = MonitoringDaemon.create_environment(
-        daemon_utils.read_config("conf/nethogs_config.ini", config_keys),
-        config_keys,
-        default_environment_values)
-
-    handler, logger = daemon_utils.configure_daemon_logs(SERVICE_NAME)
-
-    app = Nethogs(SERVICE_NAME, logger)
-    # FIXME As part of the environment initilization, set the pythonpath correctly
-    app.initialize_environment(config_path, config_keys, default_environment_values)
+    environment = daemon_utils.initialize_environment(config_path, config_keys, default_environment_values)
+    app = Nethogs(SERVICE_NAME, environment)
+    handler = app.get_handler()
     app.is_runnable = nethogs_is_runnable
     app.not_runnable_message = "Nethogs program is not runnable, check that it has been " \
                                "installed in directory: " + environment["NETHOGS_DIR"]

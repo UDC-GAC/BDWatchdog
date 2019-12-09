@@ -49,7 +49,9 @@ config_keys = [
     "POST_DOC_BUFFER_LENGTH",
     "POST_SEND_DOCS_TIMEOUT",
     "POST_SEND_DOCS_FAILED_TRIES",
-    "HEARTBEAT_ENABLED"
+    "HEARTBEAT_ENABLED",
+    "LOG_DIR",
+    "PID_DIR"
 ]
 
 default_environment_values = {
@@ -63,7 +65,9 @@ default_environment_values = {
     "POST_DOC_BUFFER_LENGTH": "1000",  # Don't go over 1500 or post packet will be too large and may cause error
     "POST_SEND_DOCS_TIMEOUT": "10",
     "POST_SEND_DOCS_FAILED_TRIES": "6",
-    "HEARTBEAT_ENABLED": "false"
+    "HEARTBEAT_ENABLED": "false",
+    "LOG_DIR":os.path.join(_base_path, "logs/"),
+    "PID_DIR":os.path.join(_base_path, "logs/")
 }
 
 
@@ -124,11 +128,9 @@ class Turbostat(MonitoringDaemon):
 
 
 if __name__ == '__main__':
-    handler, logger = daemon_utils.configure_daemon_logs(SERVICE_NAME)
-
-    app = Turbostat(SERVICE_NAME, logger)
-    # FIXME As part of the environment initilization, set the pythonpath correctly
-    app.initialize_environment(config_path, config_keys, default_environment_values)
+    environment = daemon_utils.initialize_environment(config_path, config_keys, default_environment_values)
+    app = Turbostat(SERVICE_NAME, environment)
+    handler = app.get_handler()
     app.is_runnable = turbostat_is_runnable
     app.not_runnable_message = "Turbostat program is not runnable, if it is installed, run the " + \
                                "'scripts/allow_turbostat.sh' and try again or run turbostat manually and check " \

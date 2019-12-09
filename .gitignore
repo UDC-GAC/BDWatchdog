@@ -7,13 +7,14 @@ __pycache__/
 *.pid
 .coverage*
 *.data.*
+venv/
 
 ReportGenerator/pandoc_reports/*
 
 MetricsFeeder/src/daemon/pids/
 MetricsFeeder/src/daemon/logs/
-MetricsFeeder/src/pipelines/java_mappings/
 MetricsFeeder/bin-nethogs/
+MetricsFeeder/src/java_hadoop_snitch/java_mappings/
 
 
 *FlameGraph*
