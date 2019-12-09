@@ -55,12 +55,14 @@ cd BDWatchdog/MetricsFeeder
 ```
 * On Ubuntu 16.04 and 18.04:
 ```
-bash scripts/installation/install_in_ubuntu.sh
+cd scripts/installation
+bash install_in_ubuntu.sh
 ```
 
 * On CentOS 7:
 ```
-bash scripts/installation/install_in_centos7.sh
+cd scripts/installation
+bash install_in_centos7.sh
 ```
 
 * On both Ubuntu and CentOS 7:
@@ -68,6 +70,21 @@ bash scripts/installation/install_in_centos7.sh
 pip3 install -r requirements.txt
 ```
 
+* If the daemon python package shows the next error:
+```
+Traceback (most recent call last):
+  File "src/daemons/atop.py", line 154, in <module>
+    serv = runner.DaemonRunner(app)
+  File "/usr/local/lib/python3.6/dist-packages/daemon/runner.py", line 114, in __init__
+    self._open_streams_from_app_stream_paths(app)
+  File "/usr/local/lib/python3.6/dist-packages/daemon/runner.py", line 135, in _open_streams_from_app_stream_paths
+    app.stderr_path, 'w+t', buffering=0)
+ValueError: can't have unbuffered text I/O
+```
+Apply the next hotfix:
+```
+sed 's/w+t/wb+/g' /usr/local/lib/python3.6/dist-packages/daemon/runner.py -i
+```
 
 ## Usage
 

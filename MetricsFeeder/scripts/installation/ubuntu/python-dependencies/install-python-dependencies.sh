@@ -1,2 +1,3 @@
 #!/usr/bin/env bash
-sudo apt install python3-daemon python3-lockfile
+sudo apt install -y python3 python3-pip
+#sudo apt install -y python3-daemon python3-lockfile
