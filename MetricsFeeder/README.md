@@ -83,7 +83,8 @@ ValueError: can't have unbuffered text I/O
 ```
 Apply the next hotfix:
 ```
-sed 's/w+t/wb+/g' /usr/local/lib/python3.6/dist-packages/daemon/runner.py -i
+[Ubuntu] sed 's/w+t/wb+/g' /usr/local/lib/python3.6/dist-packages/daemon/runner.py -i
+[CentOS] sed 's/w+t/wb+/g' /usr/local/lib/python3.6/site-packages/daemon/runner.py -i
 ```
 
 ## Usage
