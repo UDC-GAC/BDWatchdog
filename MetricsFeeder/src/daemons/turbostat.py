@@ -67,7 +67,7 @@ default_environment_values = {
     "POST_SEND_DOCS_FAILED_TRIES": "6",
     "HEARTBEAT_ENABLED": "false",
     "BDW_LOG_DIR":os.path.join(_base_path, "logs/"),
-    "BDW_PID_DIR":os.path.join(_base_path, "logs/")
+    "BDW_PID_DIR":os.path.join(_base_path, "pids/")
 }
 
 
