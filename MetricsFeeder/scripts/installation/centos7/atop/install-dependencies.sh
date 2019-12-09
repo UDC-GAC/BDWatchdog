@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
-sudo yum group install -y "Development Tools"
-sudo yum install -y kernel-devel
+yum group install -y "Development Tools"
+yum install -y kernel-devel wget

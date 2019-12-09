@@ -4,7 +4,6 @@ configparser
 docutils
 idna
 lockfile
-pkg-resources
 python-daemon
 requests
 urllib3
