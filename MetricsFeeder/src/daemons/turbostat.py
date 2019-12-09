@@ -50,8 +50,8 @@ config_keys = [
     "POST_SEND_DOCS_TIMEOUT",
     "POST_SEND_DOCS_FAILED_TRIES",
     "HEARTBEAT_ENABLED",
-    "LOG_DIR",
-    "PID_DIR"
+    "BDW_LOG_DIR",
+    "BDW_PID_DIR"
 ]
 
 default_environment_values = {
@@ -66,8 +66,8 @@ default_environment_values = {
     "POST_SEND_DOCS_TIMEOUT": "10",
     "POST_SEND_DOCS_FAILED_TRIES": "6",
     "HEARTBEAT_ENABLED": "false",
-    "LOG_DIR":os.path.join(_base_path, "logs/"),
-    "PID_DIR":os.path.join(_base_path, "logs/")
+    "BDW_LOG_DIR":os.path.join(_base_path, "logs/"),
+    "BDW_PID_DIR":os.path.join(_base_path, "logs/")
 }
 
 
