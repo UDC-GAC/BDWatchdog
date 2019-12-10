@@ -80,6 +80,26 @@ def send_json_documents(json_documents, requests_Session=None):
         return False, {"error": str(e)}
 
 
+def process_line(line):
+    new_doc = None
+    try:
+        new_doc = json.loads(line)
+    except ValueError as e:
+        if not line:
+            eprint("[TSDB SENDER] Empty line was received")
+        else:
+            eprint("[TSDB SENDER] Error with document " + str(line))
+            eprint(e)
+    return new_doc
+
+
+def finish(json_documents, requests_Session, message):
+    success, info = send_json_documents(json_documents, requests_Session)
+    sys.stdout.flush()
+    eprint("[TSDB SENDER] -> {0}".format(message))
+    exit(1)
+
+
 def behave_like_pipeline():
     # PROGRAM VARIABLES #
     last_timestamp = time.time() - post_doc_buffer_timeout + 1
@@ -90,25 +110,19 @@ def behave_like_pipeline():
     json_documents = []
     requests_Session = requests.Session()
     try:
-        # for line in sys.stdin:
-        while True:
-            line = sys.stdin.readline()
-            # for line in fileinput.input():
-            try:
-                new_doc = json.loads(line)
-                json_documents = json_documents + [new_doc]
-                fails = 0
-            except ValueError as e:
-                if not line:
-                    eprint("[TSDB SENDER] Empty line was received")
-                else:
-                    eprint("[TSDB SENDER] Error with document " + str(line))
-                    eprint(e)
+        for line in fileinput.input():
+            new_doc = process_line(line)
+
+            if not new_doc:
                 fails += 1
                 if fails >= MAX_FAILS:
-                    eprint("[TSDB SENDER] terminated due to too many read pipeline errors")
-                    exit(1)
-                continue
+                    message = "terminated due to too many read pipeline errors"
+                    finish(json_documents, requests_Session, message)
+                else:
+                    continue
+            else:
+                json_documents = json_documents + [new_doc]
+                fails = 0  # Reset fails
 
             current_timestamp = time.time()
             time_diff = current_timestamp - last_timestamp
@@ -118,9 +132,8 @@ def behave_like_pipeline():
                 try:
                     success, info = send_json_documents(json_documents, requests_Session)
                     if not success:
-                        eprint(
-                            "[TSDB SENDER] couldn't properly post documents to address " + post_endpoint + " error: " + str(
-                                info))
+                        eprint("[TSDB SENDER] couldn't properly post documents to address {0} error: {1}".format(
+                            post_endpoint, str(info)))
                         failed_connections += 1
                     else:
                         print("Post was done at: " + time.strftime("%D %H:%M:%S", time.localtime()) + " with " + str(
@@ -129,23 +142,29 @@ def behave_like_pipeline():
                         json_documents = []  # Empty document buffer
                 except requests.exceptions.ConnectTimeout:
                     failed_connections += 1
-                    eprint(
-                        "[TSDB SENDER] couldn't send documents to address " + post_endpoint + " and tried for " + str(
-                            failed_connections) + " times")
+                    eprint("[TSDB SENDER] couldn't send documents to address {0} and tried for {1} times".format(
+                        post_endpoint, failed_connections))
                     if failed_connections >= post_send_docs_failed_tries:
                         abort = True
 
                 if abort:
-                    eprint("[TSDB SENDER] terminated due to too connection errors")
-                    exit(1)
+                    message = "terminated due to too connection errors"
+                    finish(json_documents, requests_Session, message)
+
                 sys.stdout.flush()
-    except (KeyboardInterrupt, IOError):
+    except (KeyboardInterrupt, IOError) as e:
         # Exit silently
-        pass
+        eprint("[TSDB SENDER] terminated with error: " + str(e))
+        track = traceback.format_exc()
+        eprint(track)
+
     except Exception as e:
         eprint("[TSDB SENDER] terminated with error: " + str(e))
         track = traceback.format_exc()
         eprint(track)
+
+    message = "finishing"
+    finish(json_documents, requests_Session, message)
 
 
 def main():
