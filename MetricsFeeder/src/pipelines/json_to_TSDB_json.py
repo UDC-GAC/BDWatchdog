@@ -22,6 +22,8 @@
 
 
 from __future__ import print_function
+
+import fileinput
 import sys
 import json
 import re
@@ -59,6 +61,8 @@ def process_string(string):
 
 
 def process_line(line):
+    if not line:
+        return
     document = json.loads(line)
     try:
         for string in ["command", "host"]:
@@ -73,10 +77,12 @@ def process_line(line):
 
 def behave_like_pipeline():
     try:
-        # for line in fileinput.input():
-        while True:
-            line = sys.stdin.readline()
-            print(process_line(line))
+        for line in fileinput.input():
+        #while True:
+        #    line = sys.stdin.readline()
+            result = process_line(line)
+            if result:
+                print(result)
     except (KeyboardInterrupt, IOError):
         # Exit silently
         pass

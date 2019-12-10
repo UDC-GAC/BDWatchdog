@@ -24,6 +24,7 @@
 from __future__ import print_function
 import sys
 import os
+import fileinput
 
 TEMPLATE_PATH = "TEMPLATE_PATH"
 METRICS_PATH = "METRICS_PATH"
@@ -95,6 +96,8 @@ def initialize():
 
 
 def process_line(line, metrics_dict, tags_dict, template):
+    if not line:
+        return
     results = list()
     fields = line.strip().split(",")
     line_type = fields[0]
@@ -129,18 +132,22 @@ def process_line(line, metrics_dict, tags_dict, template):
 
 def behave_like_pipeline():
     metrics_dict, tags_dict, template = initialize()
+    current_line = None
     try:
-        # for line in fileinput.input():
-        while True:
-            line = sys.stdin.readline()
+        for line in fileinput.input():
+        #while True:
+        #    line = sys.stdin.readline()
             results = process_line(line, metrics_dict, tags_dict, template)
-            for result in results:
-                sys.stdout.write(result + "\n")
+            if results:
+                for result in results:
+                    sys.stdout.write(result + "\n")
+            current_line = line
     except (KeyboardInterrupt, IOError):
         # Exit silently
         pass
     except Exception as error:
         eprint("[CSV TO JSON] error : " + str(error))
+        eprint("[CSV TO JSON] line is : " + current_line)
 
 
 def main():
