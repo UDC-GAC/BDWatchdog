@@ -70,6 +70,10 @@ signal.signal(signal.SIGTERM, sigterm_handler)
 
 
 def process_line(line, header_mapping, fields):
+    if not line:
+        eprint("Empty line")
+        return
+
     # Skip header by looking for it and avoiding it
     try:
         # Try to test for string values for different versions of turbostat
@@ -81,6 +85,10 @@ def process_line(line, header_mapping, fields):
 
     except ValueError:
         # Line is header, skip
+        return
+    except IndexError:
+        # Line is ?
+        eprint("Error with line:" + line)
         return
 
     try:
@@ -103,13 +111,6 @@ def process_line(line, header_mapping, fields):
                     return ("PKG_PWR" + "," + get_hostname() + "," + str(get_timestamp()) + "," + fields[
                         header_mapping["Core"]] + "," + fields[header_mapping["PkgTmp"]] + "," + fields[
                               header_mapping["PkgWatt"]])
-            #     return ("CORE_PWR" + "," + get_hostname() + "," + str(get_timestamp()) + "," + fields[
-            #         header_mapping["Core"]] + "," + fields[header_mapping["CoreTmp"]].strip())
-            #
-            # elif len(fields) >= header_mapping["CoreTmp"]:
-            #     # line is for core
-            #     return ("CORE_PWR" + "," + get_hostname() + "," + str(get_timestamp()) + "," + fields[
-            #         header_mapping["Core"]] + "," + fields[header_mapping["CoreTmp"]].strip())
 
     except IndexError:
         eprint("Line : '" + line.strip() + "' couldn't be parsed")
@@ -119,11 +120,12 @@ def process_line(line, header_mapping, fields):
 def behave_like_pipeline():
     try:
         header_was_processed = False
-        # required_fields = ["PkgWatt", "CorWatt", "Core", "CPU"]
+        #required_fields = ["PkgWatt", "CorWatt", "Core", "CPU"]
         required_fields = ["PkgWatt", "Core", "CPU"]
         header_mapping = dict()
 
         for line in fileinput.input():
+            #print(line)
         #while True:
             #line = sys.stdin.readline()
 

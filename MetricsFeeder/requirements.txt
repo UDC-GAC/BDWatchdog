@@ -1,9 +1,2 @@
-certifi
-chardet
-configparser
-docutils
-idna
-lockfile
 python-daemon
 requests
-urllib3
