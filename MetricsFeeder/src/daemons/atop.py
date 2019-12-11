@@ -77,17 +77,29 @@ default_environment_values = {
     "BDW_LOG_DIR": os.path.join(_base_path, "logs/"),
     "BDW_PID_DIR": os.path.join(_base_path, "pids/"),
     "USE_PACKED_BINARIES": "true",
-    "BINARIES_PATH":os.path.join(_base_path, "../../bin/atop/"),
+    "BINARIES_PATH": os.path.join(_base_path, "../../bin/atop/"),
 }
+
 
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
 
+def get_atop_executable(environment):
+    if environment["USE_PACKED_BINARIES"] == "true":
+        ATOP_EXECUTABLE = environment["BINARIES_PATH"] + "atop"
+        eprint("Going to use pre-packed atop binary")
+    else:
+        ATOP_EXECUTABLE = "atop"
+        eprint("Going to use system-level atop binary")
+    return ATOP_EXECUTABLE
+
+
 def atop_is_runnable(environment):
     # Run a bogus 'atop' command, show CPU usage every 1 seconds, 1 time
     # If the command doesn't fail, atop works
-    return daemon_utils.command_is_runnable(['atop', '1', '1', '-P', 'CPU'])
+    ATOP_EXECUTABLE = get_atop_executable(environment)
+    return daemon_utils.command_is_runnable([ATOP_EXECUTABLE, '1', '1', '-P', 'CPU'])
 
 
 class Atop(MonitoringDaemon):
@@ -100,16 +112,11 @@ class Atop(MonitoringDaemon):
     def create_pipeline(self):
         processes_list = []
 
-        if self.environment["USE_PACKED_BINARIES"] == "true":
-            ATOP_EXECUTABLE = self.environment["BINARIES_PATH"] + "atop"
-            eprint("Going to use pre-packed atop binary")
-        else:
-            ATOP_EXECUTABLE = "atop"
-            eprint("Going to use system-level atop binary")
+        ATOP_EXECUTABLE = get_atop_executable(self.environment)
 
         # Launch Java snitch if java translation is going to be used
         if self.environment["JAVA_TRANSLATION_ENABLED"] == "true":
-            #self.snitcher = self.launch_java_snitch()
+            # self.snitcher = self.launch_java_snitch()
             snitcher = self.launch_java_snitch()
             processes_list.append(snitcher)
 
@@ -124,7 +131,8 @@ class Atop(MonitoringDaemon):
         if self.environment["JAVA_TRANSLATION_ENABLED"] == "true":
             # With JAVA mapping
             atop_to_json = self.create_pipe(
-                ["python3", os.path.join(_base_path, "../atop/atop_to_json_with_java_translation.py")], self.environment,
+                ["python3", os.path.join(_base_path, "../atop/atop_to_json_with_java_translation.py")],
+                self.environment,
                 atop.stdout,
                 subprocess.PIPE)
         else:

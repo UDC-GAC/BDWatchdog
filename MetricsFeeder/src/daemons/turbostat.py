@@ -108,20 +108,12 @@ class Turbostat(MonitoringDaemon):
                                       self.environment, first_sed.stdout, subprocess.PIPE)
         processes_list.append(second_sed)
 
-        turbostat_to_csv = self.create_pipe(["python3", os.path.join(_base_path, "../turbostat/turbostat_to_csv.py")],
+        turbostat_to_json = self.create_pipe(["python3", os.path.join(_base_path, "../turbostat/turbostat_to_json.py")],
                                             self.environment, second_sed.stdout, subprocess.PIPE)
-        processes_list.append(turbostat_to_csv)
-
-        csv_to_json = self.create_pipe(["python3", os.path.join(_base_path, "../pipelines/csv_to_json.py")],
-                                       self.environment, turbostat_to_csv.stdout, subprocess.PIPE)
-        processes_list.append(csv_to_json)
-
-        json_to_tsdb_json = self.create_pipe(["python3", os.path.join(_base_path, "../pipelines/json_to_TSDB_json.py")],
-                                             self.environment, csv_to_json.stdout, subprocess.PIPE)
-        processes_list.append(json_to_tsdb_json)
+        processes_list.append(turbostat_to_json)
 
         send_to_opentsdb = self.create_pipe(["python3", os.path.join(_base_path, "../pipelines/send_to_OpenTSDB.py")],
-                                            self.environment, json_to_tsdb_json.stdout, subprocess.PIPE)
+                                            self.environment, turbostat_to_json.stdout, subprocess.PIPE)
         processes_list.append(send_to_opentsdb)
 
         return processes_list
