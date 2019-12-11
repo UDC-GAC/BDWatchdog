@@ -125,16 +125,12 @@ def behave_like_pipeline():
         header_mapping = dict()
 
         for line in fileinput.input():
-            #print(line)
-        #while True:
-            #line = sys.stdin.readline()
-
             fields = line.split(",")
 
             # Process header and adapt pipe, after that header will be skipped
             if not header_was_processed:
                 header_mapping = create_header_mapping(line.strip())
-                # print("HEADER MAPPING:" + str(header_mapping))
+                eprint("HEADER MAPPING to be used is:" + str(header_mapping))
                 for field in required_fields:
                     if field not in header_mapping:
                         eprint("Field " + field + " not present in output, can't continue")
@@ -158,74 +154,5 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-# try:
-#     header_was_processed = False
-#     #required_fields = ["PkgWatt", "CorWatt", "Core", "CPU"]
-#     required_fields = ["PkgWatt", "Core", "CPU"]
-#     header_mapping = dict()
-#
-#     for line in fileinput.input():
-#         fields = line.split(",")
-#
-#         # Process header and adapt pipe, after that header will be skipped
-#         if not header_was_processed:
-#             header_mapping = create_header_mapping(line.strip())
-#             # print("HEADER MAPPING:" + str(header_mapping))
-#             for field in required_fields:
-#                 if field not in header_mapping:
-#                     eprint("Field " + field + " not present in output, can't continue")
-#                     bad_finish()
-#             header_was_processed = True
-#
-#         # Process line
-#         else:
-#             # Skip header by looking for it and avoiding it
-#             try:
-#                 # Try to test for string values for different versions of turbostat
-#                 #if fields[0] == "Core" or fields[0] == "Package" or fields[0] == "usec":
-#                 #    continue
-#
-#                 # Try to cast the average Megahertz, which has an int value for all the lines to be processed
-#                 int(fields[header_mapping["Avg_MHz"]])
-#
-#             except ValueError:
-#                 # Line is header, skip
-#                 continue
-#
-#             try:
-#                 if fields[header_mapping["CPU"]] == "-":
-#                     # line is for entire system
-#                     print("SYS_PWR" + "," + get_hostname() + "," + str(get_timestamp()) + "," + fields[
-#                         header_mapping["Core"]] + "," + fields[header_mapping["PkgTmp"]] + "," + fields[
-#                               header_mapping["PkgWatt"]])
-#                 else:
-#                     if len(fields) >= header_mapping["PkgWatt"]:
-#                         # line is for package, because turbostat aggregates and joins first core
-#                         # and package, print also core
-#                         if "Package" in header_mapping:
-#                             print("PKG_PWR" + "," + get_hostname() + "," + str(get_timestamp()) + "," + fields[
-#                                 header_mapping["Package"]] + "," + fields[header_mapping["PkgTmp"]] + "," + fields[
-#                                       header_mapping["PkgWatt"]])
-#
-#                         else:
-#                             # Host may only have one package and turbostat may not report the Package field
-#                             print("PKG_PWR" + "," + get_hostname() + "," + str(get_timestamp()) + "," + fields[
-#                                 header_mapping["Core"]] + "," + fields[header_mapping["PkgTmp"]] + "," + fields[
-#                                       header_mapping["PkgWatt"]])
-#                     #     print("CORE_PWR" + "," + get_hostname() + "," + str(get_timestamp()) + "," + fields[
-#                     #         header_mapping["Core"]] + "," + fields[header_mapping["CoreTmp"]].strip())
-#                     #
-#                     # elif len(fields) >= header_mapping["CoreTmp"]:
-#                     #     # line is for core
-#                     #     print("CORE_PWR" + "," + get_hostname() + "," + str(get_timestamp()) + "," + fields[
-#                     #         header_mapping["Core"]] + "," + fields[header_mapping["CoreTmp"]].strip())
-#
-#             except IndexError:
-#                 eprint("Line : '" + line.strip() + "' couldn't be parsed")
-# except KeyboardInterrupt:
-#     good_finish()
-# except IOError:
-#     bad_finish()
 
 

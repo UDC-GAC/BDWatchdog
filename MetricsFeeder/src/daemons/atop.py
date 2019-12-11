@@ -53,7 +53,9 @@ config_keys = [
     "JAVA_TRANSLATION_ENABLED",
     "HEARTBEAT_ENABLED",
     "BDW_LOG_DIR",
-    "BDW_PID_DIR"
+    "BDW_PID_DIR",
+    "USE_PACKED_BINARIES",
+    "BINARIES_PATH"
 ]
 default_environment_values = {
     "ATOP_SAMPLING_FREQUENCY": "10",
@@ -73,7 +75,9 @@ default_environment_values = {
     "JAVA_TRANSLATION_ENABLED": "false",
     "HEARTBEAT_ENABLED": "false",
     "BDW_LOG_DIR": os.path.join(_base_path, "logs/"),
-    "BDW_PID_DIR": os.path.join(_base_path, "pids/")
+    "BDW_PID_DIR": os.path.join(_base_path, "pids/"),
+    "USE_PACKED_BINARIES": "true",
+    "BINARIES_PATH":os.path.join(_base_path, "../../bin/atop/"),
 }
 
 def eprint(*args, **kwargs):
@@ -96,6 +100,13 @@ class Atop(MonitoringDaemon):
     def create_pipeline(self):
         processes_list = []
 
+        if self.environment["USE_PACKED_BINARIES"] == "true":
+            ATOP_EXECUTABLE = self.environment["BINARIES_PATH"] + "atop"
+            eprint("Going to use pre-packed atop binary")
+        else:
+            ATOP_EXECUTABLE = "atop"
+            eprint("Going to use system-level atop binary")
+
         # Launch Java snitch if java translation is going to be used
         if self.environment["JAVA_TRANSLATION_ENABLED"] == "true":
             #self.snitcher = self.launch_java_snitch()
@@ -104,7 +115,7 @@ class Atop(MonitoringDaemon):
 
         # Create the data source
         atop = subprocess.Popen(
-            ['atop', self.environment["ATOP_SAMPLING_FREQUENCY"], '-P', self.environment["METRICS"]],
+            [ATOP_EXECUTABLE, self.environment["ATOP_SAMPLING_FREQUENCY"], '-P', self.environment["METRICS"]],
             stdout=subprocess.PIPE)
 
         processes_list.append(atop)

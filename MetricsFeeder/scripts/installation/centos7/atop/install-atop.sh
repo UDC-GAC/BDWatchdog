@@ -11,11 +11,19 @@ wget http://www.atoptool.nl/download/atop-2.3.0.tar.gz
 tar xvf atop-2.3.0.tar.gz
 cd atop-2.3.0/
 
-# Compile and install
-make systemdinstall
+# Compile and install in system
+#sudo make systemdinstall
+
+# Just compile
+sudo make
 
 # Return
 cd ..
+
+# Copy the binary
+mkdir -p bin/atop
+cp atop-2.3.0/atop bin/atop/atop
+
 
 # Clean
 rm -R atop-2.3.0.tar.gz

@@ -22,6 +22,8 @@
 
 
 from __future__ import print_function
+
+import socket
 import sys
 
 
@@ -33,9 +35,11 @@ def process_line(line):
     result_lines = list()
     in_fields = line.split(",")
     try:
-        out_fields = []
         out_fields = in_fields[0:3]  # type,host,timestamp
-        # out_fields += in_fields[3:5] #date-day and date-hour
+
+        # Change the hostname as atop is unable to recognize properly hostnames with dots
+        # e.g., jonatan.gac.dec.udc.es -> hostname is jonatan
+        out_fields[1] = socket.gethostname()
 
         # RPOCESS INFO #
         if in_fields[0] == "PRM":

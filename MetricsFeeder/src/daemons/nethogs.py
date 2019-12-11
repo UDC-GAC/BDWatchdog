@@ -46,8 +46,6 @@ config_keys = [
     "TEMPLATE_PATH",
     "METRICS_PATH",
     "TAGS_PATH",
-    "NETHOGS_DIR",
-    "NETHOGS_SCRIPTS_DIR",
     "POST_DOC_BUFFER_LENGTH",
     "POST_SEND_DOCS_TIMEOUT",
     "POST_SEND_DOCS_FAILED_TRIES",
@@ -57,8 +55,10 @@ config_keys = [
     "JAVA_TRANSLATOR_WAIT_TIME",
     "HADOOP_SNITCH_FOLDER_PATH",
     "HEARTBEAT_ENABLED",
-    "LOG_DIR",
-    "PID_DIR"
+    "BDW_LOG_DIR",
+    "BDW_PID_DIR",
+    "USE_PACKED_BINARIES",
+    "NETHOGS_BINARIES_PATH",
 ]
 
 default_environment_values = {
@@ -69,8 +69,6 @@ default_environment_values = {
     "TEMPLATE_PATH": os.path.join(_base_path, "../pipelines/templates/"),
     "METRICS_PATH": os.path.join(_base_path, "../pipelines/metrics/"),
     "TAGS_PATH": os.path.join(_base_path, "../pipelines/tags/"),
-    "NETHOGS_DIR": os.path.join(_base_path, "../../bin-nethogs/"),
-    "NETHOGS_SCRIPTS_DIR": os.path.join(_base_path, "../nethogs"),
     "POST_DOC_BUFFER_LENGTH": "1000",  # Don't go over 1500 or post packet will be too large and may cause error
     "POST_SEND_DOCS_TIMEOUT": "5",
     "POST_SEND_DOCS_FAILED_TRIES": "6",
@@ -80,8 +78,10 @@ default_environment_values = {
     "JAVA_TRANSLATOR_WAIT_TIME": "3",
     "HADOOP_SNITCH_FOLDER_PATH": os.path.join(_base_path, "../java_hadoop_snitch/"),
     "HEARTBEAT_ENABLED": "false",
-    "LOG_DIR":os.path.join(_base_path, "logs/"),
-    "PID_DIR":os.path.join(_base_path, "logs/")
+    "BDW_LOG_DIR": os.path.join(_base_path, "logs/"),
+    "BDW_PID_DIR": os.path.join(_base_path, "pids/"),
+    "USE_PACKED_BINARIES": "true",
+    "NETHOGS_BINARIES_PATH": os.path.join(_base_path, "../../bin/nethogs/"),
 }
 
 
@@ -92,8 +92,9 @@ def eprint(*args, **kwargs):
 def nethogs_is_runnable(environment):
     # Run a bogus 'ls' command to show nethogs statistics for a few seconds
     # If the command doesn't fail, nethogs works
-    #return daemon_utils.command_is_runnable(['../../bin-nethogs/src/nethogs', '-v', '3', '-t', '-d', '1', '-c', '2'])
-    return daemon_utils.command_is_runnable([environment["NETHOGS_DIR"]+'src/nethogs', '-v', '3', '-t', '-d', '1', '-c', '2'])
+    # return daemon_utils.command_is_runnable(['../../nethogs/src/nethogs', '-v', '3', '-t', '-d', '1', '-c', '2'])
+    return daemon_utils.command_is_runnable(
+        [environment["NETHOGS_BINARIES_PATH"] + '/nethogs', '-v', '3', '-t', '-d', '1', '-c', '2'])
 
 
 class Nethogs(MonitoringDaemon):
@@ -108,7 +109,8 @@ class Nethogs(MonitoringDaemon):
 
         # Create the data source
         nethogs = subprocess.Popen(
-            ["bash", os.path.join(_base_path, "../nethogs/run_nethogs.sh"), self.environment["NETHOGS_SAMPLING_FREQUENCY"]],
+            ["bash", os.path.join(_base_path, "../nethogs/run_nethogs.sh"),
+             self.environment["NETHOGS_SAMPLING_FREQUENCY"]],
             env=self.environment, stdout=subprocess.PIPE)
         processes_list.append(nethogs)
 
@@ -122,7 +124,8 @@ class Nethogs(MonitoringDaemon):
         if self.environment["JAVA_TRANSLATION_ENABLED"] == "true":
             # With JAVA mapping
             nethogs_to_json = self.create_pipe(
-                ["python3", os.path.join(_base_path, "../nethogs/nethogs_to_json_with_java_translation.py")], self.environment,
+                ["python3", os.path.join(_base_path, "../nethogs/nethogs_to_json_with_java_translation.py")],
+                self.environment,
                 filtered_nethogs_output.stdout,
                 subprocess.PIPE)
         else:
@@ -145,7 +148,9 @@ if __name__ == '__main__':
     handler = app.get_handler()
     app.is_runnable = nethogs_is_runnable
     app.not_runnable_message = "Nethogs program is not runnable, check that it has been " \
-                               "installed in directory: " + environment["NETHOGS_DIR"]
+                               "installed in directory: " + environment["NETHOGS_BINARIES_PATH"] + \
+                               " and that persmission is granted " +\
+                               "(run scripts/allow_priviledges/allow_nethogs.sh if needed)"
     app.check_if_runnable()
 
     # Capture reload signal and propagate

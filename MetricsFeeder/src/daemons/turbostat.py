@@ -146,4 +146,8 @@ if __name__ == '__main__':
     # Run service
     serv = runner.DaemonRunner(app)
     serv.daemon_context.files_preserve = [handler.stream]
+    # try:
+    #     serv.do_action()
+    # except runner.DaemonRunnerStopFailureError:
+    #     pass
     serv.do_action()

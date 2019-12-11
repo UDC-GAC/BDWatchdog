@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
-cd centos7
-bash dependencies/install-dependencies.sh
-bash python-dependencies/install-python-dependencies.sh
-bash atop/install-atop.sh
-bash turbostat/install-turbostat.sh
-cd ..
+bash scripts/installation/centos7/dependencies/install-dependencies.sh
+bash scripts/installation/centos7/python-dependencies/install-python-dependencies.sh
+bash scripts/installation/centos7/atop/install-atop.sh
+bash scripts/installation/centos7/turbostat/install-turbostat.sh
 
