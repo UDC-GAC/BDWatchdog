@@ -15,7 +15,7 @@ cd atop-2.3.0/
 #sudo make systemdinstall
 
 # Just compile
-sudo make
+make
 
 # Return
 cd ..
