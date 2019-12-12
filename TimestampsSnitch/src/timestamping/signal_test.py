@@ -25,15 +25,11 @@ from __future__ import print_function
 
 import time
 import json
-import sys
 import argparse
 
 from TimestampsSnitch.src.mongodb.mongodb_agent import MongoDBTimestampAgent
 from TimestampsSnitch.src.timestamping.utils import get_username, get_timestamp
-
-
-def eprint(*args, **kwargs):
-    print(*args, file=sys.stderr, **kwargs)
+from TimestampsSnitch.src.timestamping.utils import eprint, iprint
 
 
 def signal_test(experiment_id, test_name, username, signal, timestamp):

@@ -29,10 +29,7 @@ import json
 import ast
 import os
 
-
-def eprint(*args, **kwargs):
-    print(*args, file=sys.stderr, **kwargs)
-
+from TimestampsSnitch.src.timestamping.utils import eprint, iprint
 
 headers = {'content-type': 'application/json'}
 
@@ -110,10 +107,10 @@ class MongoDBTimestampAgent:
                 # Document doesn't exist, create
                 r = requests.post(endpoint, headers=headers, data=json.dumps(doc))
                 if r.status_code != 201:
-                    eprint("[MONGODB AGENT] couldn't properly put document to address {0}".format(endpoint))
+                    eprint("Couldn't properly put document to address {0}".format(endpoint))
                     eprint(r.text)
                 else:
-                    print("Document created at: {0}".format(
+                    iprint("Document created at: {0}".format(
                         time.strftime("%D %H:%M:%S", time.localtime()) + " timestamp is " + str(time.time())))
                     break
             else:
@@ -128,10 +125,10 @@ class MongoDBTimestampAgent:
                 r = requests.put(endpoint + "/" + str(doc_id), headers=these_headers,
                                  data=json.dumps(doc))
                 if r.status_code != 200:
-                    eprint("[MONGODB AGENT] couldn't properly put document to address {0}".format(endpoint))
+                    eprint("Couldn't properly put document to address {0}".format(endpoint))
                     eprint(r.text)
                 else:
-                    print("Document updated at: " + time.strftime("%D %H:%M:%S", time.localtime()))
+                    iprint("Document updated at: " + time.strftime("%D %H:%M:%S", time.localtime()))
                     break
         if tries > MAX_CONNECTION_TRIES:
             error_string = "Information posting for document {0} failed too many times, aborting".format(str(doc))
@@ -153,7 +150,7 @@ class MongoDBTimestampAgent:
         for test in documents:
             if not self.experiment_exists(test["experiment_id"], test["username"]):
                 # Experiment doesn't exist
-                eprint("[SNITCH MONGODB AGENT] experiment {0} doesn't exist".format(test["experiment_id"]))
+                eprint("Experiment {0} doesn't exist".format(test["experiment_id"]))
                 continue
             info = self.get_test(test["experiment_id"], test["test_name"], test["username"])
             self.post_doc(test, info, self.tests_full_endpoint)
@@ -175,16 +172,16 @@ class MongoDBTimestampAgent:
         if self.experiment_exists(experiment_id, username):
             test = self.get_test(experiment_id, test_name, username)
             if not test:
-                print("Document doesn't {0} exist".format(test_name))
+                iprint("Document doesn't {0} exist".format(test_name))
                 return
             headers["If-Match"] = test["_etag"]
             tests_full_endpoint = "{0}/{1}".format(self.tests_full_endpoint, test["_id"])
             r = requests.delete(tests_full_endpoint, headers=headers)
             if r.status_code != 204:
-                eprint("[MONGODB AGENT] couldn't properly delete document to address {0}".format(tests_full_endpoint))
+                eprint("Couldn't properly delete document to address {0}".format(tests_full_endpoint))
                 eprint(r.text)
             else:
-                print("Document deleted at: " + time.strftime("%D %H:%M:%S", time.localtime()))
+                iprint("Document deleted at: " + time.strftime("%D %H:%M:%S", time.localtime()))
         else:
             return False
 
@@ -195,10 +192,10 @@ class MongoDBTimestampAgent:
             experiment_full_endoint = "{0}/{1}".format(self.experiments_full_endpoint, experiment["_id"])
             r = requests.delete(experiment_full_endoint, headers=headers)
             if r.status_code != 204:
-                eprint("[MONGODB AGENT] couldn't properly delete document in {0}".format(experiment_full_endoint))
+                eprint("Couldn't properly delete document in {0}".format(experiment_full_endoint))
                 eprint(r.text)
             else:
-                print("Document deleted at: " + time.strftime("%D %H:%M:%S", time.localtime()))
+                iprint("Document deleted at: " + time.strftime("%D %H:%M:%S", time.localtime()))
         else:
             eprint("Document doesn't {0} exist".format(experiment_id))
             return False
@@ -302,10 +299,10 @@ if __name__ == '__main__':
 
     agent = MongoDBTimestampAgent()
 
-    eprint("[MONGODB AGENT] Mongodb agent started, waiting for input to send.")
-    eprint("[MONGODB AGENT] Endpoints to use will be {0} to experiments and {1} to tests".format(
-        agent.get_experiments_endpoint(), agent.get_tests_endpoint()
-    ))
+    eprint("Mongodb agent started, waiting for input to send.")
+    # eprint("Endpoints to use will be {0} to experiments and {1} to tests".format(
+    #    agent.get_experiments_endpoint(), agent.get_tests_endpoint()
+    # ))
 
     try:
         # UNAFFECTED BY BUFFERING
@@ -320,7 +317,7 @@ if __name__ == '__main__':
                 new_doc = ast.literal_eval(line)
                 docs[new_doc["type"]] = docs[new_doc["type"]] + [new_doc["info"]]
             except ValueError:
-                print("Error with document " + str(line))
+                eprint("Error with document " + str(line))
                 continue
 
             length_docs = agent.get_legth_docs(docs)
@@ -335,8 +332,8 @@ if __name__ == '__main__':
                 sys.stdout.flush()
         agent.send_docs(docs)
     except IOError as e:
-        eprint("[MONGODB AGENT] terminated")
+        eprint("Terminated due to error")
         eprint(e)
     except KeyboardInterrupt:
-        eprint("[MONGODB AGENT] terminated")
+        eprint("Terminated due to user interrupt")
         agent.send_docs(docs)

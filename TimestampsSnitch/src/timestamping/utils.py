@@ -29,9 +29,16 @@ import datetime
 import time
 import sys
 
+SERVICE_NAME = "[BDWATCHDOG_TIMESTAMPING] : "
+
 
 def eprint(*args, **kwargs):
-    print(*args, file=sys.stderr, **kwargs)
+    message = SERVICE_NAME + str(*args)
+    print(message, file=sys.stderr, **kwargs)
+
+
+def iprint(message):
+    print(SERVICE_NAME + message)
 
 
 def get_username(args):
