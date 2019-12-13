@@ -40,10 +40,6 @@ delimit the time duration of experiments and tests, visit the
 [TimestampsSnitch](https://github.com/JonatanEnes/BDWatchdog/tree/master/TimestampsSnitch)
 subproject.
 
-* If you are curious about how the resource time series can be 
-crunched in search on interesting experimentation data, you can 
-check out the [ReportsGenerator](https://github.com/JonatanEnes/BDWatchdog/tree/master/ReportGenerator)
-subproject.
 
 ## About
 BDWatchdog has been developed in the Computer Architecture 
