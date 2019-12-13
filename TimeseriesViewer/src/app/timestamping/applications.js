@@ -1,6 +1,8 @@
 import {timeConverter} from "../../index.js";
 import {getMongoURLfromUI, sendCORSrequest} from "./shared.js";
 
+
+
 export function getApplicationsFromMongo(username, experiment_id) {
     "use strict";
     let endpoint = getMongoURLfromUI();
@@ -15,11 +17,11 @@ export function getApplicationsFromMongo(username, experiment_id) {
     getApplicationsFromMongoPaginated(mongo_REST_endpoint, true)
 }
 
-function getApplicationsFromMongoPaginated(mongo_REST_endpoint, remove_previous){
-    let headers = [ {"header":"Accept", "value":"application/json"} ];
-    sendCORSrequest("GET", mongo_REST_endpoint, headers, 200, function (response){
+function getApplicationsFromMongoPaginated(mongo_REST_endpoint, remove_previous) {
+    let headers = [{"header": "Accept", "value": "application/json"}];
+    sendCORSrequest("GET", mongo_REST_endpoint, headers, 200, function (response) {
         populateApplicationsDropdown(response, remove_previous);
-        if (response._meta["page"] * response["_meta"]["max_results"] < response["_meta"]["total"]){
+        if (response._meta["page"] * response["_meta"]["max_results"] < response["_meta"]["total"]) {
             getApplicationsFromMongoPaginated(getMongoURLfromUI() + "/" + response["_links"]["next"]["href"], false);
         }
     }, "Error getting applications");
@@ -33,28 +35,50 @@ export function getApplicationTimes() {
     let application_id = application_label.application_id;
 
     let endpoint = getMongoURLfromUI();
-    let headers = [ {"header":"Accept", "value":"application/json"} ];
+    let headers = [{"header": "Accept", "value": "application/json"}];
     let mongo_REST_endpoint = endpoint + "/tests/" + application_id;
 
-    sendCORSrequest("GET", mongo_REST_endpoint, headers, 200, function (response){
+    sendCORSrequest("GET", mongo_REST_endpoint, headers, 200, function (response) {
         propagateApplicationTimes(response)
     }, "Error getting application times");
 }
 
 
-export function deleteApplication() {
+export function deleteApplication(application, check_confirm) {
     "use strict";
-    let experiments_form = document.getElementById("experiment_picker");
-    let application_label = experiments_form.elements.application;
-    let application_id = application_label.application_id;
-    let application_etag =  application_label.etag;
+    if (check_confirm) {
+        var r = confirm("Are you sure do you want to delete the test?");
+        if (r === false) {
+            return
+        }
+    }
+
+    var experiments_form;
+    var application_label;
+    var application_id;
+    var application_etag;
+
+    if (application) {
+        application_id = application.application_id;
+        application_etag = application.etag;
+    } else {
+        experiments_form = document.getElementById("experiment_picker");
+        application_label = experiments_form.elements.application;
+        application_id = application_label.application_id;
+        application_etag = application_label.etag;
+    }
 
     let endpoint = getMongoURLfromUI();
     let mongo_REST_endpoint = endpoint + "/tests/" + application_id;
 
-    let headers = [ {"header":"Accept", "value":"application/json"}, {"header":"If-Match", "value": application_etag} ];
+    let headers = [{"header": "Accept", "value": "application/json"}, {
+        "header": "If-Match",
+        "value": application_etag
+    }];
 
-    sendCORSrequest("DELETE", mongo_REST_endpoint, headers,  204, function (response){}, "Error deleting application information");
+    sendCORSrequest("DELETE", mongo_REST_endpoint, headers, 204, function (response) {
+
+    }, "Error deleting application information");
 }
 
 
@@ -78,17 +102,32 @@ function populateApplicationsDropdown(applications, remove_previous) {
     "use strict";
     let list = document.getElementById("apps_timepicker_list");
 
-    if(remove_previous) {
+    if (remove_previous) {
         while (list.firstChild) {
             list.removeChild(list.firstChild);
         }
     }
     for (let app of applications._items) {
         let child = document.createElement("li");
-        child.innerHTML = app.test_name;
-        child.application_id = app._id;
-        child.etag = app._etag;
-        child.onclick = application_label_on_click;
-        list.append(child)
+
+        var button1 = document.createElement("div");
+        button1.innerHTML = "Set: " + app.test_name.bold();
+        button1.classList = "btn btn-default ";
+        button1.label_value = app.test_name;
+        button1.application_id = app._id;
+        button1.etag = app._etag;
+        button1.onclick = application_label_on_click
+        child.appendChild(button1);
+
+        var button2 = document.createElement("div");
+        button2.innerHTML = "Delete";
+        button2.classList = "btn btn-default ";
+        button2.application_id = app._id;
+        button2.etag = app._etag;
+        button2.onclick = deleteApplication
+        child.appendChild(button2);
+
+        list.append(child);
+
     }
 }

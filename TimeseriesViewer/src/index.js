@@ -70,8 +70,6 @@ export function drawSomething(forms, example) {
     experiment_label.value = example.label_exp;
     let app_label = experiments_form.elements.application;
     app_label.value = example.label_app;
-
-    disableQuickButtons()
 }
 
 export function requestGraphRedraw(formID, graphX, graphY) {
@@ -140,7 +138,6 @@ export function getApplications() {
 
 export function addFormFromFile(form_info) {
     "use strict"
-    disableQuickButtons()
     let metrics = form_info.metrics
     let yranges = form_info.yranges
     let new_form_number = addMetricsForm(metrics, yranges)
@@ -296,28 +293,3 @@ function requestGraphTimeRedraw(formID, start_time, end_time) {
         changeTimeInputs(form, start_time, end_time)
     }
 }
-
-
-function disableQuickButtons() {
-    "use strict"
-    if (quickButtonsDisabled) {
-        return
-    }
-    let element = document.getElementById("drawHadoopButton")
-    element.parentNode.style = ""
-    element.parentNode.removeChild(element)
-
-    element = document.getElementById("drawSparkButton")
-    element.parentNode.removeChild(element)
-
-
-    //element = document.getElementById("drawFlameGraphButton");
-    //element.parentNode.removeChild(element);
-
-    quickButtonsDisabled = true
-}
-
-// function quick_drawFlameGraph() {
-//     "use strict";
-//     disableQuickButtons();
-// }

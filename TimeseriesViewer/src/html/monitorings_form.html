@@ -4,18 +4,25 @@
 	<title></title>
 </head>
 <body>
-	<form class="navbar-form navbar-left" style="width: 300px;">
+	<form class="navbar-form navbar-left" style="width: 370px;">
 		<div class="navbar-left buttons-div">
-			<button class="btn btn-primary btn" id="addMetric" onclick="window.top.addMetric(this.parentNode.parentNode);return false;">Add Metric</button>
-			<button class="btn btn-primary btn" id="remove" onclick="window.top.removeForm(this.parentNode.parentNode.parentNode);return false;">Remove Form</button>
-			<button class="btn btn-primary btn" id="drawGraph" onclick="drawTimeseries(this.parentNode.parentNode);return false;">Draw Timeseries</button>
-			<button class="btn btn-primary btn" id="writeReport" onclick="handleReport(this.parentNode.parentNode);return false;">Write Report</button>
+			<button class="btn btn-primary btn" id="remove"
+					onclick="window.top.removeForm(this.parentNode.parentNode.parentNode);return false;">Remove</button>
+			<button class="btn btn-primary btn" id="drawGraph"
+					onclick="drawTimeseries(this.parentNode.parentNode);return false;">Plot</button>
+			<button class="btn btn-primary btn" id="writeReport"
+					onclick="handleReport(this.parentNode.parentNode);return false;">Report</button>
 		</div><!-- FIX DOM dependent functions !!!! -->
 		<div class="list-group-item navbar-left monitorings-div">
-			<strong>METRICS:</strong>
 			<ul class="metric-list">
 				<!-- Metrics Go Here, see metric.html -->
 			</ul>
+			<i class="btn btn-default"
+			   id="addMetric"
+			   onclick="window.top.addMetric(this.parentNode.parentNode);return false;">
+				<i class="fa fa-plus"></i>
+				<text>New Metric</text>
+			</i>
 		</div>
 		
 		<div class="list-group-item navbar-left times-div">
@@ -25,21 +32,17 @@
 			<strong>TIMESTAMPS:</strong>
 			<div class="input-append date" id="datetimepicker0" style="float:left">
 				<input class="timepicker" name="datetime0" type="text" value="2017/03/08-16:56:51" style="float:left">
-				<span class="add-on" style="float:left">
-					<i data-date-icon="icon-calendar" data-time-icon="icon-time"></i>
-				</span>
 				<i class="fa fa-pencil fa-lg" aria-hidden="true" onclick="setNowTime(this.parentNode.parentNode.parentNode, 0);return false;" style="float:left;margin-bottom: 10px;margin-top: 5px;cursor: pointer;"> Now </i>
 			</div>
 			<div class="input-append date" id="datetimepicker1" style="float:left">
 				<input class="timepicker" name="datetime1" type="text" value="2017/03/08-16:59:52" style="float:left">
-				<span class="add-on" style="float:left">
-					<i data-date-icon="icon-calendar" data-time-icon="icon-time"></i>
-				</span>
 				<i class="fa fa-pencil fa-lg" aria-hidden="true" onclick="setNowTime(this.parentNode.parentNode.parentNode, 1);return false;" style="float:left;margin-bottom: 10px;margin-top: 5px;cursor: pointer;"> Now </i>
 			</div>
-			<input class="" name="autoreload_time" size="4" type="number" value="20" style="float:left;max-width: 50px;margin-right: 10px;">
-			<div class="checkbox" style="float:left">
-				<label><input name="autoreload" onchange="refreshTimeNow(this.parentNode.parentNode.parentNode.parentNode, this)" type="checkbox" value="">Autoreload</label>
+			<div style="float:left">
+				<input class="" name="autoreload_time" size="4" type="number" value="20" style="float:left;max-width: 50px;margin-right: 10px;">
+				<div class="checkbox" style="float:left">
+					<label><input name="autoreload" onchange="refreshTimeNow(this.parentNode.parentNode.parentNode.parentNode, this)" type="checkbox" value="">Autoreload</label>
+				</div>
 			</div>
 		</div>
 		<div class="list-group-item navbar-left downsampling-div" style="width:100%;">
@@ -82,18 +85,6 @@
 				</div>
 			</form>
 		</div>
-	
-		<script type="text/javascript">
-		    $('#datetimepicker0').datetimepicker({
-		      format: 'yyyy/MM/dd-hh:mm:ss',
-		      language: 'en'
-		    });
-		    $('#datetimepicker1').datetimepicker({
-		      format: 'yyyy/MM/dd-hh:mm:ss',
-		      language: 'en'
-		    });
-		    $(document).ready(change_datetime_ids);
-		</script>
 	</form>
 </body>
 </html>

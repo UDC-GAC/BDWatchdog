@@ -75,36 +75,6 @@ hr.thin {
 	float:left;
 }
 
-.btn {
-    font-size: 0.8vw;
-}
-
-/* Needed for datetime picker */
-[class^="icon-"], [class*=" icon-"] {
-    display: inline-block;
-    width: 14px;
-    height: 14px;
-    margin-top: 1px;
-    line-height: 14px;
-    vertical-align: text-top;
-    background-image: url(../img/glyphicons-halflings.png);
-    background-position: 14px 14px;
-    background-repeat: no-repeat;
-}
-.icon-calendar {
-    background-position: -192px -120px;
-}
-.icon-time {
-    background-position: -48px -24px;
-}
-.icon-chevron-up {
-    background-position: -288px -120px;
-}
-.icon-chevron-down {
-    background-position: -313px -119px;
-}
-/********/
-
 
 .loader {
     border: 16px solid #f3f3f3; /* Light grey */
@@ -123,7 +93,9 @@ hr.thin {
 .form-inline {
 	padding-top:10px;
 }
-
+.input-sm {
+    font-size: 16px;
+}
 
 .castellar {
     color: #FFFFFF;
@@ -207,11 +179,13 @@ div.menu_div .menu_item {
 
 
 #exps_timepicker_list > li, #apps_timepicker_list > li {
-    padding-right: 20px;
+    text-indent: 0;
+    margin:5px;
 }
 
-#exps_timepicker_list > li:hover, #apps_timepicker_list > li:hover {
-    background-color: #5bc0de;
+#exps_timepicker_list > li > div:hover, #apps_timepicker_list > li > div:hover {
+    background-color: #e0e0e0;
+    background-position: 0 -15px;
     cursor: pointer;
 }
 

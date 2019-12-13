@@ -137,10 +137,8 @@ export function addMetric(form, metric) {
 
     let divList = get_list_from_element(metricsDiv)
     let tags = metric["tags"]
-    //~ let metric_label = metric["metric"]
-    //~ let metric_aggregator = metric["aggregator"]
     let element = $("<div class=\"row metric-row\" ondragover=\"cancelDragOver()\">").load(metric_html_filename, function () {
-        this.firstChild.value = metric["aggregator"] + ":" + metric["metric"]
+        this.getElementsByTagName('input')[0].value = metric["aggregator"] + ":" + metric["metric"]
         for (let i = 0; i < tags.length; i++) {
             addTag(element[0], tags[i])
         }
@@ -157,7 +155,7 @@ export function addTag(metric, tag) {
 
     let divList = get_list_from_element(tagsDiv)
     let element = $("<div class=\"row tag-row\" ondragover=\"cancelDragOver()\">").load(tag_html_filename, function () {
-        this.firstChild.value = tag
+        this.getElementsByTagName('input')[0].value = tag
     })
     element.appendTo(divList)
 }

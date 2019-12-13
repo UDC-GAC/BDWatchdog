@@ -31,6 +31,8 @@ export function sendCORSrequest(HTTPmethod, endpoint, headers, expected_status_c
             if (xhr.responseText !== ""){
                 response = JSON.parse(xhr.responseText);
                 success_function(response)
+            }else{
+                success_function(response)
             }
         } else {
             alert(error_message)
