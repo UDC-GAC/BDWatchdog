@@ -107,7 +107,8 @@
                         <h3>Global Controls</h3>
                         <div>
                             <!--<button class="btn btn-default" onclick="addNewProfilingForm()">Add New Profiling Form</button>-->
-                            <button class="btn btn-default" onclick="addEmptyMetricsForm()">Add New Metrics Form</button>
+                            <button class="btn btn-default" onclick="addEmptyMetricsForm()">Add New Metrics Form
+                            </button>
                             <button id="reloadAllButton" class="btn btn-default" style=""
                                     onclick="autoreloadAll();return false;">Autoreload all
                             </button>
@@ -120,20 +121,15 @@
                         </div>
                     </div>
 
-                    <form class="form-inline" id="sizes_form" name="sizes_form">
-                        <h3>Plot sizes</h3>
-                        <div>
-                            <span>X size:</span>
-                            <input class="" style="max-width:15%;" name="graphX" size="4"
-                                   type="number" value="700">
-                            <span>Y size:</span>
-                            <input class="" style="max-width:15%;" name="graphY" size="4"
-                                   type="number" value="300">
-                            <button class="btn btn-default"
-                                    onclick="resizeAll();return false;">Re-size All
-                            </button>
+                    <form>
+                        <h3>Json template file</h3>
+                        <div style="margin-left: 1vw;">
+                            <input type='file' id='fileinput' style="float:left;">
+                            <input type='button' class="btn btn-default" id='btnLoad' value='Load'
+                                   onclick='loadFile();'>
                         </div>
                     </form>
+
 
                     <form class="form-inline" id="experiment_picker" name="experiment_picker">
                         <h3>Timestamping service</h3>
@@ -149,7 +145,7 @@
                                    name="endpoint"
                                    style="width:60%"
                                    type="text"
-                                   value="http://dante.dec.udc.es:8080/private/times/">
+                                   value="http://dante.dec.udc.es:8080/bdwatchdog/times/">
                         </div>
                         <div class="menu_div">
                             <span>Username:</span>
@@ -274,19 +270,21 @@
                         </div>
                     </form>
 
-                    <hr class="thin">
 
-                    <form>
-                        <h3>Json template file</h3>
-                        <div style="margin-left: 1vw;">
-                            <input type='file' id='fileinput' style="float:left;">
-                            <input type='button' class="btn btn-default" id='btnLoad' value='Load'
-                                   onclick='loadFile();'>
+                    <form class="form-inline" id="sizes_form" name="sizes_form">
+                        <h3>Plot sizes</h3>
+                        <div>
+                            <span>X size:</span>
+                            <input class="" style="max-width:15%;" name="graphX" size="4"
+                                   type="number" value="700">
+                            <span>Y size:</span>
+                            <input class="" style="max-width:15%;" name="graphY" size="4"
+                                   type="number" value="300">
+                            <button class="btn btn-default"
+                                    onclick="resizeAll();return false;">Re-size All
+                            </button>
                         </div>
                     </form>
-
-                    <hr class="thin">
-
                 </div>
             </li>
 
