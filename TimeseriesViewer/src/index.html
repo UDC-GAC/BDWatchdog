@@ -87,19 +87,25 @@
 
             <li class="sidebar-brand" style="display: contents;">
                 <div style="display: flex; margin-left: 15px;">
-                    <img src="img/logos/bdwatchdog.png" style="height:130px;margin: 1%;"/>
-                    <img src="img/logos/serverless.png"
-                         style="height: 90px;margin: 1%;margin-top:45px;"/>
+                    <a href="http://bdwatchdog.dec.udc.es/">
+                        <img src="img/logos/bdwatchdog.png" style="height:130px;margin: 1%;"/>
+                    </a>
+                    <a href="http://bdwatchdog.dec.udc.es/serverless/index.html">
+                        <img src="img/logos/serverless.png" style="height: 90px;margin: 1%;margin-top:45px;"/>
+                    </a>
                 </div>
 
                 <div>
-                    <h3 class="castellar">Web interface</h3>
-                    <a href="http://bdwatchdog.dec.udc.es/" style="line-height: 2em;">Framework's website</a>
-                    <a href="http://jonatanenes.com" style="line-height: 2em;">Author's website (Jonatan Enes)</a>
+                    <h3 class="castellar">BDWatchdog's web interface</h3>
+                    <div>
+                        <a href="http://bdwatchdog.dec.udc.es/" style="line-height: 2em;">Framework's website</a>
+                        <text> /\</text>
+                        <a href="http://jonatanenes.com" style="line-height: 2em;">Author's website (Jonatan Enes)</a>
+                    </div>
                 </div>
             </li>
 
-            <li class="thick">
+            <hr class="thick">
 
             <li>
                 <div>
@@ -107,29 +113,46 @@
                         <h3>Global Controls</h3>
                         <div>
                             <!--<button class="btn btn-default" onclick="addNewProfilingForm()">Add New Profiling Form</button>-->
-                            <button class="btn btn-default" onclick="addEmptyMetricsForm()">Add New Metrics Form
+                            <button class="btn btn-default" onclick="addEmptyMetricsForm()">
+                                <i class="fa fa-2x fa-plus"></i>
+                                Add Form
                             </button>
                             <button id="reloadAllButton" class="btn btn-default" style=""
-                                    onclick="autoreloadAll();return false;">Autoreload all
+                                    onclick="autoreloadAll();return false;">
+                                <i class="fa fa-2x fa-hourglass-2"></i>
+                                Autoreload all
                             </button>
                             <button id="drawAllButton" class="btn btn-default" style=""
-                                    onclick="drawAllTimeseries();return false;">Draw all
+                                    onclick="drawAllTimeseries();return false;">
+                                <i class="fa fa-2x fa-area-chart"></i>
+                                Draw all
                             </button>
                             <button id="reTimeButton" class="btn btn-default"
-                                    style="" onclick="retimeAll();return false;">Retime all
+                                    style="" onclick="retimeAll();return false;">
+                                <i class="fa fa-2x fa-clock-o"></i>
+                                Retime all
                             </button>
                         </div>
                     </div>
 
+                    <hr class="thin">
+
                     <form>
                         <h3>Json template file</h3>
                         <div style="margin-left: 1vw;">
-                            <input type='file' id='fileinput' style="float:left;">
-                            <input type='button' class="btn btn-default" id='btnLoad' value='Load'
-                                   onclick='loadFile();'>
+                            <input type='file' id='fileinput' style="float:left;width: 40%;">
+                            <button type='button'
+                                    class="btn btn-default"
+                                    id='btnLoad'
+                                    onclick='loadFile();'>
+                                Load
+                                <i class="fa fa-upload"></i>
+                            </button>
+
                         </div>
                     </form>
 
+                    <hr class="thin">
 
                     <form class="form-inline" id="experiment_picker" name="experiment_picker">
                         <h3>Timestamping service</h3>
@@ -143,7 +166,7 @@
                             <span>Endpoint:</span>
                             <input class="input-sm menu_item"
                                    name="endpoint"
-                                   style="width:60%"
+                                   style="width:70%;margin-left: 5%;"
                                    type="text"
                                    value="http://dante.dec.udc.es:8080/bdwatchdog/times/">
                         </div>
@@ -152,7 +175,7 @@
                             <input class="input-sm menu_item"
                                    name="username"
                                    type="text"
-                                   style="margin-left:3%;"
+                                   style="margin-left:3%;width: 44%;"
                                    value="root">
                         </div>
 
@@ -161,7 +184,7 @@
                             <input class="input-sm menu_item"
                                    name="experiment"
                                    type="text"
-                                   style="width:33%"
+                                   style="width:43%;margin-left: 2%;"
                                    value="hadoop_experiments"
                                    id="experiment_button">
                             <button class="btn btn-default dropdown-toggle menu_item"
@@ -171,13 +194,15 @@
                                 Pick
                                 <span class="caret"></span>
                             </button>
-                            <ul class="dropdown-menu" id="exps_timepicker_list">
-                            </ul>
                             <button id="propagateExperimentsTimesButton"
                                     class="btn btn-default dropdown-toggle menu_item"
                                     type="button"
-                                    onclick="getExperimentTimes()">Propagate time
+                                    onclick="getExperimentTimes()">
+                                <i class="fa fa-pencil"></i>
+                                Set
                             </button>
+                            <ul class="dropdown-menu" id="exps_timepicker_list">
+                            </ul>
                         </div>
 
                         <div class="dropdown menu_div">
@@ -195,16 +220,20 @@
                             <button id="propagateAppsTimesButton"
                                     class="btn btn-default dropdown-toggle menu_item"
                                     type="button"
-                                    onclick="getApplicationTimes()">Propagate time
+                                    onclick="getApplicationTimes()">
+                                <i class="fa fa-pencil"></i>
+                                Set
                             </button>
                         </div>
 
                     </form>
 
+                    <hr class="thin">
+
                     <form class="form-inline" id="times_form" name="times_form">
                         <h3>Times</h3>
                         <div id="general_start_time" style="margin-bottom: 10px">
-                            <text>Start time:</text>
+                            <text>Start:</text>
                             <input id="global_start_time"
                                    name="datetime0"
                                    name="time_start"
@@ -214,14 +243,15 @@
 									<i data-date-icon="icon-calendar"
                                        data-time-icon="icon-time"></i>
 								</span>
-                            <i class="fa fa-pencil fa-lg" aria-hidden="true"
-                               onclick="setNowTime(this.parentNode.parentNode, 0);return false;"
-                               style="cursor: pointer;">
-                                Now </i>
+                            <button class="btn btn-default"
+                                    onclick="setNowTime(this.parentNode.parentNode, 0);return false;">
+                                <i class="fa fa-pencil fa-lg"></i>
+                                Set to now
+                            </button>
                         </div>
 
                         <div id="general_end_time">
-                            <text>End time:</text>
+                            <text>End:</text>
                             <input id="global_end_time"
                                    name="datetime1"
                                    name="time_end"
@@ -230,11 +260,12 @@
                             <span class="add-on">
 									<i data-date-icon="icon-calendar"
                                        data-time-icon="icon-time"></i>
-								</span>
-                            <i class="fa fa-pencil fa-lg" aria-hidden="true"
-                               onclick="setNowTime(this.parentNode.parentNode, 1);return false;"
-                               style="cursor: pointer;">
-                                Now </i>
+                            </span>
+                            <button class="btn btn-default"
+                                    onclick="setNowTime(this.parentNode.parentNode, 1);return false;">
+                                <i class="fa fa-pencil fa-lg"></i>
+                                Set to now
+                            </button>
                         </div>
 
                         <script type="module">
@@ -254,6 +285,8 @@
                         </script>
                     </form>
 
+                    <hr class="thin">
+
                     <form class="form-inline" id="config_form" name="config_form">
                         <h3>Endpoints</h3>
                         <div style="margin-bottom: 10px">
@@ -262,14 +295,15 @@
                                    style="margin-left:20px;position: absolute;width:60%" type="text"
                                    value="http://dante.dec.udc.es:8080/bdwatchdog/tsdb/">
                         </div>
-                        <div>
-                            <span>Flame graphs:</span>
-                            <input class="input" name="endpoint_MongoDB"
-                                   style="margin-left:6px;position: absolute;width:60%" type="text"
-                                   value="http://localhost:5000/flamegraph/">
-                        </div>
+<!--                        <div>-->
+<!--                            <span>Flame graphs:</span>-->
+<!--                            <input class="input" name="endpoint_MongoDB"-->
+<!--                                   style="margin-left:6px;position: absolute;width:60%" type="text"-->
+<!--                                   value="http://localhost:5000/flamegraph/">-->
+<!--                        </div>-->
                     </form>
 
+                    <hr class="thin">
 
                     <form class="form-inline" id="sizes_form" name="sizes_form">
                         <h3>Plot sizes</h3>
@@ -288,37 +322,29 @@
                 </div>
             </li>
 
-
-            <hr class="thick">
+            <hr class="thick" style="margin-bottom:20px;">
 
             <li>
-                <span class="label label-default lb-lg">Technologies</span>
+                <span class="label label-default lb-lg">Powered by:</span>
                 <div class="">
-                    <div>
+                    <span>
                         <a href="http://opentsdb.net/">
-                            <img alt="OpenTSD header" src="img/logos/opentsdb.png" style="height:50px;">
-                            <text style="font-size:11px"></text>
+                            <img alt="OpenTSD header" src="img/logos/opentsdb.png" style=";height:40px;">
                         </a>
-                    </div>
-                    <div>
                         <a href="http://mongodb.com/">
-                            <img alt="MongoDB header" src="img/logos/mongodb.png" style="height:50px;">
-                            <text style="font-size:11px"></text>
+                            <img alt="MongoDB header" src="img/logos/mongodb.png" style=";height:40px;">
                         </a>
-                    </div>
-                    <div>
                         <a href="https://d3js.org/">
-                            <img src="img/logos/d3.png" style="height:50px;">
-                            <text style="font-size:11px"></text>
+                            <img src="img/logos/d3.png" style="height:40px;">
                         </a>
-                    </div>
+                    </span>
                 </div>
             </li>
 
-            <hr class="thick">
+            <hr class="thin">
 
             <li>
-                <span class="label label-default lb-lg">Partners</span>
+                <span class="label label-default lb-lg">Partners:</span>
                 <div class="">
                     <a href="http://gac.udc.es/english/">
                         <img alt="logo gac" src="img/logos/gac.png" style="width:200px; height:50px;">
@@ -329,21 +355,20 @@
                 </div>
             </li>
 
-            <hr class="thick">
+            <hr class="thin">
 
             <li>
-                <span class="label label-default lb-lg">Funded by</span>
-                <div class="">
+                <span class="label label-default lb-lg">Funded by:</span>
+                <div>
                     <a class="plain" href="http://www.mineco.gob.es/">
-                        <img width="250px" height="80px" alt="MINECO logo" src="img/logos/mineco.jpg">
+                        <img width="240px" height="80px" alt="MINECO logo" src="img/logos/mineco.jpg">
                     </a>
-                    <hr class="thin">
                     <a class="plain" href="http://ec.europa.eu/regional_policy/en/funding/erdf/">
-                        <img width="250px" height="75px" alt="FEDER logo" src="img/logos/erdf.png">
+                        <img width="240px" height="75px" alt="FEDER logo" src="img/logos/erdf.png">
                     </a>
                 </div>
             </li>
-            <hr class="thick">
+            <hr class="thin">
 
         </ul>
 

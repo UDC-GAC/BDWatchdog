@@ -13,6 +13,10 @@
 	./build/tsdb mkmetric sys.processors.temp
 	./build/tsdb mkmetric sys.processors.energy
 
+	#Process
+	# Generated through system cpu and energy, and process cpu
+	./build/tsdb mkmetric proc.cpu.energy
+
 # SYSTEM METRICS
 	#cpu
 	./build/tsdb mkmetric sys.cpu.kernel

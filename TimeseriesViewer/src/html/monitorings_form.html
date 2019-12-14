@@ -7,7 +7,10 @@
 	<form class="navbar-form navbar-left" style="width: 370px;">
 		<div class="navbar-left buttons-div">
 			<button class="btn btn-primary btn" id="remove"
-					onclick="window.top.removeForm(this.parentNode.parentNode.parentNode);return false;">Remove</button>
+					onclick="window.top.removeForm(this.parentNode.parentNode.parentNode);return false;">
+				<i class="fa fa-1x fa-remove"
+				   style="cursor: pointer;"></i>
+				Remove</button>
 			<button class="btn btn-primary btn" id="drawGraph"
 					onclick="drawTimeseries(this.parentNode.parentNode);return false;">Plot</button>
 			<button class="btn btn-primary btn" id="writeReport"

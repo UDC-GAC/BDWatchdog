@@ -26,17 +26,15 @@ input[type=number] {
   font-size: 16px;
 }
 
-li.thick {
+hr.thick {
 	border-top: 3px dashed #8c8b8b;
     margin-top: 1%;
     margin-bottom: 1%;
 }
 
 hr.thin {
-	height: 6px;
-    border: 0;
-    margin:10px;
-    margin-left:20px;
+    margin-top: 1%;
+    margin-bottom: 1%;
 }
 
 
@@ -160,17 +158,17 @@ hr.thin {
 
 }
 
-.menu_div {
-    height: 4vh;
-    display: list-item;
-    margin-left: 0.6vw;
-}
+/*.menu_div {*/
+/*    height: 4vh;*/
+/*    display: list-item;*/
+/*    margin-left: 0.6vw;*/
+/*}*/
 
-div.menu_div .menu_item {
-    height: 90%;
-    font-size: 1.2vh;
-    margin-left: inherit
-}
+/*div.menu_div .menu_item {*/
+/*    height: 90%;*/
+/*    font-size: 1.2vh;*/
+/*    margin-left: inherit*/
+/*}*/
 
 
 .metric-list .row {
