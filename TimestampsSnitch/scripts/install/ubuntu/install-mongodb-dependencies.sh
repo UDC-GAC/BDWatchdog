@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-sudo apt install gunicorn
+sudo apt install -y gunicorn3

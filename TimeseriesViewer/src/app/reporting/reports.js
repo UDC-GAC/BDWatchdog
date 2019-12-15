@@ -159,7 +159,9 @@ function createReport(parsedData, reportID, dataHasChanged) {
         aggregations = report_info.aggregations
     }
 
-    report_info.is_energy = (labels_array[0].startsWith("sys.cpu.energy") ||
+    report_info.is_energy =
+        (labels_array[0].startsWith("proc.cpu.energy") ||
+        labels_array[0].startsWith("sys.cpu.energy") ||
         labels_array[0].startsWith("structure.energy.current"))
 
     let element = document.getElementById(reportsIdBase + report_number)
@@ -265,7 +267,7 @@ function printEnergyReport(textBox, totalEnergy) {
 function printInfoOfResource(aggregator, label, value) {
     "use strict"
     let string = ""
-    if (label.startsWith("sys.cpu.energy") || label.startsWith("structure.energy")) {
+    if (label.startsWith("proc.cpu.energy") || label.startsWith("sys.cpu.energy") || label.startsWith("structure.energy")) {
         string = value.toFixed(2) + " Watt-seconds"
     } else if (label.startsWith("proc.cpu") || label.startsWith("sys.cpu") || label.startsWith("structure.cpu") || label.startsWith("limit.cpu")) {
         string = (value / 100).toFixed(2) + " vcore-seconds"

@@ -9,12 +9,10 @@ __pycache__/
 *.data.*
 venv/
 
-ReportGenerator/pandoc_reports/*
-
 MetricsFeeder/src/daemon/pids/
 MetricsFeeder/src/daemon/logs/
 MetricsFeeder/src/java_hadoop_snitch/java_mappings/
-MetricsFeeder/bin/
+MetricsFeeder/bin
 
 *FlameGraph*
 *perf-map-agent*
