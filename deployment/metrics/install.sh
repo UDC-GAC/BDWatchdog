@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
+source ../config.sh
 if [ -z ${DATA_DIR} ]
 then
-    echo "\$DATA_DIR is empty, check and source the config.sh file and try again"
+    echo "\$DATA_DIR is empty, check the config.sh file and try again"
     exit 0
 fi
 if [ -z ${JAVA_HOME} ]
 then
-    echo "\$JAVA_HOME is not set, check and source the config.sh file and try again"
+    echo "\$JAVA_HOME is not set, check the config.sh file and try again"
     exit 0
 fi
 
@@ -52,8 +53,8 @@ git clone git://github.com/OpenTSDB/opentsdb.git
 cd opentsdb
 ./build.sh
 cp ../fix/opentsdb/create_table.sh ./src/create_table.sh
-env COMPRESSION=GZ HBASE_HOME=$HOME/timeseries_database/hbase-1.4.12/ ./src/create_table.sh
-bash $HOME/timestamps_database/BDWatchdog/MetricsFeeder/scripts/opentsdb/create-monitoring-opentsdb-metrics.sh
+env COMPRESSION=GZ HBASE_HOME=$BDWATCHDOG_DIR/deployment/metrics/hbase-1.4.12/ ./src/create_table.sh
+bash $BDWATCHDOG_DIR/MetricsFeeder/scripts/opentsdb/create-monitoring-opentsdb-metrics.sh
 envsubst < ../config/opentsdb/opentsdb.conf  > opentsdb.conf # Expand variable $HOME inside of template file
 cd ..
 

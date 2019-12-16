@@ -10,9 +10,7 @@ that can be combined to create **BDWatchdog**, a monitoring and profiling framew
 capable of producing resource usage information on a process-level 
 as well as detailed profiling of Java-based applications in the form 
 of flame graphs. In addition, auxiliar tools have been developed such 
-as a web application to visualize the data generated, a report 
-generator to automatically create reports on how resources where used 
-and a timestamp generator used to bound experimentation runs.
+as a web application to visualize the data generated and a timestamp generator used to bound experimentation runs.
 
 Thanks to the **_process-based monitoring_** approach, this framework can be 
 deployed on newer virtualization technologies like **_containers_**, acting 

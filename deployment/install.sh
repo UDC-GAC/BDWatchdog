@@ -3,7 +3,7 @@
 setup_ssh () {
     echo -e "\n" | ssh-keygen -b 2048 -t rsa -q -N ""
     echo ""
-    cat ${HOME}/.ssh/id_rsa.pub >> .ssh/authorized_keys
+    cat ${HOME}/.ssh/id_rsa.pub >> ${HOME}/.ssh/authorized_keys
     ssh localhost "exit"
 }
 

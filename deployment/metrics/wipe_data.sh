@@ -3,6 +3,8 @@ function wipe_data () {
 	rm -Rf ${DATA_DIR}/*
 }
 
+source ../config.sh
+
 if [ -z ${DATA_DIR} ]
 then
     echo "\$DATA_DIR is empty, check and source the config.sh file and try again"
