@@ -23,3 +23,13 @@ install_dependencies
 
 source config.sh
 mkdir -p ${DATA_DIR}
+
+cd timestamps
+bash install.sh
+bash start.sh
+cd ..
+
+cd metrics
+bash install.sh
+bash start.sh
+cd ..

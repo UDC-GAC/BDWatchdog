@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+if [ -z ${JAVA_HOME} ]
+then
+    echo "\$JAVA_HOME is not set, check the config.sh file and try again"
+    exit 0
+fi
 echo "Starting HDFS"
 hadoop-2.9.2/sbin/start-dfs.sh
 sleep 20
