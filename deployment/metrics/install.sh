@@ -21,6 +21,7 @@ echo -e "y" | bash wipe_software.sh
 echo "Install HDFS"
 wget http://apache.rediris.es/hadoop/common/hadoop-2.9.2/hadoop-2.9.2.tar.gz
 tar xvf hadoop-2.9.2.tar.gz
+chown -R $(whoami):$(whoami) hadoop-2.9.2
 envsubst < config/hdfs/hdfs-site.xml > hadoop-2.9.2/etc/hadoop/hdfs-site.xml
 cp config/hdfs/core-site.xml hadoop-2.9.2/etc/hadoop/core-site.xml
 cp config/hdfs/format_filesystem.sh hadoop-2.9.2
@@ -38,6 +39,7 @@ sleep 20
 echo "Install HBase"
 wget http://apache.rediris.es/hbase/hbase-1.4.12/hbase-1.4.12-bin.tar.gz
 tar xvf hbase-1.4.12-bin.tar.gz
+chown -R $(whoami):$(whoami) hbase-1.4.12
 envsubst < config/hbase/hbase-site.xml > hbase-1.4.12/conf/hbase-site.xml
 cp config/hbase/regionservers hbase-1.4.12/conf/regionservers
 

@@ -5,6 +5,7 @@ setup_ssh () {
     echo ""
     cat ${HOME}/.ssh/id_rsa.pub >> ${HOME}/.ssh/authorized_keys
     ssh localhost "exit"
+    ssh 0.0.0.0 "exit"
 }
 
 install_dependencies(){
@@ -14,8 +15,9 @@ install_dependencies(){
     apt install -y mongodb
     apt install -y build-essential
     apt install -y autoconf
-    apt install -y openjdk-8-jdk
+    #apt install -y openjdk-8-jdk
     apt install -y gnuplot-x11
+    apt install apache2
 }
 
 setup_ssh
@@ -32,4 +34,8 @@ cd ..
 cd metrics
 bash install.sh
 bash start.sh
+cd ..
+
+cd webviewer
+bash install.sh
 cd ..
