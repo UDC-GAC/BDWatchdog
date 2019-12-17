@@ -49,7 +49,18 @@ export function createJson(start_date, end_date, metrics, graph_number, downsamp
     }
 
     if (downsampling === "auto") {
-        let timeDiff = (new Date(end_date).getTime() - new Date(start_date).getTime()) / 1000;
+        // Change the date string format so that Firefox doesn't complain
+        // 2019/12/17-02:34:33  -> should be -> 2019-12-17T02:34:33
+        end_date = end_date.replace("-", "T");
+        // Do 2 replaces to avoid using pattern matching, which requires the character / in sed style (e.g., /blue/g)
+        end_date = end_date.replace("/", "-");
+        end_date = end_date.replace("/", "-");
+        start_date = start_date.replace("-", "T");
+        start_date = start_date.replace("/", "-");
+        start_date = start_date.replace("/", "-");
+        let end_date_seconds = new Date(end_date).getTime()
+        let start_date_seconds =new Date(start_date).getTime()
+        let timeDiff = (end_date_seconds - start_date_seconds) / 1000;
 
         //intervals range using hours
         if (timeDiff <= 3600) {
