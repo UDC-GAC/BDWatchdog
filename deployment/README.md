@@ -25,11 +25,13 @@ If you don't have it already, install java 8 and configure it so that
 the JAVA_HOME variable is resolved system-wise. For example, to install 
 OpenJDK 8, you can run the next command:
 ```
+apt update
 apt install -y openjdk-8-jdk
 ``` 
 and export the variable in /etc/environment
 ```
 echo "export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/jre" >> /etc/environment
+source /etc/environment
 ```
 
 ##### 2nd, Prepare the installation
@@ -46,6 +48,10 @@ BDWATCHDOG_DIR : The path to the BDWatchdog directory
 
 ##### 3rd, Begin the installation
 The installation process can be started by running the install.sh script
+
+**!Please bear in mind that the installation can take several minutes!**
+
+**!We're deploying several layered databases in here!**
 ```
 cd BDWatchdog/deployment/
 bash install.sh
@@ -77,3 +83,7 @@ and, with the command:
 tmux ls
 ``` 
 an "OPENTSDB" terminal should be present.
+
+* Web Interface
+You can open a broweser and point it to the instance's public IP, expecting
+to see the web interface.

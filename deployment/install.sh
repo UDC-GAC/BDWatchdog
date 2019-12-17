@@ -4,8 +4,8 @@ setup_ssh () {
     echo -e "\n" | ssh-keygen -b 2048 -t rsa -q -N ""
     echo ""
     cat ${HOME}/.ssh/id_rsa.pub >> ${HOME}/.ssh/authorized_keys
-    ssh localhost "exit"
-    ssh 0.0.0.0 "exit"
+    ssh-keyscan localhost >> ${HOME}/.ssh/known_hosts
+    ssh-keyscan 0.0.0.0 >> ${HOME}/.ssh/known_hosts
 }
 
 install_dependencies(){
@@ -17,7 +17,7 @@ install_dependencies(){
     apt install -y autoconf
     #apt install -y openjdk-8-jdk
     apt install -y gnuplot-x11
-    apt install apache2
+    apt install -y apache2
 }
 
 setup_ssh
@@ -38,4 +38,5 @@ cd ..
 
 cd webviewer
 bash install.sh
+bash start.sh
 cd ..
