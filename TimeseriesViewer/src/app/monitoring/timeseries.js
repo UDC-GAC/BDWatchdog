@@ -307,7 +307,10 @@ function translateYGraphLabel(firstMetric) {
     "use strict";
     let label = "UNKNOWN"
 
-    if (firstMetric.startsWith("proc.cpu") || firstMetric.startsWith("sys.cpu")) {
+
+    if (firstMetric.startsWith("proc.cpu.energy") || firstMetric.startsWith("sys.cpu.energy")){
+        label = "energy (J)"
+    } else if (firstMetric.startsWith("proc.cpu") || firstMetric.startsWith("sys.cpu")) {
         label = "cpu (%)"
     } else if (firstMetric.startsWith("proc.mem") || firstMetric.startsWith("sys.mem")) {
         label = "memory (MiB)"

@@ -75,7 +75,9 @@ config_keys = [
     &#34;POST_DOC_BUFFER_LENGTH&#34;,
     &#34;POST_SEND_DOCS_TIMEOUT&#34;,
     &#34;POST_SEND_DOCS_FAILED_TRIES&#34;,
-    &#34;HEARTBEAT_ENABLED&#34;
+    &#34;HEARTBEAT_ENABLED&#34;,
+    &#34;BDW_LOG_DIR&#34;,
+    &#34;BDW_PID_DIR&#34;
 ]
 
 default_environment_values = {
@@ -89,7 +91,9 @@ default_environment_values = {
     &#34;POST_DOC_BUFFER_LENGTH&#34;: &#34;1000&#34;,  # Don&#39;t go over 1500 or post packet will be too large and may cause error
     &#34;POST_SEND_DOCS_TIMEOUT&#34;: &#34;10&#34;,
     &#34;POST_SEND_DOCS_FAILED_TRIES&#34;: &#34;6&#34;,
-    &#34;HEARTBEAT_ENABLED&#34;: &#34;false&#34;
+    &#34;HEARTBEAT_ENABLED&#34;: &#34;false&#34;,
+    &#34;BDW_LOG_DIR&#34;:os.path.join(_base_path, &#34;logs/&#34;),
+    &#34;BDW_PID_DIR&#34;:os.path.join(_base_path, &#34;pids/&#34;)
 }
 
 
@@ -130,31 +134,21 @@ class Turbostat(MonitoringDaemon):
                                       self.environment, first_sed.stdout, subprocess.PIPE)
         processes_list.append(second_sed)
 
-        turbostat_to_csv = self.create_pipe([&#34;python3&#34;, os.path.join(_base_path, &#34;../turbostat/turbostat_to_csv.py&#34;)],
+        turbostat_to_json = self.create_pipe([&#34;python3&#34;, os.path.join(_base_path, &#34;../turbostat/turbostat_to_json.py&#34;)],
                                             self.environment, second_sed.stdout, subprocess.PIPE)
-        processes_list.append(turbostat_to_csv)
-
-        csv_to_json = self.create_pipe([&#34;python3&#34;, os.path.join(_base_path, &#34;../pipelines/csv_to_json.py&#34;)],
-                                       self.environment, turbostat_to_csv.stdout, subprocess.PIPE)
-        processes_list.append(csv_to_json)
-
-        json_to_tsdb_json = self.create_pipe([&#34;python3&#34;, os.path.join(_base_path, &#34;../pipelines/json_to_TSDB_json.py&#34;)],
-                                             self.environment, csv_to_json.stdout, subprocess.PIPE)
-        processes_list.append(json_to_tsdb_json)
+        processes_list.append(turbostat_to_json)
 
         send_to_opentsdb = self.create_pipe([&#34;python3&#34;, os.path.join(_base_path, &#34;../pipelines/send_to_OpenTSDB.py&#34;)],
-                                            self.environment, json_to_tsdb_json.stdout, subprocess.PIPE)
+                                            self.environment, turbostat_to_json.stdout, subprocess.PIPE)
         processes_list.append(send_to_opentsdb)
 
         return processes_list
 
 
 if __name__ == &#39;__main__&#39;:
-    handler, logger = daemon_utils.configure_daemon_logs(SERVICE_NAME)
-
-    app = Turbostat(SERVICE_NAME, logger)
-    # FIXME As part of the environment initilization, set the pythonpath correctly
-    app.initialize_environment(config_path, config_keys, default_environment_values)
+    environment = daemon_utils.initialize_environment(config_path, config_keys, default_environment_values)
+    app = Turbostat(SERVICE_NAME, environment)
+    handler = app.get_handler()
     app.is_runnable = turbostat_is_runnable
     app.not_runnable_message = &#34;Turbostat program is not runnable, if it is installed, run the &#34; + \
                                &#34;&#39;scripts/allow_turbostat.sh&#39; and try again or run turbostat manually and check &#34; \
@@ -170,6 +164,10 @@ if __name__ == &#39;__main__&#39;:
     # Run service
     serv = runner.DaemonRunner(app)
     serv.daemon_context.files_preserve = [handler.stream]
+    # try:
+    #     serv.do_action()
+    # except runner.DaemonRunnerStopFailureError:
+    #     pass
     serv.do_action()</code></pre>
 </details>
 </section>
@@ -215,7 +213,7 @@ if __name__ == &#39;__main__&#39;:
 <dl>
 <dt id="src.daemons.turbostat.Turbostat"><code class="flex name class">
 <span>class <span class="ident">Turbostat</span></span>
-<span>(</span><span>service_name, logger)</span>
+<span>(</span><span>service_name, environment)</span>
 </code></dt>
 <dd>
 <section class="desc"></section>
@@ -250,20 +248,12 @@ if __name__ == &#39;__main__&#39;:
                                       self.environment, first_sed.stdout, subprocess.PIPE)
         processes_list.append(second_sed)
 
-        turbostat_to_csv = self.create_pipe([&#34;python3&#34;, os.path.join(_base_path, &#34;../turbostat/turbostat_to_csv.py&#34;)],
+        turbostat_to_json = self.create_pipe([&#34;python3&#34;, os.path.join(_base_path, &#34;../turbostat/turbostat_to_json.py&#34;)],
                                             self.environment, second_sed.stdout, subprocess.PIPE)
-        processes_list.append(turbostat_to_csv)
-
-        csv_to_json = self.create_pipe([&#34;python3&#34;, os.path.join(_base_path, &#34;../pipelines/csv_to_json.py&#34;)],
-                                       self.environment, turbostat_to_csv.stdout, subprocess.PIPE)
-        processes_list.append(csv_to_json)
-
-        json_to_tsdb_json = self.create_pipe([&#34;python3&#34;, os.path.join(_base_path, &#34;../pipelines/json_to_TSDB_json.py&#34;)],
-                                             self.environment, csv_to_json.stdout, subprocess.PIPE)
-        processes_list.append(json_to_tsdb_json)
+        processes_list.append(turbostat_to_json)
 
         send_to_opentsdb = self.create_pipe([&#34;python3&#34;, os.path.join(_base_path, &#34;../pipelines/send_to_OpenTSDB.py&#34;)],
-                                            self.environment, json_to_tsdb_json.stdout, subprocess.PIPE)
+                                            self.environment, turbostat_to_json.stdout, subprocess.PIPE)
         processes_list.append(send_to_opentsdb)
 
         return processes_list</code></pre>
@@ -304,20 +294,12 @@ if __name__ == &#39;__main__&#39;:
                                   self.environment, first_sed.stdout, subprocess.PIPE)
     processes_list.append(second_sed)
 
-    turbostat_to_csv = self.create_pipe([&#34;python3&#34;, os.path.join(_base_path, &#34;../turbostat/turbostat_to_csv.py&#34;)],
+    turbostat_to_json = self.create_pipe([&#34;python3&#34;, os.path.join(_base_path, &#34;../turbostat/turbostat_to_json.py&#34;)],
                                         self.environment, second_sed.stdout, subprocess.PIPE)
-    processes_list.append(turbostat_to_csv)
-
-    csv_to_json = self.create_pipe([&#34;python3&#34;, os.path.join(_base_path, &#34;../pipelines/csv_to_json.py&#34;)],
-                                   self.environment, turbostat_to_csv.stdout, subprocess.PIPE)
-    processes_list.append(csv_to_json)
-
-    json_to_tsdb_json = self.create_pipe([&#34;python3&#34;, os.path.join(_base_path, &#34;../pipelines/json_to_TSDB_json.py&#34;)],
-                                         self.environment, csv_to_json.stdout, subprocess.PIPE)
-    processes_list.append(json_to_tsdb_json)
+    processes_list.append(turbostat_to_json)
 
     send_to_opentsdb = self.create_pipe([&#34;python3&#34;, os.path.join(_base_path, &#34;../pipelines/send_to_OpenTSDB.py&#34;)],
-                                        self.environment, json_to_tsdb_json.stdout, subprocess.PIPE)
+                                        self.environment, turbostat_to_json.stdout, subprocess.PIPE)
     processes_list.append(send_to_opentsdb)
 
     return processes_list</code></pre>
@@ -344,7 +326,7 @@ if __name__ == &#39;__main__&#39;:
 </section>
 </article>
 <nav id="sidebar">
-<a href="/code/index.html"><img src="https://s3-eu-west-1.amazonaws.com/jonatan.enes.udc/logo_bdwatchdog.png" style="height:100px;"/></a>
+<a href="/code/index.html"><img src="https://s3-eu-west-1.amazonaws.com/jonatan.enes.udc/bdwatchdog_website/logo_bdwatchdog.png" style="height:100px;"/></a>
 <h1>Index</h1>
 <div class="toc">
 <ul></ul>

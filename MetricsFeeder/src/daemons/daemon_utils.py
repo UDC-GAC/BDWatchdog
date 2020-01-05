@@ -109,7 +109,7 @@ class MonitoringDaemon:
     @staticmethod
     def threaded_read_last_process_output(process):
         for line in process.stdout:
-            print(line.strip())  # Dump to stdout of daemon
+            print(line.strip().decode())  # Dump to stdout of daemon
             sys.stdout.flush()
 
     @staticmethod

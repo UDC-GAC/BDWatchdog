@@ -50,6 +50,7 @@
 from __future__ import print_function
 import sys
 import os
+import fileinput
 
 TEMPLATE_PATH = &#34;TEMPLATE_PATH&#34;
 METRICS_PATH = &#34;METRICS_PATH&#34;
@@ -121,6 +122,8 @@ def initialize():
 
 
 def process_line(line, metrics_dict, tags_dict, template):
+    if not line:
+        return
     results = list()
     fields = line.strip().split(&#34;,&#34;)
     line_type = fields[0]
@@ -155,18 +158,22 @@ def process_line(line, metrics_dict, tags_dict, template):
 
 def behave_like_pipeline():
     metrics_dict, tags_dict, template = initialize()
+    current_line = None
     try:
-        # for line in fileinput.input():
-        while True:
-            line = sys.stdin.readline()
+        for line in fileinput.input():
+        #while True:
+        #    line = sys.stdin.readline()
             results = process_line(line, metrics_dict, tags_dict, template)
-            for result in results:
-                sys.stdout.write(result + &#34;\n&#34;)
+            if results:
+                for result in results:
+                    sys.stdout.write(result + &#34;\n&#34;)
+            current_line = line
     except (KeyboardInterrupt, IOError):
         # Exit silently
         pass
     except Exception as error:
         eprint(&#34;[CSV TO JSON] error : &#34; + str(error))
+        eprint(&#34;[CSV TO JSON] line is : &#34; + current_line)
 
 
 def main():
@@ -195,18 +202,22 @@ if __name__ == &#34;__main__&#34;:
 </summary>
 <pre><code class="python">def behave_like_pipeline():
     metrics_dict, tags_dict, template = initialize()
+    current_line = None
     try:
-        # for line in fileinput.input():
-        while True:
-            line = sys.stdin.readline()
+        for line in fileinput.input():
+        #while True:
+        #    line = sys.stdin.readline()
             results = process_line(line, metrics_dict, tags_dict, template)
-            for result in results:
-                sys.stdout.write(result + &#34;\n&#34;)
+            if results:
+                for result in results:
+                    sys.stdout.write(result + &#34;\n&#34;)
+            current_line = line
     except (KeyboardInterrupt, IOError):
         # Exit silently
         pass
     except Exception as error:
-        eprint(&#34;[CSV TO JSON] error : &#34; + str(error))</code></pre>
+        eprint(&#34;[CSV TO JSON] error : &#34; + str(error))
+        eprint(&#34;[CSV TO JSON] line is : &#34; + current_line)</code></pre>
 </details>
 </dd>
 <dt id="src.pipelines.csv_to_json.eprint"><code class="name flex">
@@ -310,6 +321,8 @@ if __name__ == &#34;__main__&#34;:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def process_line(line, metrics_dict, tags_dict, template):
+    if not line:
+        return
     results = list()
     fields = line.strip().split(&#34;,&#34;)
     line_type = fields[0]
@@ -348,7 +361,7 @@ if __name__ == &#34;__main__&#34;:
 </section>
 </article>
 <nav id="sidebar">
-<a href="/code/index.html"><img src="https://s3-eu-west-1.amazonaws.com/jonatan.enes.udc/logo_bdwatchdog.png" style="height:100px;"/></a>
+<a href="/code/index.html"><img src="https://s3-eu-west-1.amazonaws.com/jonatan.enes.udc/bdwatchdog_website/logo_bdwatchdog.png" style="height:100px;"/></a>
 <h1>Index</h1>
 <div class="toc">
 <ul></ul>

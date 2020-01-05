@@ -72,8 +72,6 @@ config_keys = [
     &#34;TEMPLATE_PATH&#34;,
     &#34;METRICS_PATH&#34;,
     &#34;TAGS_PATH&#34;,
-    &#34;NETHOGS_DIR&#34;,
-    &#34;NETHOGS_SCRIPTS_DIR&#34;,
     &#34;POST_DOC_BUFFER_LENGTH&#34;,
     &#34;POST_SEND_DOCS_TIMEOUT&#34;,
     &#34;POST_SEND_DOCS_FAILED_TRIES&#34;,
@@ -82,7 +80,11 @@ config_keys = [
     &#34;JAVA_TRANSLATOR_MAX_TRIES&#34;,
     &#34;JAVA_TRANSLATOR_WAIT_TIME&#34;,
     &#34;HADOOP_SNITCH_FOLDER_PATH&#34;,
-    &#34;HEARTBEAT_ENABLED&#34;
+    &#34;HEARTBEAT_ENABLED&#34;,
+    &#34;BDW_LOG_DIR&#34;,
+    &#34;BDW_PID_DIR&#34;,
+    &#34;USE_PACKED_BINARIES&#34;,
+    &#34;NETHOGS_BINARIES_PATH&#34;,
 ]
 
 default_environment_values = {
@@ -93,8 +95,6 @@ default_environment_values = {
     &#34;TEMPLATE_PATH&#34;: os.path.join(_base_path, &#34;../pipelines/templates/&#34;),
     &#34;METRICS_PATH&#34;: os.path.join(_base_path, &#34;../pipelines/metrics/&#34;),
     &#34;TAGS_PATH&#34;: os.path.join(_base_path, &#34;../pipelines/tags/&#34;),
-    &#34;NETHOGS_DIR&#34;: os.path.join(_base_path, &#34;../../bin-nethogs/&#34;),
-    &#34;NETHOGS_SCRIPTS_DIR&#34;: os.path.join(_base_path, &#34;../nethogs&#34;),
     &#34;POST_DOC_BUFFER_LENGTH&#34;: &#34;1000&#34;,  # Don&#39;t go over 1500 or post packet will be too large and may cause error
     &#34;POST_SEND_DOCS_TIMEOUT&#34;: &#34;5&#34;,
     &#34;POST_SEND_DOCS_FAILED_TRIES&#34;: &#34;6&#34;,
@@ -103,7 +103,11 @@ default_environment_values = {
     &#34;JAVA_TRANSLATOR_MAX_TRIES&#34;: &#34;4&#34;,
     &#34;JAVA_TRANSLATOR_WAIT_TIME&#34;: &#34;3&#34;,
     &#34;HADOOP_SNITCH_FOLDER_PATH&#34;: os.path.join(_base_path, &#34;../java_hadoop_snitch/&#34;),
-    &#34;HEARTBEAT_ENABLED&#34;: &#34;false&#34;
+    &#34;HEARTBEAT_ENABLED&#34;: &#34;false&#34;,
+    &#34;BDW_LOG_DIR&#34;: os.path.join(_base_path, &#34;logs/&#34;),
+    &#34;BDW_PID_DIR&#34;: os.path.join(_base_path, &#34;pids/&#34;),
+    &#34;USE_PACKED_BINARIES&#34;: &#34;true&#34;,
+    &#34;NETHOGS_BINARIES_PATH&#34;: os.path.join(_base_path, &#34;../../bin/nethogs/&#34;),
 }
 
 
@@ -114,8 +118,9 @@ def eprint(*args, **kwargs):
 def nethogs_is_runnable(environment):
     # Run a bogus &#39;ls&#39; command to show nethogs statistics for a few seconds
     # If the command doesn&#39;t fail, nethogs works
-    #return daemon_utils.command_is_runnable([&#39;../../bin-nethogs/src/nethogs&#39;, &#39;-v&#39;, &#39;3&#39;, &#39;-t&#39;, &#39;-d&#39;, &#39;1&#39;, &#39;-c&#39;, &#39;2&#39;])
-    return daemon_utils.command_is_runnable([environment[&#34;NETHOGS_DIR&#34;]+&#39;src/nethogs&#39;, &#39;-v&#39;, &#39;3&#39;, &#39;-t&#39;, &#39;-d&#39;, &#39;1&#39;, &#39;-c&#39;, &#39;2&#39;])
+    # return daemon_utils.command_is_runnable([&#39;../../nethogs/src/nethogs&#39;, &#39;-v&#39;, &#39;3&#39;, &#39;-t&#39;, &#39;-d&#39;, &#39;1&#39;, &#39;-c&#39;, &#39;2&#39;])
+    return daemon_utils.command_is_runnable(
+        [environment[&#34;NETHOGS_BINARIES_PATH&#34;] + &#39;/nethogs&#39;, &#39;-v&#39;, &#39;3&#39;, &#39;-t&#39;, &#39;-d&#39;, &#39;1&#39;, &#39;-c&#39;, &#39;2&#39;])
 
 
 class Nethogs(MonitoringDaemon):
@@ -130,7 +135,8 @@ class Nethogs(MonitoringDaemon):
 
         # Create the data source
         nethogs = subprocess.Popen(
-            [&#34;bash&#34;, os.path.join(_base_path, &#34;../nethogs/run_nethogs.sh&#34;), self.environment[&#34;NETHOGS_SAMPLING_FREQUENCY&#34;]],
+            [&#34;bash&#34;, os.path.join(_base_path, &#34;../nethogs/run_nethogs.sh&#34;),
+             self.environment[&#34;NETHOGS_SAMPLING_FREQUENCY&#34;]],
             env=self.environment, stdout=subprocess.PIPE)
         processes_list.append(nethogs)
 
@@ -144,7 +150,8 @@ class Nethogs(MonitoringDaemon):
         if self.environment[&#34;JAVA_TRANSLATION_ENABLED&#34;] == &#34;true&#34;:
             # With JAVA mapping
             nethogs_to_json = self.create_pipe(
-                [&#34;python3&#34;, os.path.join(_base_path, &#34;../nethogs/nethogs_to_json_with_java_translation.py&#34;)], self.environment,
+                [&#34;python3&#34;, os.path.join(_base_path, &#34;../nethogs/nethogs_to_json_with_java_translation.py&#34;)],
+                self.environment,
                 filtered_nethogs_output.stdout,
                 subprocess.PIPE)
         else:
@@ -162,19 +169,14 @@ class Nethogs(MonitoringDaemon):
 
 
 if __name__ == &#39;__main__&#39;:
-    environment = MonitoringDaemon.create_environment(
-        daemon_utils.read_config(&#34;conf/nethogs_config.ini&#34;, config_keys),
-        config_keys,
-        default_environment_values)
-
-    handler, logger = daemon_utils.configure_daemon_logs(SERVICE_NAME)
-
-    app = Nethogs(SERVICE_NAME, logger)
-    # FIXME As part of the environment initilization, set the pythonpath correctly
-    app.initialize_environment(config_path, config_keys, default_environment_values)
+    environment = daemon_utils.initialize_environment(config_path, config_keys, default_environment_values)
+    app = Nethogs(SERVICE_NAME, environment)
+    handler = app.get_handler()
     app.is_runnable = nethogs_is_runnable
     app.not_runnable_message = &#34;Nethogs program is not runnable, check that it has been &#34; \
-                               &#34;installed in directory: &#34; + environment[&#34;NETHOGS_DIR&#34;]
+                               &#34;installed in directory: &#34; + environment[&#34;NETHOGS_BINARIES_PATH&#34;] + \
+                               &#34; and that persmission is granted &#34; +\
+                               &#34;(run scripts/allow_priviledges/allow_nethogs.sh if needed)&#34;
     app.check_if_runnable()
 
     # Capture reload signal and propagate
@@ -218,8 +220,9 @@ if __name__ == &#39;__main__&#39;:
 <pre><code class="python">def nethogs_is_runnable(environment):
     # Run a bogus &#39;ls&#39; command to show nethogs statistics for a few seconds
     # If the command doesn&#39;t fail, nethogs works
-    #return daemon_utils.command_is_runnable([&#39;../../bin-nethogs/src/nethogs&#39;, &#39;-v&#39;, &#39;3&#39;, &#39;-t&#39;, &#39;-d&#39;, &#39;1&#39;, &#39;-c&#39;, &#39;2&#39;])
-    return daemon_utils.command_is_runnable([environment[&#34;NETHOGS_DIR&#34;]+&#39;src/nethogs&#39;, &#39;-v&#39;, &#39;3&#39;, &#39;-t&#39;, &#39;-d&#39;, &#39;1&#39;, &#39;-c&#39;, &#39;2&#39;])</code></pre>
+    # return daemon_utils.command_is_runnable([&#39;../../nethogs/src/nethogs&#39;, &#39;-v&#39;, &#39;3&#39;, &#39;-t&#39;, &#39;-d&#39;, &#39;1&#39;, &#39;-c&#39;, &#39;2&#39;])
+    return daemon_utils.command_is_runnable(
+        [environment[&#34;NETHOGS_BINARIES_PATH&#34;] + &#39;/nethogs&#39;, &#39;-v&#39;, &#39;3&#39;, &#39;-t&#39;, &#39;-d&#39;, &#39;1&#39;, &#39;-c&#39;, &#39;2&#39;])</code></pre>
 </details>
 </dd>
 </dl>
@@ -229,7 +232,7 @@ if __name__ == &#39;__main__&#39;:
 <dl>
 <dt id="src.daemons.nethogs.Nethogs"><code class="flex name class">
 <span>class <span class="ident">Nethogs</span></span>
-<span>(</span><span>service_name, logger)</span>
+<span>(</span><span>service_name, environment)</span>
 </code></dt>
 <dd>
 <section class="desc"></section>
@@ -249,7 +252,8 @@ if __name__ == &#39;__main__&#39;:
 
         # Create the data source
         nethogs = subprocess.Popen(
-            [&#34;bash&#34;, os.path.join(_base_path, &#34;../nethogs/run_nethogs.sh&#34;), self.environment[&#34;NETHOGS_SAMPLING_FREQUENCY&#34;]],
+            [&#34;bash&#34;, os.path.join(_base_path, &#34;../nethogs/run_nethogs.sh&#34;),
+             self.environment[&#34;NETHOGS_SAMPLING_FREQUENCY&#34;]],
             env=self.environment, stdout=subprocess.PIPE)
         processes_list.append(nethogs)
 
@@ -263,7 +267,8 @@ if __name__ == &#39;__main__&#39;:
         if self.environment[&#34;JAVA_TRANSLATION_ENABLED&#34;] == &#34;true&#34;:
             # With JAVA mapping
             nethogs_to_json = self.create_pipe(
-                [&#34;python3&#34;, os.path.join(_base_path, &#34;../nethogs/nethogs_to_json_with_java_translation.py&#34;)], self.environment,
+                [&#34;python3&#34;, os.path.join(_base_path, &#34;../nethogs/nethogs_to_json_with_java_translation.py&#34;)],
+                self.environment,
                 filtered_nethogs_output.stdout,
                 subprocess.PIPE)
         else:
@@ -299,7 +304,8 @@ if __name__ == &#39;__main__&#39;:
 
     # Create the data source
     nethogs = subprocess.Popen(
-        [&#34;bash&#34;, os.path.join(_base_path, &#34;../nethogs/run_nethogs.sh&#34;), self.environment[&#34;NETHOGS_SAMPLING_FREQUENCY&#34;]],
+        [&#34;bash&#34;, os.path.join(_base_path, &#34;../nethogs/run_nethogs.sh&#34;),
+         self.environment[&#34;NETHOGS_SAMPLING_FREQUENCY&#34;]],
         env=self.environment, stdout=subprocess.PIPE)
     processes_list.append(nethogs)
 
@@ -313,7 +319,8 @@ if __name__ == &#39;__main__&#39;:
     if self.environment[&#34;JAVA_TRANSLATION_ENABLED&#34;] == &#34;true&#34;:
         # With JAVA mapping
         nethogs_to_json = self.create_pipe(
-            [&#34;python3&#34;, os.path.join(_base_path, &#34;../nethogs/nethogs_to_json_with_java_translation.py&#34;)], self.environment,
+            [&#34;python3&#34;, os.path.join(_base_path, &#34;../nethogs/nethogs_to_json_with_java_translation.py&#34;)],
+            self.environment,
             filtered_nethogs_output.stdout,
             subprocess.PIPE)
     else:
@@ -351,7 +358,7 @@ if __name__ == &#39;__main__&#39;:
 </section>
 </article>
 <nav id="sidebar">
-<a href="/code/index.html"><img src="https://s3-eu-west-1.amazonaws.com/jonatan.enes.udc/logo_bdwatchdog.png" style="height:100px;"/></a>
+<a href="/code/index.html"><img src="https://s3-eu-west-1.amazonaws.com/jonatan.enes.udc/bdwatchdog_website/logo_bdwatchdog.png" style="height:100px;"/></a>
 <h1>Index</h1>
 <div class="toc">
 <ul></ul>

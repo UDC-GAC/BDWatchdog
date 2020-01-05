@@ -46,15 +46,21 @@
 # You should have received a copy of the GNU General Public License
 # along with BDWatchdog. If not, see &lt;http://www.gnu.org/licenses/&gt;.
 
-
 from __future__ import print_function
 
-import fileinput
+import socket
 import sys
-import MetricsFeeder.src.turbostat.turbostat_to_csv as turbostat_to_csv
+import fileinput
+import signal
+import time
+import traceback
 
-from MetricsFeeder.src.pipelines import csv_to_json as csv_to_json
-from MetricsFeeder.src.pipelines import json_to_TSDB_json as json_to_TSDB_json
+from MetricsFeeder.src.pipelines import csv_to_json
+from MetricsFeeder.src.pipelines.csv_to_json import process_line as to_json
+from MetricsFeeder.src.pipelines.json_to_TSDB_json import process_line as to_TSDB_json
+
+metrics_dict, tags_dict, template = None, None, None
+header_mapping = dict()
 
 
 def eprint(*args, **kwargs):
@@ -70,43 +76,126 @@ def good_finish():
     sys.exit(0)
 
 
-def bad_finish(error):
-    eprint(&#34;[TURBOSTAT TO JSON] error in : &#34; + str(error))
+def bad_finish():
     sys.exit(1)
 
 
-def process_line(line, metrics_dict, tags_dict, template):
-    line_in_csv = turbostat_to_csv.process_line(line)
+def get_hostname():
+    return socket.gethostname()
+
+
+def get_timestamp():
+    return int(time.time())
+
+
+def create_header_mapping(header):
+    mapping = dict()
+    fs = header.split(&#34;,&#34;)
+    counter = 0
+    for f in fs:
+        mapping[f] = counter
+        counter += 1
+    return mapping
+
+
+signal.signal(signal.SIGTERM, sigterm_handler)
+
+
+def turbostat_to_csv(line, header_mapping, fields):
+    if not line:
+        eprint(&#34;Empty line&#34;)
+        return
+
+    # Skip header by looking for it and avoiding it
+    try:
+        # Try to test for string values for different versions of turbostat
+        # if fields[0] == &#34;Core&#34; or fields[0] == &#34;Package&#34; or fields[0] == &#34;usec&#34;:
+        #    continue
+
+        # Try to cast the average Megahertz, which has an int value for all the lines to be processed
+        int(fields[header_mapping[&#34;Avg_MHz&#34;]])
+
+    except ValueError:
+        # Line is header, skip
+        return
+    except IndexError:
+        # Line is ?
+        eprint(&#34;Error with line:&#34; + line)
+        return
+
+    try:
+        if fields[header_mapping[&#34;CPU&#34;]] == &#34;-&#34;:
+            # line is for entire system
+            return (&#34;SYS_PWR&#34; + &#34;,&#34; + get_hostname() + &#34;,&#34; + str(get_timestamp()) + &#34;,&#34; + fields[
+                header_mapping[&#34;Core&#34;]] + &#34;,&#34; + fields[header_mapping[&#34;PkgTmp&#34;]] + &#34;,&#34; + fields[
+                        header_mapping[&#34;PkgWatt&#34;]])
+        else:
+            if len(fields) &gt;= header_mapping[&#34;PkgWatt&#34;]:
+                # line is for package, because turbostat aggregates and joins first core
+                # and package, print also core
+                if &#34;Package&#34; in header_mapping:
+                    return (&#34;PKG_PWR&#34; + &#34;,&#34; + get_hostname() + &#34;,&#34; + str(get_timestamp()) + &#34;,&#34; + fields[
+                        header_mapping[&#34;Package&#34;]] + &#34;,&#34; + fields[header_mapping[&#34;PkgTmp&#34;]] + &#34;,&#34; + fields[
+                                header_mapping[&#34;PkgWatt&#34;]])
+
+                else:
+                    # Host may only have one package and turbostat may not report the Package field
+                    return (&#34;PKG_PWR&#34; + &#34;,&#34; + get_hostname() + &#34;,&#34; + str(get_timestamp()) + &#34;,&#34; + fields[
+                        header_mapping[&#34;Core&#34;]] + &#34;,&#34; + fields[header_mapping[&#34;PkgTmp&#34;]] + &#34;,&#34; + fields[
+                                header_mapping[&#34;PkgWatt&#34;]])
+
+    except IndexError:
+        eprint(&#34;Line : &#39;&#34; + line.strip() + &#34;&#39; couldn&#39;t be parsed&#34;)
+        return
+
+
+def process_line(line):
+    fields = line.split(&#34;,&#34;)
+    line_in_csv = turbostat_to_csv(line, header_mapping, fields)
     if line_in_csv:
-        for json in csv_to_json.process_line(line_in_csv, metrics_dict, tags_dict, template):
-            TSDB_json = json_to_TSDB_json.process_line(json)
-            print(TSDB_json)
-    #pass
+        json_docs = to_json(line_in_csv, metrics_dict, tags_dict, template)
+        if json_docs:
+            for doc in json_docs:
+                line_in_valid_json = to_TSDB_json(doc)
+                print(line_in_valid_json)
+
+
+def process_header(line):
+    # required_fields = [&#34;PkgWatt&#34;, &#34;CorWatt&#34;, &#34;Core&#34;, &#34;CPU&#34;]
+    required_fields = [&#34;PkgWatt&#34;, &#34;Core&#34;, &#34;CPU&#34;]
+    header_mapping = create_header_mapping(line.strip())
+    eprint(&#34;HEADER MAPPING to be used is:&#34; + str(header_mapping))
+    for field in required_fields:
+        if field not in header_mapping:
+            eprint(&#34;Field &#34; + field + &#34; not present in output, can&#39;t continue&#34;)
+            bad_finish()
+    return header_mapping
+
 
 def behave_like_pipeline():
-    global process_function
-    try:
-        metrics_dict, tags_dict, template = csv_to_json.initialize()
+    global header_mapping
 
-        #while True:
-        #    line = sys.stdin.readline()
-        #    process_function(line, metrics_dict, tags_dict, template)
+    try:
+        header_was_processed = False
 
         for line in fileinput.input():
-           process_function(line, metrics_dict, tags_dict, template)
-
-
-        # for line in sys.stdin:
-        #    process_function(line, metrics_dict, tags_dict, template)
+            # Process header and adapt pipe, after that header will be skipped
+            if not header_was_processed:
+                header_mapping = process_header(line)
+                header_was_processed = True
+            # Process line
+            else:
+                process_line(line)
 
     except KeyboardInterrupt:
-        # Exit silently
         good_finish()
-    except IOError as e:
-        bad_finish(e)
+    except Exception as error:
+        eprint(&#34;[TURBOSTAT TO CSV] error : &#34; + str(error) + str(traceback.format_exc()))
 
 
 def main():
+    global metrics_dict, tags_dict, template
+    metrics_dict, tags_dict, template = csv_to_json.initialize()
     behave_like_pipeline()
 
 
@@ -122,7 +211,7 @@ if __name__ == &#34;__main__&#34;:
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="src.turbostat.turbostat_to_json.bad_finish"><code class="name flex">
-<span>def <span class="ident">bad_finish</span></span>(<span>error)</span>
+<span>def <span class="ident">bad_finish</span></span>(<span>)</span>
 </code></dt>
 <dd>
 <section class="desc"></section>
@@ -130,8 +219,7 @@ if __name__ == &#34;__main__&#34;:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def bad_finish(error):
-    eprint(&#34;[TURBOSTAT TO JSON] error in : &#34; + str(error))
+<pre><code class="python">def bad_finish():
     sys.exit(1)</code></pre>
 </details>
 </dd>
@@ -145,26 +233,43 @@ if __name__ == &#34;__main__&#34;:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def behave_like_pipeline():
-    global process_function
-    try:
-        metrics_dict, tags_dict, template = csv_to_json.initialize()
+    global header_mapping
 
-        #while True:
-        #    line = sys.stdin.readline()
-        #    process_function(line, metrics_dict, tags_dict, template)
+    try:
+        header_was_processed = False
 
         for line in fileinput.input():
-           process_function(line, metrics_dict, tags_dict, template)
-
-
-        # for line in sys.stdin:
-        #    process_function(line, metrics_dict, tags_dict, template)
+            # Process header and adapt pipe, after that header will be skipped
+            if not header_was_processed:
+                header_mapping = process_header(line)
+                header_was_processed = True
+            # Process line
+            else:
+                process_line(line)
 
     except KeyboardInterrupt:
-        # Exit silently
         good_finish()
-    except IOError as e:
-        bad_finish(e)</code></pre>
+    except Exception as error:
+        eprint(&#34;[TURBOSTAT TO CSV] error : &#34; + str(error) + str(traceback.format_exc()))</code></pre>
+</details>
+</dd>
+<dt id="src.turbostat.turbostat_to_json.create_header_mapping"><code class="name flex">
+<span>def <span class="ident">create_header_mapping</span></span>(<span>header)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def create_header_mapping(header):
+    mapping = dict()
+    fs = header.split(&#34;,&#34;)
+    counter = 0
+    for f in fs:
+        mapping[f] = counter
+        counter += 1
+    return mapping</code></pre>
 </details>
 </dd>
 <dt id="src.turbostat.turbostat_to_json.eprint"><code class="name flex">
@@ -178,6 +283,32 @@ if __name__ == &#34;__main__&#34;:
 </summary>
 <pre><code class="python">def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)</code></pre>
+</details>
+</dd>
+<dt id="src.turbostat.turbostat_to_json.get_hostname"><code class="name flex">
+<span>def <span class="ident">get_hostname</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_hostname():
+    return socket.gethostname()</code></pre>
+</details>
+</dd>
+<dt id="src.turbostat.turbostat_to_json.get_timestamp"><code class="name flex">
+<span>def <span class="ident">get_timestamp</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_timestamp():
+    return int(time.time())</code></pre>
 </details>
 </dd>
 <dt id="src.turbostat.turbostat_to_json.good_finish"><code class="name flex">
@@ -204,11 +335,13 @@ if __name__ == &#34;__main__&#34;:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def main():
+    global metrics_dict, tags_dict, template
+    metrics_dict, tags_dict, template = csv_to_json.initialize()
     behave_like_pipeline()</code></pre>
 </details>
 </dd>
-<dt id="src.turbostat.turbostat_to_json.process_line"><code class="name flex">
-<span>def <span class="ident">process_line</span></span>(<span>line, metrics_dict, tags_dict, template)</span>
+<dt id="src.turbostat.turbostat_to_json.process_header"><code class="name flex">
+<span>def <span class="ident">process_header</span></span>(<span>line)</span>
 </code></dt>
 <dd>
 <section class="desc"></section>
@@ -216,12 +349,36 @@ if __name__ == &#34;__main__&#34;:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def process_line(line, metrics_dict, tags_dict, template):
-    line_in_csv = turbostat_to_csv.process_line(line)
+<pre><code class="python">def process_header(line):
+    # required_fields = [&#34;PkgWatt&#34;, &#34;CorWatt&#34;, &#34;Core&#34;, &#34;CPU&#34;]
+    required_fields = [&#34;PkgWatt&#34;, &#34;Core&#34;, &#34;CPU&#34;]
+    header_mapping = create_header_mapping(line.strip())
+    eprint(&#34;HEADER MAPPING to be used is:&#34; + str(header_mapping))
+    for field in required_fields:
+        if field not in header_mapping:
+            eprint(&#34;Field &#34; + field + &#34; not present in output, can&#39;t continue&#34;)
+            bad_finish()
+    return header_mapping</code></pre>
+</details>
+</dd>
+<dt id="src.turbostat.turbostat_to_json.process_line"><code class="name flex">
+<span>def <span class="ident">process_line</span></span>(<span>line)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def process_line(line):
+    fields = line.split(&#34;,&#34;)
+    line_in_csv = turbostat_to_csv(line, header_mapping, fields)
     if line_in_csv:
-        for json in csv_to_json.process_line(line_in_csv, metrics_dict, tags_dict, template):
-            TSDB_json = json_to_TSDB_json.process_line(json)
-            print(TSDB_json)</code></pre>
+        json_docs = to_json(line_in_csv, metrics_dict, tags_dict, template)
+        if json_docs:
+            for doc in json_docs:
+                line_in_valid_json = to_TSDB_json(doc)
+                print(line_in_valid_json)</code></pre>
 </details>
 </dd>
 <dt id="src.turbostat.turbostat_to_json.sigterm_handler"><code class="name flex">
@@ -237,13 +394,70 @@ if __name__ == &#34;__main__&#34;:
     good_finish()</code></pre>
 </details>
 </dd>
+<dt id="src.turbostat.turbostat_to_json.turbostat_to_csv"><code class="name flex">
+<span>def <span class="ident">turbostat_to_csv</span></span>(<span>line, header_mapping, fields)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def turbostat_to_csv(line, header_mapping, fields):
+    if not line:
+        eprint(&#34;Empty line&#34;)
+        return
+
+    # Skip header by looking for it and avoiding it
+    try:
+        # Try to test for string values for different versions of turbostat
+        # if fields[0] == &#34;Core&#34; or fields[0] == &#34;Package&#34; or fields[0] == &#34;usec&#34;:
+        #    continue
+
+        # Try to cast the average Megahertz, which has an int value for all the lines to be processed
+        int(fields[header_mapping[&#34;Avg_MHz&#34;]])
+
+    except ValueError:
+        # Line is header, skip
+        return
+    except IndexError:
+        # Line is ?
+        eprint(&#34;Error with line:&#34; + line)
+        return
+
+    try:
+        if fields[header_mapping[&#34;CPU&#34;]] == &#34;-&#34;:
+            # line is for entire system
+            return (&#34;SYS_PWR&#34; + &#34;,&#34; + get_hostname() + &#34;,&#34; + str(get_timestamp()) + &#34;,&#34; + fields[
+                header_mapping[&#34;Core&#34;]] + &#34;,&#34; + fields[header_mapping[&#34;PkgTmp&#34;]] + &#34;,&#34; + fields[
+                        header_mapping[&#34;PkgWatt&#34;]])
+        else:
+            if len(fields) &gt;= header_mapping[&#34;PkgWatt&#34;]:
+                # line is for package, because turbostat aggregates and joins first core
+                # and package, print also core
+                if &#34;Package&#34; in header_mapping:
+                    return (&#34;PKG_PWR&#34; + &#34;,&#34; + get_hostname() + &#34;,&#34; + str(get_timestamp()) + &#34;,&#34; + fields[
+                        header_mapping[&#34;Package&#34;]] + &#34;,&#34; + fields[header_mapping[&#34;PkgTmp&#34;]] + &#34;,&#34; + fields[
+                                header_mapping[&#34;PkgWatt&#34;]])
+
+                else:
+                    # Host may only have one package and turbostat may not report the Package field
+                    return (&#34;PKG_PWR&#34; + &#34;,&#34; + get_hostname() + &#34;,&#34; + str(get_timestamp()) + &#34;,&#34; + fields[
+                        header_mapping[&#34;Core&#34;]] + &#34;,&#34; + fields[header_mapping[&#34;PkgTmp&#34;]] + &#34;,&#34; + fields[
+                                header_mapping[&#34;PkgWatt&#34;]])
+
+    except IndexError:
+        eprint(&#34;Line : &#39;&#34; + line.strip() + &#34;&#39; couldn&#39;t be parsed&#34;)
+        return</code></pre>
+</details>
+</dd>
 </dl>
 </section>
 <section>
 </section>
 </article>
 <nav id="sidebar">
-<a href="/code/index.html"><img src="https://s3-eu-west-1.amazonaws.com/jonatan.enes.udc/logo_bdwatchdog.png" style="height:100px;"/></a>
+<a href="/code/index.html"><img src="https://s3-eu-west-1.amazonaws.com/jonatan.enes.udc/bdwatchdog_website/logo_bdwatchdog.png" style="height:100px;"/></a>
 <h1>Index</h1>
 <div class="toc">
 <ul></ul>
@@ -258,11 +472,16 @@ if __name__ == &#34;__main__&#34;:
 <ul class="">
 <li><code><a title="src.turbostat.turbostat_to_json.bad_finish" href="#src.turbostat.turbostat_to_json.bad_finish">bad_finish</a></code></li>
 <li><code><a title="src.turbostat.turbostat_to_json.behave_like_pipeline" href="#src.turbostat.turbostat_to_json.behave_like_pipeline">behave_like_pipeline</a></code></li>
+<li><code><a title="src.turbostat.turbostat_to_json.create_header_mapping" href="#src.turbostat.turbostat_to_json.create_header_mapping">create_header_mapping</a></code></li>
 <li><code><a title="src.turbostat.turbostat_to_json.eprint" href="#src.turbostat.turbostat_to_json.eprint">eprint</a></code></li>
+<li><code><a title="src.turbostat.turbostat_to_json.get_hostname" href="#src.turbostat.turbostat_to_json.get_hostname">get_hostname</a></code></li>
+<li><code><a title="src.turbostat.turbostat_to_json.get_timestamp" href="#src.turbostat.turbostat_to_json.get_timestamp">get_timestamp</a></code></li>
 <li><code><a title="src.turbostat.turbostat_to_json.good_finish" href="#src.turbostat.turbostat_to_json.good_finish">good_finish</a></code></li>
 <li><code><a title="src.turbostat.turbostat_to_json.main" href="#src.turbostat.turbostat_to_json.main">main</a></code></li>
+<li><code><a title="src.turbostat.turbostat_to_json.process_header" href="#src.turbostat.turbostat_to_json.process_header">process_header</a></code></li>
 <li><code><a title="src.turbostat.turbostat_to_json.process_line" href="#src.turbostat.turbostat_to_json.process_line">process_line</a></code></li>
 <li><code><a title="src.turbostat.turbostat_to_json.sigterm_handler" href="#src.turbostat.turbostat_to_json.sigterm_handler">sigterm_handler</a></code></li>
+<li><code><a title="src.turbostat.turbostat_to_json.turbostat_to_csv" href="#src.turbostat.turbostat_to_json.turbostat_to_csv">turbostat_to_csv</a></code></li>
 </ul>
 </li>
 </ul>

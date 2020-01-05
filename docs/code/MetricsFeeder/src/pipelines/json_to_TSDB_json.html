@@ -48,6 +48,8 @@
 
 
 from __future__ import print_function
+
+import fileinput
 import sys
 import json
 import re
@@ -85,6 +87,8 @@ def process_string(string):
 
 
 def process_line(line):
+    if not line:
+        return
     document = json.loads(line)
     try:
         for string in [&#34;command&#34;, &#34;host&#34;]:
@@ -99,10 +103,12 @@ def process_line(line):
 
 def behave_like_pipeline():
     try:
-        # for line in fileinput.input():
-        while True:
-            line = sys.stdin.readline()
-            print(process_line(line))
+        for line in fileinput.input():
+        #while True:
+        #    line = sys.stdin.readline()
+            result = process_line(line)
+            if result:
+                print(result)
     except (KeyboardInterrupt, IOError):
         # Exit silently
         pass
@@ -136,10 +142,12 @@ if __name__ == &#34;__main__&#34;:
 </summary>
 <pre><code class="python">def behave_like_pipeline():
     try:
-        # for line in fileinput.input():
-        while True:
-            line = sys.stdin.readline()
-            print(process_line(line))
+        for line in fileinput.input():
+        #while True:
+        #    line = sys.stdin.readline()
+            result = process_line(line)
+            if result:
+                print(result)
     except (KeyboardInterrupt, IOError):
         # Exit silently
         pass
@@ -183,6 +191,8 @@ if __name__ == &#34;__main__&#34;:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def process_line(line):
+    if not line:
+        return
     document = json.loads(line)
     try:
         for string in [&#34;command&#34;, &#34;host&#34;]:
@@ -237,7 +247,7 @@ if __name__ == &#34;__main__&#34;:
 </section>
 </article>
 <nav id="sidebar">
-<a href="/code/index.html"><img src="https://s3-eu-west-1.amazonaws.com/jonatan.enes.udc/logo_bdwatchdog.png" style="height:100px;"/></a>
+<a href="/code/index.html"><img src="https://s3-eu-west-1.amazonaws.com/jonatan.enes.udc/bdwatchdog_website/logo_bdwatchdog.png" style="height:100px;"/></a>
 <h1>Index</h1>
 <div class="toc">
 <ul></ul>

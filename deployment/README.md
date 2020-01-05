@@ -60,8 +60,9 @@ This script will do a best-effort to install and configure both the
 timestamping (MongoDB) and metrics (HDFS+HBase+OpenTSDB) necessary programs.
 
 ##### 4th, Start the services
-Once the installation ends, all of the services should have been installed. You
-can start and test them one by one.
+Once the installation ends, all of the services should have been installed. 
+They should have also been started, but at any rate you can start (if needed) 
+and test them one by one.
 
 * Timestamping :
 ```
@@ -72,16 +73,11 @@ tmux ls
 On the list it should appear an "EVE" terminal
 
 * Metrics :
-With the installation process, all of the services required to deploy the
-OpenTSDB should have been started already, otherwise you can run:
 ```
 cd metrics
 bash start.sh
-```
-and, with the command:
-```
 tmux ls
-``` 
+```
 an "OPENTSDB" terminal should be present.
 
 * Web Interface

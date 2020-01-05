@@ -49,6 +49,7 @@
 
 from __future__ import print_function
 
+import fileinput
 import sys
 import json
 import traceback
@@ -105,6 +106,26 @@ def send_json_documents(json_documents, requests_Session=None):
         return False, {&#34;error&#34;: str(e)}
 
 
+def process_line(line):
+    new_doc = None
+    try:
+        new_doc = json.loads(line)
+    except ValueError as e:
+        if not line:
+            eprint(&#34;[TSDB SENDER] Empty line was received&#34;)
+        else:
+            eprint(&#34;[TSDB SENDER] Error with document &#34; + str(line))
+            eprint(e)
+    return new_doc
+
+
+def finish(json_documents, requests_Session, message):
+    success, info = send_json_documents(json_documents, requests_Session)
+    sys.stdout.flush()
+    eprint(&#34;[TSDB SENDER] -&gt; {0}&#34;.format(message))
+    exit(1)
+
+
 def behave_like_pipeline():
     # PROGRAM VARIABLES #
     last_timestamp = time.time() - post_doc_buffer_timeout + 1
@@ -115,25 +136,19 @@ def behave_like_pipeline():
     json_documents = []
     requests_Session = requests.Session()
     try:
-        # for line in sys.stdin:
-        while True:
-            line = sys.stdin.readline()
-            # for line in fileinput.input():
-            try:
-                new_doc = json.loads(line)
-                json_documents = json_documents + [new_doc]
-                fails = 0
-            except ValueError as e:
-                if not line:
-                    eprint(&#34;[TSDB SENDER] Empty line was received&#34;)
-                else:
-                    eprint(&#34;[TSDB SENDER] Error with document &#34; + str(line))
-                    eprint(e)
+        for line in fileinput.input():
+            new_doc = process_line(line)
+
+            if not new_doc:
                 fails += 1
                 if fails &gt;= MAX_FAILS:
-                    eprint(&#34;[TSDB SENDER] terminated due to too many read pipeline errors&#34;)
-                    exit(1)
-                continue
+                    message = &#34;terminated due to too many read pipeline errors&#34;
+                    finish(json_documents, requests_Session, message)
+                else:
+                    continue
+            else:
+                json_documents = json_documents + [new_doc]
+                fails = 0  # Reset fails
 
             current_timestamp = time.time()
             time_diff = current_timestamp - last_timestamp
@@ -143,9 +158,8 @@ def behave_like_pipeline():
                 try:
                     success, info = send_json_documents(json_documents, requests_Session)
                     if not success:
-                        eprint(
-                            &#34;[TSDB SENDER] couldn&#39;t properly post documents to address &#34; + post_endpoint + &#34; error: &#34; + str(
-                                info))
+                        eprint(&#34;[TSDB SENDER] couldn&#39;t properly post documents to address {0} error: {1}&#34;.format(
+                            post_endpoint, str(info)))
                         failed_connections += 1
                     else:
                         print(&#34;Post was done at: &#34; + time.strftime(&#34;%D %H:%M:%S&#34;, time.localtime()) + &#34; with &#34; + str(
@@ -154,23 +168,29 @@ def behave_like_pipeline():
                         json_documents = []  # Empty document buffer
                 except requests.exceptions.ConnectTimeout:
                     failed_connections += 1
-                    eprint(
-                        &#34;[TSDB SENDER] couldn&#39;t send documents to address &#34; + post_endpoint + &#34; and tried for &#34; + str(
-                            failed_connections) + &#34; times&#34;)
+                    eprint(&#34;[TSDB SENDER] couldn&#39;t send documents to address {0} and tried for {1} times&#34;.format(
+                        post_endpoint, failed_connections))
                     if failed_connections &gt;= post_send_docs_failed_tries:
                         abort = True
 
                 if abort:
-                    eprint(&#34;[TSDB SENDER] terminated due to too connection errors&#34;)
-                    exit(1)
+                    message = &#34;terminated due to too connection errors&#34;
+                    finish(json_documents, requests_Session, message)
+
                 sys.stdout.flush()
-    except (KeyboardInterrupt, IOError):
+    except (KeyboardInterrupt, IOError) as e:
         # Exit silently
-        pass
+        eprint(&#34;[TSDB SENDER] terminated with error: &#34; + str(e))
+        track = traceback.format_exc()
+        eprint(track)
+
     except Exception as e:
         eprint(&#34;[TSDB SENDER] terminated with error: &#34; + str(e))
         track = traceback.format_exc()
         eprint(track)
+
+    message = &#34;finishing&#34;
+    finish(json_documents, requests_Session, message)
 
 
 def main():
@@ -207,25 +227,19 @@ if __name__ == &#34;__main__&#34;:
     json_documents = []
     requests_Session = requests.Session()
     try:
-        # for line in sys.stdin:
-        while True:
-            line = sys.stdin.readline()
-            # for line in fileinput.input():
-            try:
-                new_doc = json.loads(line)
-                json_documents = json_documents + [new_doc]
-                fails = 0
-            except ValueError as e:
-                if not line:
-                    eprint(&#34;[TSDB SENDER] Empty line was received&#34;)
-                else:
-                    eprint(&#34;[TSDB SENDER] Error with document &#34; + str(line))
-                    eprint(e)
+        for line in fileinput.input():
+            new_doc = process_line(line)
+
+            if not new_doc:
                 fails += 1
                 if fails &gt;= MAX_FAILS:
-                    eprint(&#34;[TSDB SENDER] terminated due to too many read pipeline errors&#34;)
-                    exit(1)
-                continue
+                    message = &#34;terminated due to too many read pipeline errors&#34;
+                    finish(json_documents, requests_Session, message)
+                else:
+                    continue
+            else:
+                json_documents = json_documents + [new_doc]
+                fails = 0  # Reset fails
 
             current_timestamp = time.time()
             time_diff = current_timestamp - last_timestamp
@@ -235,9 +249,8 @@ if __name__ == &#34;__main__&#34;:
                 try:
                     success, info = send_json_documents(json_documents, requests_Session)
                     if not success:
-                        eprint(
-                            &#34;[TSDB SENDER] couldn&#39;t properly post documents to address &#34; + post_endpoint + &#34; error: &#34; + str(
-                                info))
+                        eprint(&#34;[TSDB SENDER] couldn&#39;t properly post documents to address {0} error: {1}&#34;.format(
+                            post_endpoint, str(info)))
                         failed_connections += 1
                     else:
                         print(&#34;Post was done at: &#34; + time.strftime(&#34;%D %H:%M:%S&#34;, time.localtime()) + &#34; with &#34; + str(
@@ -246,23 +259,29 @@ if __name__ == &#34;__main__&#34;:
                         json_documents = []  # Empty document buffer
                 except requests.exceptions.ConnectTimeout:
                     failed_connections += 1
-                    eprint(
-                        &#34;[TSDB SENDER] couldn&#39;t send documents to address &#34; + post_endpoint + &#34; and tried for &#34; + str(
-                            failed_connections) + &#34; times&#34;)
+                    eprint(&#34;[TSDB SENDER] couldn&#39;t send documents to address {0} and tried for {1} times&#34;.format(
+                        post_endpoint, failed_connections))
                     if failed_connections &gt;= post_send_docs_failed_tries:
                         abort = True
 
                 if abort:
-                    eprint(&#34;[TSDB SENDER] terminated due to too connection errors&#34;)
-                    exit(1)
+                    message = &#34;terminated due to too connection errors&#34;
+                    finish(json_documents, requests_Session, message)
+
                 sys.stdout.flush()
-    except (KeyboardInterrupt, IOError):
+    except (KeyboardInterrupt, IOError) as e:
         # Exit silently
-        pass
+        eprint(&#34;[TSDB SENDER] terminated with error: &#34; + str(e))
+        track = traceback.format_exc()
+        eprint(track)
+
     except Exception as e:
         eprint(&#34;[TSDB SENDER] terminated with error: &#34; + str(e))
         track = traceback.format_exc()
-        eprint(track)</code></pre>
+        eprint(track)
+
+    message = &#34;finishing&#34;
+    finish(json_documents, requests_Session, message)</code></pre>
 </details>
 </dd>
 <dt id="src.pipelines.send_to_OpenTSDB.eprint"><code class="name flex">
@@ -278,6 +297,22 @@ if __name__ == &#34;__main__&#34;:
     print(*args, file=sys.stderr, **kwargs)</code></pre>
 </details>
 </dd>
+<dt id="src.pipelines.send_to_OpenTSDB.finish"><code class="name flex">
+<span>def <span class="ident">finish</span></span>(<span>json_documents, requests_Session, message)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def finish(json_documents, requests_Session, message):
+    success, info = send_json_documents(json_documents, requests_Session)
+    sys.stdout.flush()
+    eprint(&#34;[TSDB SENDER] -&gt; {0}&#34;.format(message))
+    exit(1)</code></pre>
+</details>
+</dd>
 <dt id="src.pipelines.send_to_OpenTSDB.main"><code class="name flex">
 <span>def <span class="ident">main</span></span>(<span>)</span>
 </code></dt>
@@ -289,6 +324,28 @@ if __name__ == &#34;__main__&#34;:
 </summary>
 <pre><code class="python">def main():
     behave_like_pipeline()</code></pre>
+</details>
+</dd>
+<dt id="src.pipelines.send_to_OpenTSDB.process_line"><code class="name flex">
+<span>def <span class="ident">process_line</span></span>(<span>line)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def process_line(line):
+    new_doc = None
+    try:
+        new_doc = json.loads(line)
+    except ValueError as e:
+        if not line:
+            eprint(&#34;[TSDB SENDER] Empty line was received&#34;)
+        else:
+            eprint(&#34;[TSDB SENDER] Error with document &#34; + str(line))
+            eprint(e)
+    return new_doc</code></pre>
 </details>
 </dd>
 <dt id="src.pipelines.send_to_OpenTSDB.send_json_documents"><code class="name flex">
@@ -333,7 +390,7 @@ if __name__ == &#34;__main__&#34;:
 </section>
 </article>
 <nav id="sidebar">
-<a href="/code/index.html"><img src="https://s3-eu-west-1.amazonaws.com/jonatan.enes.udc/logo_bdwatchdog.png" style="height:100px;"/></a>
+<a href="/code/index.html"><img src="https://s3-eu-west-1.amazonaws.com/jonatan.enes.udc/bdwatchdog_website/logo_bdwatchdog.png" style="height:100px;"/></a>
 <h1>Index</h1>
 <div class="toc">
 <ul></ul>
@@ -348,7 +405,9 @@ if __name__ == &#34;__main__&#34;:
 <ul class="">
 <li><code><a title="src.pipelines.send_to_OpenTSDB.behave_like_pipeline" href="#src.pipelines.send_to_OpenTSDB.behave_like_pipeline">behave_like_pipeline</a></code></li>
 <li><code><a title="src.pipelines.send_to_OpenTSDB.eprint" href="#src.pipelines.send_to_OpenTSDB.eprint">eprint</a></code></li>
+<li><code><a title="src.pipelines.send_to_OpenTSDB.finish" href="#src.pipelines.send_to_OpenTSDB.finish">finish</a></code></li>
 <li><code><a title="src.pipelines.send_to_OpenTSDB.main" href="#src.pipelines.send_to_OpenTSDB.main">main</a></code></li>
+<li><code><a title="src.pipelines.send_to_OpenTSDB.process_line" href="#src.pipelines.send_to_OpenTSDB.process_line">process_line</a></code></li>
 <li><code><a title="src.pipelines.send_to_OpenTSDB.send_json_documents" href="#src.pipelines.send_to_OpenTSDB.send_json_documents">send_json_documents</a></code></li>
 </ul>
 </li>
