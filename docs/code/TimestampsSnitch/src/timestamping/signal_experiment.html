@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.7.2" />
-<title>src.nethogs.filter_raw_output API documentation</title>
+<title>src.timestamping.signal_experiment API documentation</title>
 <meta name="description" content="" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
@@ -17,7 +17,7 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>src.nethogs.filter_raw_output</code></h1>
+<h1 class="title">Module <code>src.timestamping.signal_experiment</code></h1>
 </header>
 <section id="section-intro">
 <details class="source">
@@ -47,32 +47,83 @@
 # along with BDWatchdog. If not, see &lt;http://www.gnu.org/licenses/&gt;.
 
 
-import fileinput
+from __future__ import print_function
+
+import argparse
+import json
+
+from TimestampsSnitch.src.mongodb.mongodb_agent import MongoDBTimestampAgent
+from TimestampsSnitch.src.timestamping.utils import get_username, get_timestamp
+from TimestampsSnitch.src.timestamping.utils import eprint, iprint
 
 
-def main():
-    first_batch_processed = False
-    in_second_batch = False
-    for line in fileinput.input():
-        if line.startswith(&#34;START&#34;) or line.startswith(&#34;TIMESTAMP&#34;) \
-                or line.startswith(&#34;INTERVAL&#34;):
-            print(line.strip())
+def signal_experiment(experiment_id, username, signal, timestamp):
+    d = dict()
+    info = dict()
+    info[&#34;experiment_id&#34;] = experiment_id
+    info[&#34;username&#34;] = username
+    d[&#34;info&#34;] = info
+    d[&#34;type&#34;] = &#34;experiment&#34;
+    d[&#34;info&#34;][&#34;{0}_time&#34;.format(signal)] = timestamp
+    print(json.dumps(d))
 
-        elif line.startswith(&#34;Refreshing:&#34;):
-            if not first_batch_processed:
-                first_batch_processed = True
-            else:
-                in_second_batch = True
-        elif line.startswith(&#34;END&#34;):
-            first_batch_processed = False
-            in_second_batch = False
+
+def print_experiment(experiment_data):
+    doc_to_dump = {&#34;type&#34;: &#34;experiment&#34;, &#34;info&#34;: {}}
+    for field in [&#34;username&#34;, &#34;start_time&#34;, &#34;end_time&#34;, &#34;experiment_id&#34;]:
+        if field not in experiment_data:
+            eprint(&#34;Field {0} missing from experiment {1}&#34;.format(field, experiment_data[&#34;experiment_id&#34;]))
         else:
-            if in_second_batch:
-                print(line.strip())
+            doc_to_dump[&#34;info&#34;][field] = experiment_data[field]
+    print(json.dumps(doc_to_dump))
 
 
-if __name__ == &#34;__main__&#34;:
-    main()</code></pre>
+def get_experiment_info(experiment_name, username):
+    if experiment_name == &#34;ALL&#34;:
+        data = mongodb_agent.get_all_experiments(username)
+        if not data:
+            eprint(&#34;Couldn&#39;t find experiment data, maybe there is none?&#34;)
+            exit(0)
+    else:
+        data = mongodb_agent.get_experiment(experiment_name, username)
+        if not data:
+            eprint(&#34;Couldn&#39;t find experiment with id {0}&#34;.format(experiment_name))
+            exit(0)
+
+    if type(data) == type(dict()):
+        print_experiment(data)
+    elif type(data) == type(list()):
+        for experiment in data:
+            print_experiment(experiment)
+    else:
+        print_experiment(data)
+
+
+if __name__ == &#39;__main__&#39;:
+    mongodb_agent = MongoDBTimestampAgent()
+
+    parser = argparse.ArgumentParser(description=&#39;Signal for the start, end times or for the deletion of a test.&#39;)
+    parser.add_argument(&#39;option&#39;, metavar=&#39;option&#39;, type=str,
+                        help=&#39;an operation option &#34;info&#34;, &#34;start&#34;, &#34;end&#34; or &#34;delete&#34;&#39;)
+    parser.add_argument(&#39;experiment_name&#39;, metavar=&#39;experiment_name&#39;, type=str,
+                        help=&#39;The name of the experiment that encompasses this test&#39;)
+    parser.add_argument(&#39;--time&#39;, type=str, default=None,
+                        help=&#34;A time string in the form &#39;yyyy/mm/dd-HH:MM:SS&#39; (e.g., &#39;2018/06/01-12:34:36&#39;)&#34;)
+    parser.add_argument(&#39;--username&#39;, type=str, default=None,
+                        help=&#34;The username&#34;)
+    args = parser.parse_args()
+
+    username = get_username(args)
+
+    if args.option == &#34;start&#34; or args.option == &#34;end&#34;:
+        signal_experiment(args.experiment_name, username, args.option, get_timestamp(args))
+    elif args.option == &#34;delete&#34;:
+        mongodb_agent.delete_experiment(args.experiment_name, username)
+    elif args.option == &#34;info&#34;:
+        get_experiment_info(args.experiment_name, username)
+    else:
+        eprint(&#34;Bad option&#34;)
+        exit(1)</code></pre>
 </details>
 </section>
 <section>
@@ -82,8 +133,8 @@ if __name__ == &#34;__main__&#34;:
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="src.nethogs.filter_raw_output.main"><code class="name flex">
-<span>def <span class="ident">main</span></span>(<span>)</span>
+<dt id="src.timestamping.signal_experiment.get_experiment_info"><code class="name flex">
+<span>def <span class="ident">get_experiment_info</span></span>(<span>experiment_name, username)</span>
 </code></dt>
 <dd>
 <section class="desc"></section>
@@ -91,25 +142,64 @@ if __name__ == &#34;__main__&#34;:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def main():
-    first_batch_processed = False
-    in_second_batch = False
-    for line in fileinput.input():
-        if line.startswith(&#34;START&#34;) or line.startswith(&#34;TIMESTAMP&#34;) \
-                or line.startswith(&#34;INTERVAL&#34;):
-            print(line.strip())
+<pre><code class="python">def get_experiment_info(experiment_name, username):
+    if experiment_name == &#34;ALL&#34;:
+        data = mongodb_agent.get_all_experiments(username)
+        if not data:
+            eprint(&#34;Couldn&#39;t find experiment data, maybe there is none?&#34;)
+            exit(0)
+    else:
+        data = mongodb_agent.get_experiment(experiment_name, username)
+        if not data:
+            eprint(&#34;Couldn&#39;t find experiment with id {0}&#34;.format(experiment_name))
+            exit(0)
 
-        elif line.startswith(&#34;Refreshing:&#34;):
-            if not first_batch_processed:
-                first_batch_processed = True
-            else:
-                in_second_batch = True
-        elif line.startswith(&#34;END&#34;):
-            first_batch_processed = False
-            in_second_batch = False
+    if type(data) == type(dict()):
+        print_experiment(data)
+    elif type(data) == type(list()):
+        for experiment in data:
+            print_experiment(experiment)
+    else:
+        print_experiment(data)</code></pre>
+</details>
+</dd>
+<dt id="src.timestamping.signal_experiment.print_experiment"><code class="name flex">
+<span>def <span class="ident">print_experiment</span></span>(<span>experiment_data)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def print_experiment(experiment_data):
+    doc_to_dump = {&#34;type&#34;: &#34;experiment&#34;, &#34;info&#34;: {}}
+    for field in [&#34;username&#34;, &#34;start_time&#34;, &#34;end_time&#34;, &#34;experiment_id&#34;]:
+        if field not in experiment_data:
+            eprint(&#34;Field {0} missing from experiment {1}&#34;.format(field, experiment_data[&#34;experiment_id&#34;]))
         else:
-            if in_second_batch:
-                print(line.strip())</code></pre>
+            doc_to_dump[&#34;info&#34;][field] = experiment_data[field]
+    print(json.dumps(doc_to_dump))</code></pre>
+</details>
+</dd>
+<dt id="src.timestamping.signal_experiment.signal_experiment"><code class="name flex">
+<span>def <span class="ident">signal_experiment</span></span>(<span>experiment_id, username, signal, timestamp)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def signal_experiment(experiment_id, username, signal, timestamp):
+    d = dict()
+    info = dict()
+    info[&#34;experiment_id&#34;] = experiment_id
+    info[&#34;username&#34;] = username
+    d[&#34;info&#34;] = info
+    d[&#34;type&#34;] = &#34;experiment&#34;
+    d[&#34;info&#34;][&#34;{0}_time&#34;.format(signal)] = timestamp
+    print(json.dumps(d))</code></pre>
 </details>
 </dd>
 </dl>
@@ -126,12 +216,14 @@ if __name__ == &#34;__main__&#34;:
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="src.nethogs" href="index.html">src.nethogs</a></code></li>
+<li><code><a title="src.timestamping" href="index.html">src.timestamping</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="src.nethogs.filter_raw_output.main" href="#src.nethogs.filter_raw_output.main">main</a></code></li>
+<li><code><a title="src.timestamping.signal_experiment.get_experiment_info" href="#src.timestamping.signal_experiment.get_experiment_info">get_experiment_info</a></code></li>
+<li><code><a title="src.timestamping.signal_experiment.print_experiment" href="#src.timestamping.signal_experiment.print_experiment">print_experiment</a></code></li>
+<li><code><a title="src.timestamping.signal_experiment.signal_experiment" href="#src.timestamping.signal_experiment.signal_experiment">signal_experiment</a></code></li>
 </ul>
 </li>
 </ul>

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.7.2" />
-<title>src.daemons API documentation</title>
+<title>src.timestamping.utils API documentation</title>
 <meta name="description" content="" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
@@ -17,34 +17,151 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>src.daemons</code></h1>
+<h1 class="title">Module <code>src.timestamping.utils</code></h1>
 </header>
 <section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python"># Copyright (c) 2019 Universidade da Coruña
+# Authors:
+#     - Jonatan Enes [main](jonatan.enes@udc.es, jonatan.enes.alvarez@gmail.com)
+#     - Roberto R. Expósito
+#     - Juan Touriño
+#
+# This file is part of the BDWatchdog framework, from
+# now on referred to as BDWatchdog.
+#
+# BDWatchdog is free software: you can redistribute it
+# and/or modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation, either version 3
+# of the License, or (at your option) any later version.
+#
+# BDWatchdog is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with BDWatchdog. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+
+
+from __future__ import print_function
+
+import os
+import pwd
+import datetime
+import time
+import sys
+
+SERVICE_NAME = &#34;[BDWATCHDOG_TIMESTAMPING] : &#34;
+
+
+def eprint(*args, **kwargs):
+    message = SERVICE_NAME + str(*args)
+    print(message, file=sys.stderr, **kwargs)
+
+
+def iprint(message):
+    print(SERVICE_NAME + message)
+
+
+def get_username(args):
+    if not args or not args.username:
+        return pwd.getpwuid(os.getuid())[0]
+    else:
+        return args.username
+
+
+def get_timestamp(args):
+    timestamp = None
+    if args.time:
+        try:
+            ts = datetime.datetime.strptime(args.time, &#34;%Y/%m/%d-%H:%M:%S&#34;)
+            timestamp = int(time.mktime(ts.timetuple()))
+        except ValueError:
+            eprint(&#34;Bad time format, it should follow the format &#39;yyyy/mm/dd HH:MM:SS&#39; (e.g., &#39;2018/06/01-12:34:36&#39;)&#34;)
+            exit(1)
+    else:
+        timestamp = int(time.time())
+    return timestamp</code></pre>
+</details>
 </section>
 <section>
-<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt><code class="name"><a title="src.daemons.atop" href="atop.html">src.daemons.atop</a></code></dt>
+<dt id="src.timestamping.utils.eprint"><code class="name flex">
+<span>def <span class="ident">eprint</span></span>(<span>*args, **kwargs)</span>
+</code></dt>
 <dd>
 <section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def eprint(*args, **kwargs):
+    message = SERVICE_NAME + str(*args)
+    print(message, file=sys.stderr, **kwargs)</code></pre>
+</details>
 </dd>
-<dt><code class="name"><a title="src.daemons.daemon_utils" href="daemon_utils.html">src.daemons.daemon_utils</a></code></dt>
+<dt id="src.timestamping.utils.get_timestamp"><code class="name flex">
+<span>def <span class="ident">get_timestamp</span></span>(<span>args)</span>
+</code></dt>
 <dd>
 <section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_timestamp(args):
+    timestamp = None
+    if args.time:
+        try:
+            ts = datetime.datetime.strptime(args.time, &#34;%Y/%m/%d-%H:%M:%S&#34;)
+            timestamp = int(time.mktime(ts.timetuple()))
+        except ValueError:
+            eprint(&#34;Bad time format, it should follow the format &#39;yyyy/mm/dd HH:MM:SS&#39; (e.g., &#39;2018/06/01-12:34:36&#39;)&#34;)
+            exit(1)
+    else:
+        timestamp = int(time.time())
+    return timestamp</code></pre>
+</details>
 </dd>
-<dt><code class="name"><a title="src.daemons.nethogs" href="nethogs.html">src.daemons.nethogs</a></code></dt>
+<dt id="src.timestamping.utils.get_username"><code class="name flex">
+<span>def <span class="ident">get_username</span></span>(<span>args)</span>
+</code></dt>
 <dd>
 <section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_username(args):
+    if not args or not args.username:
+        return pwd.getpwuid(os.getuid())[0]
+    else:
+        return args.username</code></pre>
+</details>
 </dd>
-<dt><code class="name"><a title="src.daemons.turbostat" href="turbostat.html">src.daemons.turbostat</a></code></dt>
+<dt id="src.timestamping.utils.iprint"><code class="name flex">
+<span>def <span class="ident">iprint</span></span>(<span>message)</span>
+</code></dt>
 <dd>
 <section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def iprint(message):
+    print(SERVICE_NAME + message)</code></pre>
+</details>
 </dd>
 </dl>
-</section>
-<section>
-</section>
-<section>
 </section>
 <section>
 </section>
@@ -58,15 +175,15 @@
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="src" href="../index.html">src</a></code></li>
+<li><code><a title="src.timestamping" href="index.html">src.timestamping</a></code></li>
 </ul>
 </li>
-<li><h3><a href="#header-submodules">Sub-modules</a></h3>
-<ul>
-<li><code><a title="src.daemons.atop" href="atop.html">src.daemons.atop</a></code></li>
-<li><code><a title="src.daemons.daemon_utils" href="daemon_utils.html">src.daemons.daemon_utils</a></code></li>
-<li><code><a title="src.daemons.nethogs" href="nethogs.html">src.daemons.nethogs</a></code></li>
-<li><code><a title="src.daemons.turbostat" href="turbostat.html">src.daemons.turbostat</a></code></li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="src.timestamping.utils.eprint" href="#src.timestamping.utils.eprint">eprint</a></code></li>
+<li><code><a title="src.timestamping.utils.get_timestamp" href="#src.timestamping.utils.get_timestamp">get_timestamp</a></code></li>
+<li><code><a title="src.timestamping.utils.get_username" href="#src.timestamping.utils.get_username">get_username</a></code></li>
+<li><code><a title="src.timestamping.utils.iprint" href="#src.timestamping.utils.iprint">iprint</a></code></li>
 </ul>
 </li>
 </ul>

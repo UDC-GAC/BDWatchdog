@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.7.2" />
-<title>src.java_hadoop_snitch.java_ps API documentation</title>
+<title>src API documentation</title>
 <meta name="description" content="" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
@@ -17,105 +17,103 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>src.java_hadoop_snitch.java_ps</code></h1>
+<h1 class="title">Module <code>src</code></h1>
 </header>
 <section id="section-intro">
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python"># Copyright (c) 2019 Universidade da Coruña
-# Authors:
-#     - Jonatan Enes [main](jonatan.enes@udc.es, jonatan.enes.alvarez@gmail.com)
-#     - Roberto R. Expósito
-#     - Juan Touriño
-#
-# This file is part of the BDWatchdog framework, from
-# now on referred to as BDWatchdog.
-#
-# BDWatchdog is free software: you can redistribute it
-# and/or modify it under the terms of the GNU General Public License
-# as published by the Free Software Foundation, either version 3
-# of the License, or (at your option) any later version.
-#
-# BDWatchdog is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with BDWatchdog. If not, see &lt;http://www.gnu.org/licenses/&gt;.
-
-
-import fileinput
-
-
-def main():
-    for line in fileinput.input():
-        fields = line.strip().split(&#34; &#34;)
-        pid = fields[0]
-        for field in fields:
-            if field.startswith(&#34;org.apache.hadoop.&#34;) or field.startswith(&#34;org.apache.spark.&#34;):
-                # print &#34;Process &#34; + pid + &#34; is java with cmdline &#34; + field.strip().split(&#34;.&#34;)[-1]
-                print(pid + &#34; &#34; + field.strip().split(&#34;.&#34;)[-1])
-
-
-if __name__ == &#34;__main__&#34;:
-    main()</code></pre>
-</details>
 </section>
 <section>
-</section>
-<section>
-</section>
-<section>
-<h2 class="section-title" id="header-functions">Functions</h2>
+<h2 class="section-title" id="header-submodules">Sub-modules</h2>
 <dl>
-<dt id="src.java_hadoop_snitch.java_ps.main"><code class="name flex">
-<span>def <span class="ident">main</span></span>(<span>)</span>
-</code></dt>
+<dt><code class="name"><a title="src.mongodb" href="mongodb/index.html">src.mongodb</a></code></dt>
 <dd>
 <section class="desc"></section>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def main():
-    for line in fileinput.input():
-        fields = line.strip().split(&#34; &#34;)
-        pid = fields[0]
-        for field in fields:
-            if field.startswith(&#34;org.apache.hadoop.&#34;) or field.startswith(&#34;org.apache.spark.&#34;):
-                # print &#34;Process &#34; + pid + &#34; is java with cmdline &#34; + field.strip().split(&#34;.&#34;)[-1]
-                print(pid + &#34; &#34; + field.strip().split(&#34;.&#34;)[-1])</code></pre>
-</details>
+</dd>
+<dt><code class="name"><a title="src.timestamping" href="timestamping/index.html">src.timestamping</a></code></dt>
+<dd>
+<section class="desc"></section>
 </dd>
 </dl>
 </section>
 <section>
 </section>
+<section>
+</section>
+<section>
+</section>
 </article>
 <nav id="sidebar">
-<a href="/code/index.html"><img src="https://s3-eu-west-1.amazonaws.com/jonatan.enes.udc/logo_bdwatchdog.png" style="height:100px;"/></a>
+<a href="/code/index.html"><img src="https://s3-eu-west-1.amazonaws.com/jonatan.enes.udc/bdwatchdog_website/logo_bdwatchdog.png" style="height:100px;"/></a>
 <h1>Index</h1>
 <div class="toc">
 <ul></ul>
 </div>
 <ul id="index">
-<li><h3>Super-module</h3>
+<li><h3><a href="#header-submodules">Sub-modules</a></h3>
 <ul>
-<li><code><a title="src.java_hadoop_snitch" href="index.html">src.java_hadoop_snitch</a></code></li>
-</ul>
-</li>
-<li><h3><a href="#header-functions">Functions</a></h3>
-<ul class="">
-<li><code><a title="src.java_hadoop_snitch.java_ps.main" href="#src.java_hadoop_snitch.java_ps.main">main</a></code></li>
+<li><code><a title="src.mongodb" href="mongodb/index.html">src.mongodb</a></code></li>
+<li><code><a title="src.timestamping" href="timestamping/index.html">src.timestamping</a></code></li>
 </ul>
 </li>
 </ul>
 </nav>
 </main>
 <footer id="footer">
+<!-- Footer -->
+<footer class="page-footer font-small mdb-color lighten-3 pt-4">
+<!-- Footer Elements -->
+<div class="container">
+<!--Grid row-->
+<div class="row">
+<!--Grid column-->
+<div class="col-lg-3 col-md-12 mb-4">
+<!--Image-->
+<div class="view overlay z-depth-1-half">
+<a href="http://gac.udc.es/english/">
+<img src="/img/logotipoingles.png" class="img-fluid" alt="">
+<div class="mask rgba-white-light"></div>
+</a>
+</div>
+</div>
+<!--Grid column-->
+<!--Grid column-->
+<div class="col-lg-3 col-md-6 mb-4">
+<!--Image-->
+<div class="view overlay z-depth-1-half">
+<a href="http://www.mineco.gob.es">
+<img src="/img/mineco.jpg" class="img-fluid" alt="">
+<div class="mask rgba-white-light"></div>
+</a>
+</div>
+</div>
+<!--Grid column-->
+<!--Grid column-->
+<div class="col-lg-3 col-md-6 mb-4">
+<!--Image-->
+<div class="view overlay z-depth-1-half">
+<img src="/img/feder.jpg" class="img-fluid" alt="">
+<a href="http://www.mineco.gob.es">
+<div class="mask rgba-white-light"></div>
+</a>
+</div>
+</div>
+<!--Grid column-->
+<!--Grid column-->
+<div class="col-lg-3 col-md-12 mb-4">
+<!--Image-->
+<div class="view overlay z-depth-1-half">
+<a href="http://www.udc.es/index.html?language=en">
+<img src="/img/03_Simbolo_logo_cor.png" class="img-fluid" alt="">
+<div class="mask rgba-white-light"></div>
+</a>
+</div>
+</div>
+<!--Grid column-->
+</div>
+<!--Grid row-->
+</div>
+<!-- Footer Elements -->
+</footer>
+<!-- Footer -->
 <p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.2</a>.</p>
 </footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.7.2" />
-<title>src.nethogs.filter_raw_output API documentation</title>
+<title>src.timestamping.signal_test API documentation</title>
 <meta name="description" content="" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
@@ -17,7 +17,7 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>src.nethogs.filter_raw_output</code></h1>
+<h1 class="title">Module <code>src.timestamping.signal_test</code></h1>
 </header>
 <section id="section-intro">
 <details class="source">
@@ -47,32 +47,92 @@
 # along with BDWatchdog. If not, see &lt;http://www.gnu.org/licenses/&gt;.
 
 
-import fileinput
+from __future__ import print_function
+
+import time
+import json
+import argparse
+
+from TimestampsSnitch.src.mongodb.mongodb_agent import MongoDBTimestampAgent
+from TimestampsSnitch.src.timestamping.utils import get_username, get_timestamp
+from TimestampsSnitch.src.timestamping.utils import eprint, iprint
 
 
-def main():
-    first_batch_processed = False
-    in_second_batch = False
-    for line in fileinput.input():
-        if line.startswith(&#34;START&#34;) or line.startswith(&#34;TIMESTAMP&#34;) \
-                or line.startswith(&#34;INTERVAL&#34;):
-            print(line.strip())
+def signal_test(experiment_id, test_name, username, signal, timestamp):
+    d = dict()
+    info = dict()
+    info[&#34;experiment_id&#34;] = experiment_id
+    info[&#34;username&#34;] = username
+    info[&#34;test_name&#34;] = test_name
+    info[&#34;test_id&#34;] = experiment_id + &#34;_&#34; + test_name
+    d[&#34;info&#34;] = info
+    d[&#34;type&#34;] = &#34;test&#34;
+    if not timestamp:
+        timestamp = int(time.time())
+    d[&#34;info&#34;][&#34;{0}_time&#34;.format(signal)] = timestamp
+    print(json.dumps(d))
 
-        elif line.startswith(&#34;Refreshing:&#34;):
-            if not first_batch_processed:
-                first_batch_processed = True
-            else:
-                in_second_batch = True
-        elif line.startswith(&#34;END&#34;):
-            first_batch_processed = False
-            in_second_batch = False
+
+def print_test(test_data):
+    doc_to_dump = {&#34;type&#34;: &#34;test&#34;, &#34;info&#34;: {}}
+    for field in [&#34;username&#34;, &#34;start_time&#34;, &#34;end_time&#34;, &#34;experiment_id&#34;, &#34;test_id&#34;, &#34;test_name&#34;]:
+        if field not in test_data:
+            eprint(&#34;Field {0} missing from test {1}&#34;.format(field, test_data[&#34;test_id&#34;]))
         else:
-            if in_second_batch:
-                print(line.strip())
+            doc_to_dump[&#34;info&#34;][field] = test_data[field]
+    print(json.dumps(doc_to_dump))
 
 
-if __name__ == &#34;__main__&#34;:
-    main()</code></pre>
+def get_test_info(experiment_name, test_name, username):
+    if not mongodb_agent.experiment_exists(experiment_name, username):
+        eprint(&#34;Couldn&#39;t find experiment with id {0}&#34;.format(experiment_name))
+        exit(0)
+
+    if not test_name or test_name == &#34;ALL&#34;:
+        tests = mongodb_agent.get_experiment_tests(experiment_name, username)
+    else:
+        test = mongodb_agent.get_test(experiment_name, test_name, username)
+        if not test:
+            tests = []
+        else:
+            tests = [test]
+
+    if not tests:
+        eprint(&#34;Couldn&#39;t find tests for experiment {0}&#34;.format(experiment_name))
+        exit(0)
+
+    for test in tests:
+        print_test(test)
+
+
+if __name__ == &#39;__main__&#39;:
+    mongodb_agent = MongoDBTimestampAgent()
+
+    parser = argparse.ArgumentParser(description=&#39;Signal for the start, end times or for the deletion of a test.&#39;)
+    parser.add_argument(&#39;option&#39;, metavar=&#39;option&#39;, type=str,
+                        help=&#39;an operation option &#34;info&#34;, &#34;start&#34;, &#34;end&#34; or &#34;delete&#34;&#39;)
+    parser.add_argument(&#39;experiment_name&#39;, metavar=&#39;experiment_name&#39;, type=str,
+                        help=&#39;The name of the experiment that encompasses this test&#39;)
+    parser.add_argument(&#39;test_name&#39;, metavar=&#39;test_name&#39;, type=str,
+                        help=&#39;The name of the test&#39;)
+    parser.add_argument(&#39;--time&#39;, type=str, default=None,
+                        help=&#34;A time string in the form &#39;yyyy/mm/dd-HH:MM:SS&#39; (e.g., &#39;2018/06/01-12:34:36&#39;)&#34;)
+    parser.add_argument(&#39;--username&#39;, type=str, default=None,
+                        help=&#34;The username&#34;)
+
+    args = parser.parse_args()
+
+    username = get_username(args)
+
+    if args.option == &#34;start&#34; or args.option == &#34;end&#34;:
+        signal_test(args.experiment_name, args.test_name, username, args.option, get_timestamp(args))
+    elif args.option == &#34;delete&#34;:
+        mongodb_agent.delete_test(args.experiment_name, args.test_name, username)
+    elif args.option == &#34;info&#34;:
+        get_test_info(args.experiment_name, args.test_name, username)
+    else:
+        eprint(&#34;Bad option&#34;)
+        exit(1)</code></pre>
 </details>
 </section>
 <section>
@@ -82,8 +142,8 @@ if __name__ == &#34;__main__&#34;:
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="src.nethogs.filter_raw_output.main"><code class="name flex">
-<span>def <span class="ident">main</span></span>(<span>)</span>
+<dt id="src.timestamping.signal_test.get_test_info"><code class="name flex">
+<span>def <span class="ident">get_test_info</span></span>(<span>experiment_name, test_name, username)</span>
 </code></dt>
 <dd>
 <section class="desc"></section>
@@ -91,25 +151,69 @@ if __name__ == &#34;__main__&#34;:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def main():
-    first_batch_processed = False
-    in_second_batch = False
-    for line in fileinput.input():
-        if line.startswith(&#34;START&#34;) or line.startswith(&#34;TIMESTAMP&#34;) \
-                or line.startswith(&#34;INTERVAL&#34;):
-            print(line.strip())
+<pre><code class="python">def get_test_info(experiment_name, test_name, username):
+    if not mongodb_agent.experiment_exists(experiment_name, username):
+        eprint(&#34;Couldn&#39;t find experiment with id {0}&#34;.format(experiment_name))
+        exit(0)
 
-        elif line.startswith(&#34;Refreshing:&#34;):
-            if not first_batch_processed:
-                first_batch_processed = True
-            else:
-                in_second_batch = True
-        elif line.startswith(&#34;END&#34;):
-            first_batch_processed = False
-            in_second_batch = False
+    if not test_name or test_name == &#34;ALL&#34;:
+        tests = mongodb_agent.get_experiment_tests(experiment_name, username)
+    else:
+        test = mongodb_agent.get_test(experiment_name, test_name, username)
+        if not test:
+            tests = []
         else:
-            if in_second_batch:
-                print(line.strip())</code></pre>
+            tests = [test]
+
+    if not tests:
+        eprint(&#34;Couldn&#39;t find tests for experiment {0}&#34;.format(experiment_name))
+        exit(0)
+
+    for test in tests:
+        print_test(test)</code></pre>
+</details>
+</dd>
+<dt id="src.timestamping.signal_test.print_test"><code class="name flex">
+<span>def <span class="ident">print_test</span></span>(<span>test_data)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def print_test(test_data):
+    doc_to_dump = {&#34;type&#34;: &#34;test&#34;, &#34;info&#34;: {}}
+    for field in [&#34;username&#34;, &#34;start_time&#34;, &#34;end_time&#34;, &#34;experiment_id&#34;, &#34;test_id&#34;, &#34;test_name&#34;]:
+        if field not in test_data:
+            eprint(&#34;Field {0} missing from test {1}&#34;.format(field, test_data[&#34;test_id&#34;]))
+        else:
+            doc_to_dump[&#34;info&#34;][field] = test_data[field]
+    print(json.dumps(doc_to_dump))</code></pre>
+</details>
+</dd>
+<dt id="src.timestamping.signal_test.signal_test"><code class="name flex">
+<span>def <span class="ident">signal_test</span></span>(<span>experiment_id, test_name, username, signal, timestamp)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def signal_test(experiment_id, test_name, username, signal, timestamp):
+    d = dict()
+    info = dict()
+    info[&#34;experiment_id&#34;] = experiment_id
+    info[&#34;username&#34;] = username
+    info[&#34;test_name&#34;] = test_name
+    info[&#34;test_id&#34;] = experiment_id + &#34;_&#34; + test_name
+    d[&#34;info&#34;] = info
+    d[&#34;type&#34;] = &#34;test&#34;
+    if not timestamp:
+        timestamp = int(time.time())
+    d[&#34;info&#34;][&#34;{0}_time&#34;.format(signal)] = timestamp
+    print(json.dumps(d))</code></pre>
 </details>
 </dd>
 </dl>
@@ -126,12 +230,14 @@ if __name__ == &#34;__main__&#34;:
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="src.nethogs" href="index.html">src.nethogs</a></code></li>
+<li><code><a title="src.timestamping" href="index.html">src.timestamping</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="src.nethogs.filter_raw_output.main" href="#src.nethogs.filter_raw_output.main">main</a></code></li>
+<li><code><a title="src.timestamping.signal_test.get_test_info" href="#src.timestamping.signal_test.get_test_info">get_test_info</a></code></li>
+<li><code><a title="src.timestamping.signal_test.print_test" href="#src.timestamping.signal_test.print_test">print_test</a></code></li>
+<li><code><a title="src.timestamping.signal_test.signal_test" href="#src.timestamping.signal_test.signal_test">signal_test</a></code></li>
 </ul>
 </li>
 </ul>

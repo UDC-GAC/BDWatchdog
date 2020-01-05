@@ -1,4 +1,6 @@
-from rest import eve_rest
+from eve import Eve
 
-if __name__ == "__main__":
-    eve_rest.run()
+eve_rest = Eve(settings='settings.py')
+
+if __name__ == '__main__':
+    eve_rest.run(host='0.0.0.0')
