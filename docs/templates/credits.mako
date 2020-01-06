@@ -1,73 +1,38 @@
-<!-- Footer -->
-	<footer class="page-footer font-small mdb-color lighten-3 pt-4">
+<!--Grid row-->
+<div class="row">
 
-	  <!-- Footer Elements -->
-	  <div class="container">
+    <div class="footer_image">
+        <a href="http://gac.udc.es/english/">
+            <img src="https://s3-eu-west-1.amazonaws.com/jonatan.enes.udc/bdwatchdog_website/footer/logotipoingles.png"
+                 class="img-fluid" alt="">
+            <div class="mask rgba-white-light"></div>
+        </a>
+    </div>
 
-		<!--Grid row-->
-		<div class="row">
 
-		  <!--Grid column-->
-		  <div class="col-lg-3 col-md-12 mb-4">
+    <div class="footer_image">
+        <a href="http://www.mineco.gob.es">
+            <img src="https://s3-eu-west-1.amazonaws.com/jonatan.enes.udc/bdwatchdog_website/footer/mineco.jpg"
+                 class="img-fluid" alt="">
+            <div class="mask rgba-white-light"></div>
+        </a>
+    </div>
 
-			<!--Image-->
-			<div class="view overlay z-depth-1-half">
-			  <a href="http://gac.udc.es/english/">
-				<img src="/img/logotipoingles.png" class="img-fluid" alt="">
-				<div class="mask rgba-white-light"></div>
-			  </a>
-			</div>
 
-		  </div>
-		  <!--Grid column-->
+    <div class="footer_image">
+        <img src="https://s3-eu-west-1.amazonaws.com/jonatan.enes.udc/bdwatchdog_website/footer/feder.jpg"
+             class="img-fluid" alt="">
+        <a href="http://www.mineco.gob.es">
+            <div class="mask rgba-white-light"></div>
+        </a>
+    </div>
 
-		  <!--Grid column-->
-		  <div class="col-lg-3 col-md-6 mb-4">
+    <div class="footer_image">
+        <a href="http://www.udc.es/index.html?language=en">
+            <img src="https://s3-eu-west-1.amazonaws.com/jonatan.enes.udc/bdwatchdog_website/footer/03_Simbolo_logo_cor.png"
+                 class="img-fluid" alt="">
+            <div class="mask rgba-white-light"></div>
+        </a>
+    </div>
 
-			<!--Image-->
-			<div class="view overlay z-depth-1-half">
-			  <a href="http://www.mineco.gob.es">
-				<img src="/img/mineco.jpg" class="img-fluid" alt="">
-				<div class="mask rgba-white-light"></div>
-			  </a>
-			</div>
-
-		  </div>
-		  <!--Grid column-->
-
-		  <!--Grid column-->
-		  <div class="col-lg-3 col-md-6 mb-4">
-
-			<!--Image-->
-			<div class="view overlay z-depth-1-half">
-			  <img src="/img/feder.jpg" class="img-fluid" alt="">
-			  <a href="http://www.mineco.gob.es">
-				<div class="mask rgba-white-light"></div>
-			  </a>
-			</div>
-
-		  </div>
-		  <!--Grid column-->
-
-		  <!--Grid column-->
-		  <div class="col-lg-3 col-md-12 mb-4">
-
-			<!--Image-->
-			<div class="view overlay z-depth-1-half">
-			  <a href="http://www.udc.es/index.html?language=en">
-				  <img src="/img/03_Simbolo_logo_cor.png" class="img-fluid" alt="">
-				<div class="mask rgba-white-light"></div>
-			  </a>
-			</div>
-
-		  </div>
-		  <!--Grid column-->
-
-		</div>
-		<!--Grid row-->
-
-	  </div>
-	  <!-- Footer Elements -->
-
-	</footer>
-	<!-- Footer -->
+</div>
