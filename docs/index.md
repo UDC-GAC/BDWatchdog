@@ -1,8 +1,6 @@
-# BDWatchdog documentation
+![Logo](img/logo.png){: style="max-width:25%; margin-left: 40%"} 
 
-![Logo](img/logo.png){: style="height:150px;width:100px;"} 
-
-The **BDWatchdog** framework has been developed at Universidade da Coruña (Spain), as part of a PhD thesis from the candidate [Jonatan Enes](http://jonatanenes.com/).
+The **BDWatchdog** framework ...
 
 In this page all the documentation is presented for the several modules and utilities that compose the framework.
 
@@ -10,13 +8,17 @@ In this page all the documentation is presented for the several modules and util
 * In order to see data from real experiments where this tool was used, you can visit [this demo](http://bdwatchdog.dec.udc.es/TimeseriesViewer_DEMO/).
 * For the source code you can visit its [GitHub](https://github.com/JonatanEnes/BDWatchdog).
 
-### Documentation layout
+Finally, this framework is the subject of a publication in Future Generation Computer Systems (FGCS), which is available [online](https://www.sciencedirect.com/science/article/pii/S0167739X17316096).
 
-The documentation has been structured as following:
+This documentation webpage has been structured with the following sections:
 
-1. [Architecture](architecture.md): Where the architecture and design used is briefly described so as to better understand the role of each of the microservices.
+1. [Use case](use_case.md): This sections summarizes the core use case of this framework with a simple example.
 
-2. [Usage](usage.md): In this section it is described how to deploy the services as well as the framework overall. Some guidelines are also provided.
+2. [Architecture](architecture.md): Which briefly describes the architecture and design used.
 
-3. [Source Code](code/index.html): If you are interested on the low-level code and code documentation. 
+3. [Deployment](deployment.md): In this section it is described how to deploy the framework overall. Some guidelines are also provided.
+
+4. [Source Code](code/index.html): If you are interested on the low-level code and code documentation. 
+
+5. [Sponsors](sponsors.md): Some comments on the backers and sponsors of this framework.
 
