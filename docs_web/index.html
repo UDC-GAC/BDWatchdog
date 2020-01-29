@@ -99,7 +99,7 @@
             </span>
             <span class="md-header-nav__topic">
               
-                Home
+                Introduction
               
             </span>
           
@@ -216,8 +216,8 @@
     <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
     
     
-    <a href="." title="Home" class="md-nav__link md-nav__link--active">
-      Home
+    <a href="." title="Introduction" class="md-nav__link md-nav__link--active">
+      Introduction
     </a>
     
   </li>
@@ -265,8 +265,8 @@
 
 
   <li class="md-nav__item">
-    <a href="code/" title="Source code" class="md-nav__link">
-      Source code
+    <a href="sponsors/" title="Sponsors" class="md-nav__link">
+      Sponsors
     </a>
   </li>
 
@@ -277,8 +277,20 @@
 
 
   <li class="md-nav__item">
-    <a href="sponsors/" title="Sponsors" class="md-nav__link">
-      Sponsors
+    <a href="http://bdwatchdog.dec.udc.es/monitoring/index.html" title="Homepage (external)" class="md-nav__link">
+      Homepage (external)
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="code/" title="Source code (external)" class="md-nav__link">
+      Source code (external)
     </a>
   </li>
 
@@ -298,18 +310,33 @@
                   <a href="https://github.com/JonatanEnes/BDWatchdog/edit/master/docs/index.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
                 
                 
-                  <h1>Home</h1>
+                  <h1>Introduction</h1>
                 
                 <p><img alt="Logo" src="img/logo.png" style="max-width:25%; margin-left: 40%" /> </p>
-<p>The <strong>BDWatchdog</strong> framework ...</p>
+<p>The <strong>BDWatchdog</strong> framework has been developed in order to offer deep
+<strong>diagnostic capabilities</strong> when it comes to resource usage, over a wide 
+arrange of <strong>infrastructure units</strong>, from entire hosts down to <strong>individual 
+processes</strong>, supporting in the middle virtual machines or <strong>containers</strong>.
+This diagnostic is performed by combining both <strong>resource monitoring</strong>, with the
+use of time series, as well as <strong>flame graphs</strong> for profiling. The framework is
+also capable of working in real-time. </p>
 <p>In this page all the documentation is presented for the several modules and utilities that compose the framework.</p>
 <ul>
-<li>For a brief summary of this tool you can visit its <a href="http://bdwatchdog.dec.udc.es/monitoring/index.html">website</a>.</li>
-<li>In order to see data from real experiments where this tool was used, you can visit <a href="http://bdwatchdog.dec.udc.es/TimeseriesViewer_DEMO/">this demo</a>.</li>
-<li>For the source code you can visit its <a href="https://github.com/JonatanEnes/BDWatchdog">GitHub</a>.</li>
+<li>For a brief summary of this tool you can visit its 
+<a href="http://bdwatchdog.dec.udc.es/monitoring/index.html">website</a>.</li>
+<li>In order to see data from real experiments where this tool was used, 
+you can visit <a href="http://bdwatchdog.dec.udc.es/TimeseriesViewer_DEMO/">this demo</a>.</li>
+<li>For the uncommented source code you can visit its 
+<a href="https://github.com/JonatanEnes/BDWatchdog">GitHub</a>.</li>
 </ul>
-<p>Finally, this framework is the subject of a publication in Future Generation Computer Systems (FGCS), which is available <a href="https://www.sciencedirect.com/science/article/pii/S0167739X17316096">online</a>.</p>
-<p>This documentation webpage has been structured with the following sections:</p>
+<p>BDWatchdog has been the subject of a publication in Future Generation Computer 
+Systems (FGCS), which is available 
+<a href="https://www.sciencedirect.com/science/article/pii/S0167739X17316096">online</a>.
+All the technical details are explaine on the full-length paper along with some
+experimentation.</p>
+<p>In this documentation webpage a simpler approach of the framework's 
+architecture is given, in addition to some guidelines for its deployment.
+The documentation webpage has been structured with the following sections:</p>
 <ol>
 <li>
 <p><a href="use_case/">Use case</a>: This sections summarizes the core use case of this framework with a simple example.</p>
