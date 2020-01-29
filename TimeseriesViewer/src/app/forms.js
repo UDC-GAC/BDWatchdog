@@ -87,3 +87,20 @@ export function removeForm(form) {
 
 window.removeForm = removeForm
 window.setNowTime = setNowTime
+
+//----------------------
+//--  DEMO specific ----
+jQuery.getJSON('app/templates/hadoop.json', function(data) {
+    window.YarnChilds_form = data
+});
+jQuery.getJSON('app/templates/spark.json', function(data) {
+    window.SparkExecutors_form = data
+});
+jQuery.getJSON('app/templates/metagenomic.json', function(data) {
+    window.energy_form = data
+});
+jQuery.getJSON('app/templates/serverless.json', function(data) {
+    window.serverless_form = data
+});
+//--  DEMO specific ----
+//----------------------

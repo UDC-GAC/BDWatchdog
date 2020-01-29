@@ -1,37 +1,36 @@
 import {changeTimeInputs, getFormFromDiv, getNumFromForm} from "./app/forms.js";
 import {getGraphNumFromID, getGraphID, triggerResize} from "./app/graphs.js";
 
-import {addNewMetricsForm, changeTimeValues, addMetricsForm, refreshTimeNow} from "./app/monitoring/monitorings.js";
-import {reDrawGraphByNumber} from "./app/monitoring/timeseries.js";
+import {
+    addNewMetricsForm,
+    changeTimeValues,
+    addMetricsForm,
+    refreshTimeNow,
+    resetFormsList,
+    decrease_form_counter
+} from "./app/monitoring/monitorings.js";
+import {reDrawGraphByNumber, decrease_graph_counter} from "./app/monitoring/timeseries.js";
 import {monitorings, divFormsIdBase} from "./app/monitoring/monitorings.js";
 
 import {profilings} from "./app/profiling/profilings.js";
+import {decrease_report_counter} from "./app/reporting/reports.js";
+
 import {flameGraphsIdBase} from "./app/profiling/flamegraphs.js";
 
 import {getExperimentsFromMongo, getExperimentTimes, deleteExperiment} from "./app/timestamping/experiments.js";
-import {getApplicationsFromMongo, getApplicationTimes, deleteApplication} from "./app/timestamping/applications.js";
+import {
+    propagateApplicationTimes,
+    getApplicationsFromMongo,
+    getApplicationTimes,
+    deleteApplication
+} from "./app/timestamping/applications.js";
 import {getNowTime, getTodayTime} from "./app/forms.js";
 
 // PUBLIC //
 export const formsContainerId = "formsContainer";
 export const graphsContainerId = "graphsContainer";
-//window.graphsContainerId = graphsContainerId;
 export const reportsContainerId = "reportsContainer";
-// QUICKBUTTONS //
-export const spark_example = {
-    label_exp: "spark_experiments",
-    label_app: "PageRank",
-    end_time: 1512667973,
-    start_time: 1512666728
-};
-export const hadoop_example = {
-    label_exp: "hadoop_experiments",
-    label_app: "TeraSort",
-    end_time: 1512664138,
-    start_time: 1512663747
-};
-window.spark_example = spark_example;
-window.hadoop_example = hadoop_example;
+export const defaultExperimentsInfoURL = "http://bdwatchdog-demo:8000";
 
 export function createCORSRequest(method, url) {
     "use strict";
@@ -51,25 +50,6 @@ export function createCORSRequest(method, url) {
         xhr = null
     }
     return xhr
-}
-
-export function drawSomething(forms, example) {
-    "use strict";
-    propagateApplicationTimes({end_time: example.end_time, start_time: example.start_time});
-    addNewMetricsForm(forms);
-
-    //FIXME
-    //Shouldn't use a setTimeout
-    setTimeout(function () {
-        let reTimeButton = document.getElementById("reTimeButton");
-        reTimeButton.click()
-    }, 2000);
-
-    let experiments_form = document.getElementById("experiment_picker");
-    let experiment_label = experiments_form.elements.experiment;
-    experiment_label.value = example.label_exp;
-    let app_label = experiments_form.elements.application;
-    app_label.value = example.label_app;
 }
 
 export function requestGraphRedraw(formID, graphX, graphY) {
@@ -134,8 +114,6 @@ export function getApplications() {
 }
 
 
-
-
 export function addFormFromFile(form_info) {
     "use strict"
     let metrics = form_info.metrics
@@ -156,14 +134,11 @@ export function loadFile() {
     input = document.getElementById("fileinput")
     if (!input) {
         alert("Um, couldn't find the fileinput element.")
-    }
-    else if (!input.files) {
+    } else if (!input.files) {
         alert("This browser doesn't seem to support the `files` property of file inputs.")
-    }
-    else if (!input.files[0]) {
+    } else if (!input.files[0]) {
         alert("Please select a file before clicking 'Load'")
-    }
-    else {
+    } else {
         file = input.files[0]
         fr = new FileReader()
         fr.onload = receivedText
@@ -239,41 +214,6 @@ export function drawAllTimeseries() {
     }
 }
 
-window.autoreloadAll = autoreloadAll
-window.resizeAll = resizeAll
-window.retimeAll = retimeAll
-window.drawAllTimeseries = drawAllTimeseries
-window.loadFile = loadFile
-window.drawSomething = drawSomething
-
-window.getExperiments = getExperiments
-window.getExperimentTimes = getExperimentTimes
-window.deleteExperiment = deleteExperiment
-window.getApplications = getApplications
-window.getApplicationTimes = getApplicationTimes
-window.deleteApplication = deleteApplication
-
-
-
-
-// PRIVATE //
-export const defaultExperimentsInfoURL = "http://bdwatchdog-demo:8000"
-let quickButtonsDisabled = false
-
-function setAutoReload(formID) {
-    "use strict"
-    let graphID
-    if (formID.startsWith("monitorings")) {
-        graphID = getGraphID(getGraphNumFromID(formID))
-        let form = getFormFromDiv(document.getElementById(formID))
-        form.elements.autoreload.checked = true
-        let graph_number = getGraphNumFromID(graphID)
-        reDrawGraphByNumber(graph_number)
-        refreshTimeNow(form)
-        handleReport(form)
-    }
-}
-
 function requestGraphTimeRedraw(formID, start_time, end_time) {
     "use strict"
     let graph_num
@@ -293,3 +233,137 @@ function requestGraphTimeRedraw(formID, start_time, end_time) {
         changeTimeInputs(form, start_time, end_time)
     }
 }
+
+function setAutoReload(formID) {
+    "use strict"
+    let graphID
+    if (formID.startsWith("monitorings")) {
+        graphID = getGraphID(getGraphNumFromID(formID))
+        let form = getFormFromDiv(document.getElementById(formID))
+        form.elements.autoreload.checked = true
+        let graph_number = getGraphNumFromID(graphID)
+        reDrawGraphByNumber(graph_number)
+        refreshTimeNow(form)
+        handleReport(form)
+    }
+}
+
+//----------------------
+//--  DEMO specific -----
+
+let spark_example = {
+    label_exp: "spark_experiments",
+    label_app: "PageRank",
+    end_time: 1512667973,
+    start_time: 1512666728,
+    type: "bdwatchdog"
+};
+window.spark_example = spark_example
+
+let hadoop_example = {
+    label_exp: "hadoop_experiments",
+    label_app: "TeraSort",
+    end_time: 1512664138,
+    start_time: 1512663747,
+    type: "bdwatchdog"
+};
+window.hadoop_example = hadoop_example
+
+let serverless_example = {
+    label_exp: "serverless_experiments",
+    label_app: "TeraSort_PageRank",
+    end_time: 1567369745,
+    start_time: 1567366402,
+    type: "serverless"
+};
+window.serverless_example = serverless_example
+
+let energy_example = {
+    label_exp: "energy_experiments",
+    label_app: "Metagenomics",
+    end_time: 1571593092,
+    start_time: 1571588317,
+    type: "serverless"
+};
+window.energy_example = energy_example
+
+function set_timestamping_endpoint_value(endpoint) {
+    document.getElementById("experiment_picker").elements.endpoint.value = endpoint
+}
+
+function set_opentsdb_endpoint_value(endpoint) {
+    document.getElementById("config_form").elements.endpoint_OpenTSDB.value = endpoint
+}
+
+function hideForms() {
+    let hideFormsButton = document.getElementById("forms-toggle");
+    hideFormsButton.click();
+}
+
+hideForms()
+
+export function drawSomething(forms, example) {
+    "use strict";
+    set_timestamping_endpoint_value("http://dante.dec.udc.es:8080/" + example.type + "/times/");
+    set_opentsdb_endpoint_value("http://dante.dec.udc.es:8080/" + example.type + "/tsdb/");
+
+    propagateApplicationTimes({end_time: example.end_time, start_time: example.start_time});
+    cleanAll();
+    addNewMetricsForm(forms);
+
+    //TO BE FIXED //
+    //waitForElement("#metrics-form_3", function(){
+    //let reTimeButton = document.getElementById("reTimeButton")
+    //reTimeButton.click()
+    //});
+
+    setTimeout(function () {
+        let reTimeButton = document.getElementById("reTimeButton");
+        reTimeButton.click();
+    }, 1400);
+    //TO BE FIX //
+
+    let experiments_form = document.getElementById("experiment_picker");
+    let experiment_label = experiments_form.elements.experiment;
+    experiment_label.value = example.label_exp;
+    let app_label = experiments_form.elements.application;
+    app_label.value = example.label_app;
+}
+
+function cleanAll() {
+    let container = document.getElementById(formsContainerId)
+    while (container.firstChild) {
+        container.removeChild(container.firstChild);
+        decrease_form_counter()
+    }
+    resetFormsList()
+    container = document.getElementById(graphsContainerId)
+    while (container.firstChild) {
+        container.removeChild(container.firstChild);
+        decrease_graph_counter()
+    }
+    container = document.getElementById(reportsContainerId)
+    while (container.firstChild) {
+        container.removeChild(container.firstChild);
+        decrease_report_counter()
+    }
+}
+//--  DEMO specific -----
+//----------------------
+
+window.autoreloadAll = autoreloadAll
+window.resizeAll = resizeAll
+window.retimeAll = retimeAll
+window.drawAllTimeseries = drawAllTimeseries
+window.loadFile = loadFile
+
+
+window.getExperiments = getExperiments
+window.getExperimentTimes = getExperimentTimes
+window.deleteExperiment = deleteExperiment
+window.getApplications = getApplications
+window.getApplicationTimes = getApplicationTimes
+window.deleteApplication = deleteApplication
+window.drawSomething = drawSomething
+
+

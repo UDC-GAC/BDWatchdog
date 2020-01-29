@@ -9,6 +9,10 @@ import {formsContainerId} from "../../index.js";
 export let monitorings = []
 export const divFormsIdBase = "monitorings-form_"
 
+export function resetFormsList() {
+    monitorings = []
+}
+
 export function addEmptyMetricsForm() {
     "use strict"
     addNewMetricsForm(default_metrics_form)
@@ -16,8 +20,9 @@ export function addEmptyMetricsForm() {
 
 export function addNewMetricsForm(metrics_form) {
     "use strict"
-    let newArr = JSON.parse(metrics_form)
-    let timeseries = newArr["timeseries"]
+    //let newArr = JSON.parse(metrics_form)
+    //let timeseries = newArr["timeseries"]
+    let timeseries = metrics_form["timeseries"]
     for (let plot of timeseries) {
         addFormFromFile(plot)
     }
@@ -42,6 +47,14 @@ export function change_datetime_ids() {
 
     newDate = new Date(now)
     datetime.children[0].value = getTodayTime(newDate) + "-" + getNowTime(newDate)
+}
+
+export function increase_form_counter() {
+    form_counter = form_counter + 1
+}
+
+export function decrease_form_counter() {
+    form_counter = form_counter - 1
 }
 
 export function addMetricsForm(metrics, yranges) {
@@ -159,6 +172,7 @@ export function addTag(metric, tag) {
     })
     element.appendTo(divList)
 }
+
 export function removeThisMetricOrTag(button) {
     let input = button.parentNode.children[0] //input of this button
     let aElements = button.parentNode.parentNode.getElementsByClassName("row")
@@ -170,41 +184,6 @@ export function removeThisMetricOrTag(button) {
         }
     }
 }
-
-
-export const node0_form = "{\"timeseries\":[{\"metrics\":[{\"metric\": \"proc.cpu.user\",\"aggregator\" : \"zimsum\",\"tags\" : [\"host=node0\"]},{\"metric\": \"proc.cpu.kernel\",\"aggregator\" : \"zimsum\",\"tags\" : [\"host=node0\"]}],\"yranges\":{\"ymin\": 0,\"ymax\": 700}},{\"metrics\":[{\"metric\": \"proc.mem.resident\",\"aggregator\" : \"zimsum\",\"tags\" : [\"host=node0\"]},{\"metric\": \"proc.mem.swap\",\"aggregator\" : \"zimsum\",\"tags\" : [\"host=node0\"]}],\"yranges\":{\"ymin\": 0,\"ymax\": 25000}}]}"
-export const node1_form = "{\"timeseries\":[{\"metrics\":[{\"metric\": \"proc.cpu.user\",\"aggregator\" : \"zimsum\",\"tags\" : [\"host=node1\"]},{\"metric\": \"proc.cpu.kernel\",\"aggregator\" : \"zimsum\",\"tags\" : [\"host=node1\"]}],\"yranges\":{\"ymin\": 0,\"ymax\": 700}},{\"metrics\":[{\"metric\": \"proc.mem.resident\",\"aggregator\" : \"zimsum\",\"tags\" : [\"host=node1\"]},{\"metric\": \"proc.mem.swap\",\"aggregator\" : \"zimsum\",\"tags\" : [\"host=node1\"]}],\"yranges\":{\"ymin\": 0,\"ymax\": 25000}},{\"metrics\":[{\"metric\": \"proc.disk.reads.mb\",\"aggregator\" : \"zimsum\",\"tags\" : [\"host=node1\"]},{\"metric\": \"proc.disk.writes.mb\",\"aggregator\" : \"zimsum\",\"tags\" : [\"host=node1\"]}],\"yranges\":{\"ymin\": 0,\"ymax\": 120}},{\"metrics\":[{\"metric\": \"proc.net.tcp.in.mb\",\"aggregator\" : \"zimsum\",\"tags\" : [\"host=node1\"]},{\"metric\": \"proc.net.tcp.out.mb\",\"aggregator\" : \"zimsum\",\"tags\" : [\"host=node1\"]}],\"yranges\":{\"ymin\": 0,\"ymax\": 2500}}]}"
-export const node2_form = "{\"timeseries\":[{\"metrics\":[{\"metric\": \"proc.cpu.user\",\"aggregator\" : \"zimsum\",\"tags\" : [\"host=node2\"]},{\"metric\": \"proc.cpu.kernel\",\"aggregator\" : \"zimsum\",\"tags\" : [\"host=node2\"]}],\"yranges\":{\"ymin\": 0,\"ymax\": 700}},{\"metrics\":[{\"metric\": \"proc.mem.resident\",\"aggregator\" : \"zimsum\",\"tags\" : [\"host=node2\"]},{\"metric\": \"proc.mem.swap\",\"aggregator\" : \"zimsum\",\"tags\" : [\"host=node2\"]}],\"yranges\":{\"ymin\": 0,\"ymax\": 25000}},{\"metrics\":[{\"metric\": \"proc.disk.reads.mb\",\"aggregator\" : \"zimsum\",\"tags\" : [\"host=node2\"]},{\"metric\": \"proc.disk.writes.mb\",\"aggregator\" : \"zimsum\",\"tags\" : [\"host=node2\"]}],\"yranges\":{\"ymin\": 0,\"ymax\": 120}},{\"metrics\":[{\"metric\": \"proc.net.tcp.in.mb\",\"aggregator\" : \"zimsum\",\"tags\" : [\"host=node2\"]},{\"metric\": \"proc.net.tcp.out.mb\",\"aggregator\" : \"zimsum\",\"tags\" : [\"host=node2\"]}],\"yranges\":{\"ymin\": 0,\"ymax\": 2500}}]}"
-export const node3_form = "{\"timeseries\":[{\"metrics\":[{\"metric\": \"proc.cpu.user\",\"aggregator\" : \"zimsum\",\"tags\" : [\"host=node3\"]},{\"metric\": \"proc.cpu.kernel\",\"aggregator\" : \"zimsum\",\"tags\" : [\"host=node3\"]}],\"yranges\":{\"ymin\": 0,\"ymax\": 700}},{\"metrics\":[{\"metric\": \"proc.mem.resident\",\"aggregator\" : \"zimsum\",\"tags\" : [\"host=node3\"]},{\"metric\": \"proc.mem.swap\",\"aggregator\" : \"zimsum\",\"tags\" : [\"host=node3\"]}],\"yranges\":{\"ymin\": 0,\"ymax\": 25000}},{\"metrics\":[{\"metric\": \"proc.disk.reads.mb\",\"aggregator\" : \"zimsum\",\"tags\" : [\"host=node3\"]},{\"metric\": \"proc.disk.writes.mb\",\"aggregator\" : \"zimsum\",\"tags\" : [\"host=node3\"]}],\"yranges\":{\"ymin\": 0,\"ymax\": 120}},{\"metrics\":[{\"metric\": \"proc.net.tcp.in.mb\",\"aggregator\" : \"zimsum\",\"tags\" : [\"host=node3\"]},{\"metric\": \"proc.net.tcp.out.mb\",\"aggregator\" : \"zimsum\",\"tags\" : [\"host=node3\"]}],\"yranges\":{\"ymin\": 0,\"ymax\": 2500}}]}"
-export const nodeManagers_form = "{\"timeseries\":[{\"metrics\":[{\"metric\": \"proc.cpu.user\",\"aggregator\" : \"zimsum\",\"tags\" : [\"command=NodeManager\"]},{\"metric\": \"proc.cpu.kernel\",\"aggregator\" : \"zimsum\",\"tags\" : [\"command=NodeManager\"]}],\"yranges\":{\"ymin\": 0,\"ymax\": 700}},{\"metrics\":[{\"metric\": \"proc.mem.resident\",\"aggregator\" : \"zimsum\",\"tags\" : [\"command=NodeManager\"]},{\"metric\": \"proc.mem.swap\",\"aggregator\" : \"zimsum\",\"tags\" : [\"command=NodeManager\"]}],\"yranges\":{\"ymin\": 0,\"ymax\": 25000}},{\"metrics\":[{\"metric\": \"proc.disk.reads.mb\",\"aggregator\" : \"zimsum\",\"tags\" : [\"command=NodeManager\"]},{\"metric\": \"proc.disk.writes.mb\",\"aggregator\" : \"zimsum\",\"tags\" : [\"command=NodeManager\"]}],\"yranges\":{\"ymin\": 0,\"ymax\": 120}},{\"metrics\":[{\"metric\": \"proc.net.tcp.in.mb\",\"aggregator\" : \"zimsum\",\"tags\" : [\"command=NodeManager\"]},{\"metric\": \"proc.net.tcp.out.mb\",\"aggregator\" : \"zimsum\",\"tags\" : [\"command=NodeManager\"]}],\"yranges\":{\"ymin\": 0,\"ymax\": 2500}}]}"
-export const dataNodes_form = "{\"timeseries\":[{\"metrics\":[{\"metric\": \"proc.cpu.user\",\"aggregator\" : \"zimsum\",\"tags\" : [\"command=DataNode\"]},{\"metric\": \"proc.cpu.kernel\",\"aggregator\" : \"zimsum\",\"tags\" : [\"command=DataNode\"]}],\"yranges\":{\"ymin\": 0,\"ymax\": 700}},{\"metrics\":[{\"metric\": \"proc.mem.resident\",\"aggregator\" : \"zimsum\",\"tags\" : [\"command=DataNode\"]},{\"metric\": \"proc.mem.swap\",\"aggregator\" : \"zimsum\",\"tags\" : [\"command=DataNode\"]}],\"yranges\":{\"ymin\": 0,\"ymax\": 25000}},{\"metrics\":[{\"metric\": \"proc.disk.reads.mb\",\"aggregator\" : \"zimsum\",\"tags\" : [\"command=DataNode\"]},{\"metric\": \"proc.disk.writes.mb\",\"aggregator\" : \"zimsum\",\"tags\" : [\"command=DataNode\"]}],\"yranges\":{\"ymin\": 0,\"ymax\": 120}},{\"metrics\":[{\"metric\": \"proc.net.tcp.in.mb\",\"aggregator\" : \"zimsum\",\"tags\" : [\"command=DataNode\"]},{\"metric\": \"proc.net.tcp.out.mb\",\"aggregator\" : \"zimsum\",\"tags\" : [\"command=DataNode\"]}],\"yranges\":{\"ymin\": 0,\"ymax\": 2500}}]}"
-export const YarnChilds_form = "{\"timeseries\":[{\"metrics\":[{\"metric\": \"proc.cpu.user\",\"aggregator\" : \"zimsum\",\"tags\" : [\"command=YarnChild\"]},{\"metric\": \"proc.cpu.kernel\",\"aggregator\" : \"zimsum\",\"tags\" : [\"command=YarnChild\"]}],\"yranges\":{\"ymin\": 0,\"ymax\": 700}},{\"metrics\":[{\"metric\": \"proc.mem.resident\",\"aggregator\" : \"zimsum\",\"tags\" : [\"command=YarnChild\"]},{\"metric\": \"proc.mem.swap\",\"aggregator\" : \"zimsum\",\"tags\" : [\"command=YarnChild\"]}],\"yranges\":{\"ymin\": 0,\"ymax\": 25000}},{\"metrics\":[{\"metric\": \"proc.disk.reads.mb\",\"aggregator\" : \"zimsum\",\"tags\" : [\"command=YarnChild\"]},{\"metric\": \"proc.disk.writes.mb\",\"aggregator\" : \"zimsum\",\"tags\" : [\"command=YarnChild\"]}],\"yranges\":{\"ymin\": 0,\"ymax\": 120}},{\"metrics\":[{\"metric\": \"proc.net.tcp.in.mb\",\"aggregator\" : \"zimsum\",\"tags\" : [\"command=YarnChild\"]},{\"metric\": \"proc.net.tcp.out.mb\",\"aggregator\" : \"zimsum\",\"tags\" : [\"command=YarnChild\"]}],\"yranges\":{\"ymin\": 0,\"ymax\": 2500}}]}"
-export const SparkExecutors_form = "{\"timeseries\":[{\"metrics\":[{\"metric\": \"proc.cpu.user\",\"aggregator\" : \"zimsum\",\"tags\" : [\"command=CoarseGrainedExecutorBackend\"]},{\"metric\": \"proc.cpu.kernel\",\"aggregator\" : \"zimsum\",\"tags\" : [\"command=CoarseGrainedExecutorBackend\"]}],\"yranges\":{\"ymin\": 0,\"ymax\": 700}},{\"metrics\":[{\"metric\": \"proc.mem.resident\",\"aggregator\" : \"zimsum\",\"tags\" : [\"command=CoarseGrainedExecutorBackend\"]},{\"metric\": \"proc.mem.swap\",\"aggregator\" : \"zimsum\",\"tags\" : [\"command=CoarseGrainedExecutorBackend\"]}],\"yranges\":{\"ymin\": 0,\"ymax\": 25000}},{\"metrics\":[{\"metric\": \"proc.disk.reads.mb\",\"aggregator\" : \"zimsum\",\"tags\" : [\"command=CoarseGrainedExecutorBackend\"]},{\"metric\": \"proc.disk.writes.mb\",\"aggregator\" : \"zimsum\",\"tags\" : [\"command=CoarseGrainedExecutorBackend\"]}],\"yranges\":{\"ymin\": 0,\"ymax\": 120}},{\"metrics\":[{\"metric\": \"proc.net.tcp.in.mb\",\"aggregator\" : \"zimsum\",\"tags\" : [\"command=CoarseGrainedExecutorBackend\"]},{\"metric\": \"proc.net.tcp.out.mb\",\"aggregator\" : \"zimsum\",\"tags\" : [\"command=CoarseGrainedExecutorBackend\"]}],\"yranges\":{\"ymin\": 0,\"ymax\": 2500}}]}"
-export const NameNode_form = "{\"timeseries\":[{\"metrics\":[{\"metric\": \"proc.cpu.user\",\"aggregator\" : \"zimsum\",\"tags\" : [\"command=NameNode\"]},{\"metric\": \"proc.cpu.kernel\",\"aggregator\" : \"zimsum\",\"tags\" : [\"command=NameNode\"]}],\"yranges\":{\"ymin\": 0,\"ymax\": 700}},{\"metrics\":[{\"metric\": \"proc.mem.resident\",\"aggregator\" : \"zimsum\",\"tags\" : [\"command=NameNode\"]},{\"metric\": \"proc.mem.swap\",\"aggregator\" : \"zimsum\",\"tags\" : [\"command=NameNode\"]}],\"yranges\":{\"ymin\": 0,\"ymax\": 25000}},{\"metrics\":[{\"metric\": \"proc.disk.reads.mb\",\"aggregator\" : \"zimsum\",\"tags\" : [\"command=NameNode\"]},{\"metric\": \"proc.disk.writes.mb\",\"aggregator\" : \"zimsum\",\"tags\" : [\"command=NameNode\"]}],\"yranges\":{\"ymin\": 0,\"ymax\": 120}},{\"metrics\":[{\"metric\": \"proc.net.tcp.in.mb\",\"aggregator\" : \"zimsum\",\"tags\" : [\"command=NameNode\"]},{\"metric\": \"proc.net.tcp.out.mb\",\"aggregator\" : \"zimsum\",\"tags\" : [\"command=NameNode\"]}],\"yranges\":{\"ymin\": 0,\"ymax\": 2500}}]}"
-export const ResourceManager_form = "{\"timeseries\":[{\"metrics\":[{\"metric\": \"proc.cpu.user\",\"aggregator\" : \"zimsum\",\"tags\" : [\"command=ResourceManager\"]},{\"metric\": \"proc.cpu.kernel\",\"aggregator\" : \"zimsum\",\"tags\" : [\"command=ResourceManager\"]}],\"yranges\":{\"ymin\": 0,\"ymax\": 700}},{\"metrics\":[{\"metric\": \"proc.mem.resident\",\"aggregator\" : \"zimsum\",\"tags\" : [\"command=ResourceManager\"]},{\"metric\": \"proc.mem.swap\",\"aggregator\" : \"zimsum\",\"tags\" : [\"command=ResourceManager\"]}],\"yranges\":{\"ymin\": 0,\"ymax\": 25000}},{\"metrics\":[{\"metric\": \"proc.disk.reads.mb\",\"aggregator\" : \"zimsum\",\"tags\" : [\"command=ResourceManager\"]},{\"metric\": \"proc.disk.writes.mb\",\"aggregator\" : \"zimsum\",\"tags\" : [\"command=ResourceManager\"]}],\"yranges\":{\"ymin\": 0,\"ymax\": 120}},{\"metrics\":[{\"metric\": \"proc.net.tcp.in.mb\",\"aggregator\" : \"zimsum\",\"tags\" : [\"command=ResourceManager\"]},{\"metric\": \"proc.net.tcp.out.mb\",\"aggregator\" : \"zimsum\",\"tags\" : [\"command=ResourceManager\"]}],\"yranges\":{\"ymin\": 0,\"ymax\": 2500}}]}"
-
-
-// FIXME
-// This is needed to allow the main page functions and variables to be exposed
-window.node0_form = node0_form
-window.node1_form = node1_form
-window.node2_form = node2_form
-window.node3_form = node3_form
-window.nodeManagers_form = nodeManagers_form
-window.dataNodes_form = dataNodes_form
-window.YarnChilds_form = YarnChilds_form
-window.SparkExecutors_form = SparkExecutors_form
-window.NameNode_form = NameNode_form
-window.ResourceManager_form = ResourceManager_form
-
-
-window.addNewMetricsForm = addNewMetricsForm
-window.change_datetime_ids = change_datetime_ids
-window.addEmptyMetricsForm = addEmptyMetricsForm
-window.drawTimeseries = drawTimeseries
-window.addMetric = addMetric
-window.addTag = addTag
-window.removeThisMetricOrTag = removeThisMetricOrTag
 
 // PRIVATE //
 

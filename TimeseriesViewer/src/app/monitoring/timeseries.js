@@ -59,7 +59,7 @@ export function createJson(start_date, end_date, metrics, graph_number, downsamp
         start_date = start_date.replace("/", "-");
         start_date = start_date.replace("/", "-");
         let end_date_seconds = new Date(end_date).getTime()
-        let start_date_seconds =new Date(start_date).getTime()
+        let start_date_seconds = new Date(start_date).getTime()
         let timeDiff = (end_date_seconds - start_date_seconds) / 1000;
 
         //intervals range using hours
@@ -236,7 +236,7 @@ export function parseResponseMetricsData(allMetricsData) {
             tags_string_array.push(tag + ":" + metricData["tags"][tag])
         }
         let tags_string = tags_string_array.join(",")
-        labels_array.push(metricData["metric"] + ";"+tags_string)
+        labels_array.push(metricData["metric"] + ";" + tags_string)
     }
 
     //Look for the highest and lowest timestamp
@@ -308,7 +308,7 @@ function translateYGraphLabel(firstMetric) {
     let label = "UNKNOWN"
 
 
-    if (firstMetric.startsWith("proc.cpu.energy") || firstMetric.startsWith("sys.cpu.energy")){
+    if (firstMetric.startsWith("proc.cpu.energy") || firstMetric.startsWith("sys.cpu.energy")) {
         label = "energy (J)"
     } else if (firstMetric.startsWith("proc.cpu") || firstMetric.startsWith("sys.cpu")) {
         label = "cpu (%)"
@@ -462,6 +462,14 @@ export function drawGraph(parsedData, graphID, dataHasChanged) {
 //######################
 
 //####### ADD GRAPH #######
+
+export function increase_graph_counter() {
+    graph_counter = graph_counter + 1
+}
+
+export function decrease_graph_counter() {
+    graph_counter = graph_counter - 1
+}
 
 export function addGraph(metrics) {
     "use strict";

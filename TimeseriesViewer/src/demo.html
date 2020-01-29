@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BDWatchdog's interface</title>
+    <link href="img/favicon.png" rel="shortcut icon" type="image/x-icon">
+
+    <!-- JQuery -->
+    <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+
+    <!-- Bootstrap -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+    <!-- D3 -->
+    <script src="http://mbostock.github.com/d3/d3.v2.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-tip/0.6.7/d3-tip.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/countdown/2.6.0/countdown.min.js"></script>
+
+    <!-- Metrics timeseries graphs -->
+    <script src="app/monitoring/dynamicChartD3_3v.js" type="module"></script>
+    <script src="https://cdn.jsdelivr.net/interact.js/1.2.6/interact.min.js"></script>
+
+    <!-- FlameGraphs -->
+    <link rel="stylesheet" href="css/d3-flame-graph.css"/>
+    <script src="app/profiling/d3-flame-graph.js"></script>
+
+    <!-- My Javascript -->
+    <script type="text/javascript">
+        window.addEventListener("load", windowLoadHandler, false);
+
+        function windowLoadHandler() {
+            let propagateAppsTimesButton = document.getElementById("propagateAppsTimesButton");
+            propagateAppsTimesButton.disabled = true;
+
+            let pickAppButton = document.getElementById("pickAppButton");
+            pickAppButton.disabled = true;
+
+            let propagateExperimentsTimesButton = document.getElementById("propagateExperimentsTimesButton");
+            propagateExperimentsTimesButton.disabled = true
+        }
+
+        window.onerror = function (message, source, lineno, colno, error) {
+            let a = 0;
+        }
+
+    </script>
+
+    <script src="./index.js" type="module">
+    </script>
+
+    <script src="app/forms.js" type="module">
+    </script>
+    <script src="app/graphs.js" type="module">
+    </script>
+
+    <script src="app/reporting/reports.js" type="module">
+    </script>
+    <script src="app/monitoring/monitorings.js" type="module">
+    </script>
+    <script src="app/monitoring/timeseries.js" type="module">
+    </script>
+
+    <script src="app/profiling/profilings.js" type="module">
+    </script>
+    <script src="app/profiling/flamegraphs.js" type="module">
+    </script>
+
+    <link href='https://fonts.googleapis.com/css?family=Pacifico' rel='stylesheet' type='text/css'>
+
+    <!-- My CSS -->
+    <link href="css/simple-sidebar.css" rel="stylesheet">
+    <link href="css/styles.css" rel="stylesheet">
+    <link href="css/graphs.css" rel="stylesheet">
+
+</head>
+
+<body>
+<div id="wrapper">
+    <!-- Sidebar -->
+    <div id="sidebar-wrapper">
+        <ul class="sidebar-nav">
+
+            <li class="sidebar-brand" style="display: contents;">
+                <div style="display: flex; margin-left: 15px;">
+                    <a href="http://bdwatchdog.dec.udc.es/">
+                        <img src="img/logos/bdwatchdog.png" style="height:130px;margin: 1%;"/>
+                    </a>
+                    <a href="http://bdwatchdog.dec.udc.es/serverless/index.html">
+                        <img src="img/logos/serverless.png" style="height: 90px;margin: 1%;margin-top:45px;"/>
+                    </a>
+                </div>
+
+                <div>
+                    <h3 class="castellar">BDWatchdog's web interface</h3>
+                    <div>
+                        <a href="http://bdwatchdog.dec.udc.es/" style="line-height: 2em;">Framework's website</a>
+                        <text> /\</text>
+                        <a href="http://jonatanenes.com" style="line-height: 2em;">Author's website (Jonatan Enes)</a>
+                    </div>
+                </div>
+            </li>
+
+            <hr class="thick">
+
+            <li>
+                <div>
+                    <div>
+                        <h3>Global Controls</h3>
+                        <div>
+                            <!--<button class="btn btn-default" onclick="addNewProfilingForm()">Add New Profiling Form</button>-->
+<!--                            <button class="btn btn-default" onclick="addEmptyMetricsForm()">-->
+<!--                                <i class="fa fa-2x fa-plus"></i>-->
+<!--                                Add Form-->
+<!--                            </button>-->
+<!--                            <button id="reloadAllButton" class="btn btn-default" style=""-->
+<!--                                    onclick="autoreloadAll();return false;">-->
+<!--                                <i class="fa fa-2x fa-hourglass-2"></i>-->
+<!--                                Autoreload all-->
+<!--                            </button>-->
+                            <button id="drawAllButton" class="btn btn-default" style=""
+                                    onclick="drawAllTimeseries();return false;">
+                                <i class="fa fa-2x fa-area-chart"></i>
+                                Draw all
+                            </button>
+                            <button id="reTimeButton" class="btn btn-default"
+                                    style="" onclick="retimeAll();return false;">
+                                <i class="fa fa-2x fa-clock-o"></i>
+                                Retime all
+                            </button>
+                        </div>
+                    </div>
+
+<!--                    <hr class="thin">-->
+
+<!--                    <form>-->
+<!--                        <h3>Json template file</h3>-->
+<!--                        <div style="margin-left: 1vw;">-->
+<!--                            <input type='file' id='fileinput' style="float:left;width: 40%;">-->
+<!--                            <button type='button'-->
+<!--                                    class="btn btn-default"-->
+<!--                                    id='btnLoad'-->
+<!--                                    onclick='loadFile();'>-->
+<!--                                Load-->
+<!--                                <i class="fa fa-upload"></i>-->
+<!--                            </button>-->
+
+<!--                        </div>-->
+<!--                    </form>-->
+
+<!--                    <hr class="thin">-->
+
+                    <form class="form-inline" id="experiment_picker" name="experiment_picker">
+                        <h3>Timestamping service</h3>
+                        <p>This section is integrated with the
+                            <a style="display: initial;"
+                               href="https://github.com/JonatanEnes/BDWatchdog/tree/master/TimestampsSnitch">
+                                application's timestamping tool</a>
+                        </p>
+
+                        <div class="menu_div">
+                            <span>Endpoint:</span>
+                            <input class="input-sm menu_item"
+                                   name="endpoint"
+                                   style="width:70%;margin-left: 5%;"
+                                   type="text"
+                                   value="http://dante.dec.udc.es:8080/bdwatchdog/times/">
+                        </div>
+<!--                        <div class="menu_div">-->
+<!--                            <span>Username:</span>-->
+<!--                            <input class="input-sm menu_item"-->
+<!--                                   name="username"-->
+<!--                                   type="text"-->
+<!--                                   style="margin-left:3%;width: 44%;"-->
+<!--                                   value="root">-->
+<!--                        </div>-->
+
+                        <div class="dropdown menu_div">
+                            <span>Experiment:</span>
+                            <input class="input-sm menu_item"
+                                   name="experiment"
+                                   type="text"
+                                   style="width:43%;margin-left: 2%;"
+                                   value="hadoop_experiments"
+                                   id="experiment_button">
+                            <button class="btn btn-default dropdown-toggle menu_item"
+                                    type="button"
+                                    onclick="getExperiments()" data-toggle="dropdown" aria-haspopup="true"
+                                    aria-expanded="true">
+                                Pick
+                                <span class="caret"></span>
+                            </button>
+                            <button id="propagateExperimentsTimesButton"
+                                    class="btn btn-default dropdown-toggle menu_item"
+                                    type="button"
+                                    onclick="getExperimentTimes()">
+                                <i class="fa fa-pencil"></i>
+                                Set
+                            </button>
+                            <ul class="dropdown-menu" id="exps_timepicker_list">
+                            </ul>
+                        </div>
+
+                        <div class="dropdown menu_div">
+                            <span>Test:</span>
+                            <input class="input-sm menu_item" style="margin-left:11%;" name="application" type="text"
+                                   value="TeraGen">
+                            <button id="pickAppButton"
+                                    class="btn btn-default dropdown-toggle menu_item"
+                                    type="button" onclick="getApplications()"
+                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                Pick
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu" id="apps_timepicker_list"></ul>
+                            <button id="propagateAppsTimesButton"
+                                    class="btn btn-default dropdown-toggle menu_item"
+                                    type="button"
+                                    onclick="getApplicationTimes()">
+                                <i class="fa fa-pencil"></i>
+                                Set
+                            </button>
+                        </div>
+
+                    </form>
+
+                    <hr class="thin">
+
+                    <form class="form-inline" id="times_form" name="times_form">
+                        <h3>Times</h3>
+                        <div id="general_start_time" style="margin-bottom: 10px">
+                            <text>Start:</text>
+                            <input id="global_start_time"
+                                   name="datetime0"
+                                   name="time_start"
+                                   type="text"
+                                   value="2017/02/08-19:52:52">
+                            <span class="add-on">
+									<i data-date-icon="icon-calendar"
+                                       data-time-icon="icon-time"></i>
+								</span>
+                            <button class="btn btn-default"
+                                    onclick="setNowTime(this.parentNode.parentNode, 0);return false;">
+                                <i class="fa fa-pencil fa-lg"></i>
+                                Set to now
+                            </button>
+                        </div>
+
+                        <div id="general_end_time">
+                            <text>End:</text>
+                            <input id="global_end_time"
+                                   name="datetime1"
+                                   name="time_end"
+                                   type="text"
+                                   value="2017/02/08-21:30:11">
+                            <span class="add-on">
+									<i data-date-icon="icon-calendar"
+                                       data-time-icon="icon-time"></i>
+                            </span>
+                            <button class="btn btn-default"
+                                    onclick="setNowTime(this.parentNode.parentNode, 1);return false;">
+                                <i class="fa fa-pencil fa-lg"></i>
+                                Set to now
+                            </button>
+                        </div>
+
+                        <script type="module">
+                            import {getTodayTime, getNowTime} from "./app/forms.js"
+
+                            let newDate = new Date();
+                            let FiveMinutes = 5 * 60 * 1000;
+                            let ago = newDate.getTime() - FiveMinutes;
+                            let now = newDate.getTime();
+
+                            newDate = new Date(ago);
+                            document.getElementById("global_start_time").value = getTodayTime(newDate) + "-" + getNowTime(newDate);
+
+                            newDate = new Date(now);
+                            document.getElementById("global_end_time").value = getTodayTime(newDate) + "-" + getNowTime(newDate);
+
+                        </script>
+                    </form>
+
+                    <hr class="thin">
+
+                    <form class="form-inline" id="config_form" name="config_form">
+                        <h3>Endpoints</h3>
+                        <div style="margin-bottom: 10px">
+                            <span>Time series:</span>
+                            <input class="input" name="endpoint_OpenTSDB"
+                                   style="margin-left:20px;position: absolute;width:60%" type="text"
+                                   value="http://dante.dec.udc.es:8080/bdwatchdog/tsdb/">
+                        </div>
+<!--                        <div>-->
+<!--                            <span>Flame graphs:</span>-->
+<!--                            <input class="input" name="endpoint_MongoDB"-->
+<!--                                   style="margin-left:6px;position: absolute;width:60%" type="text"-->
+<!--                                   value="http://localhost:5000/flamegraph/">-->
+<!--                        </div>-->
+                    </form>
+
+                    <hr class="thin">
+
+<!--                    <form class="form-inline" id="sizes_form" name="sizes_form">-->
+<!--                        <h3>Plot sizes</h3>-->
+<!--                        <div>-->
+<!--                            <span>X size:</span>-->
+<!--                            <input class="" style="max-width:15%;" name="graphX" size="4"-->
+<!--                                   type="number" value="700">-->
+<!--                            <span>Y size:</span>-->
+<!--                            <input class="" style="max-width:15%;" name="graphY" size="4"-->
+<!--                                   type="number" value="300">-->
+<!--                            <button class="btn btn-default"-->
+<!--                                    onclick="resizeAll();return false;">Re-size All-->
+<!--                            </button>-->
+<!--                        </div>-->
+<!--                    </form>-->
+                </div>
+            </li>
+
+            <hr class="thick" style="margin-bottom:20px;">
+
+            <li>
+                <span class="label label-default lb-lg">Powered by:</span>
+                <div class="">
+                    <span>
+                        <a href="http://opentsdb.net/">
+                            <img alt="OpenTSD header" src="img/logos/opentsdb.png" style=";height:40px;">
+                        </a>
+                        <a href="http://mongodb.com/">
+                            <img alt="MongoDB header" src="img/logos/mongodb.png" style=";height:40px;">
+                        </a>
+                        <a href="https://d3js.org/">
+                            <img src="img/logos/d3.png" style="height:40px;">
+                        </a>
+                    </span>
+                </div>
+            </li>
+
+            <hr class="thin">
+
+            <li>
+                <span class="label label-default lb-lg">Partners:</span>
+                <div class="">
+                    <a href="http://gac.udc.es/english/">
+                        <img alt="logo gac" src="img/logos/gac.png" style="width:200px; height:50px;">
+                    </a>
+                    <a href="http://www.udc.es/index.html?language=en">
+                        <img alt="logo udc" src="img/logos/udc.png" style="width:200px; height:50px;">
+                    </a>
+                </div>
+            </li>
+
+            <hr class="thin">
+
+            <li>
+                <span class="label label-default lb-lg">Funded by:</span>
+                <div>
+                    <a class="plain" href="http://www.mineco.gob.es/">
+                        <img width="240px" height="80px" alt="MINECO logo" src="img/logos/mineco.jpg">
+                    </a>
+                    <a class="plain" href="http://ec.europa.eu/regional_policy/en/funding/erdf/">
+                        <img width="240px" height="75px" alt="FEDER logo" src="img/logos/erdf.png">
+                    </a>
+                </div>
+            </li>
+            <hr class="thin">
+
+        </ul>
+
+    </div>
+    <!-- /#sidebar-wrapper -->
+
+    <!---------------------->
+    <!--  DEMO specific -->
+    <div class="container" style="width: 100%; background-color: #e6ffe6; overflow: auto; padding:20px">
+
+        <div class="alert alert-secondary" style="margin-right:20px; width: 20%;background-color: orange;">
+            <p>
+                <strong> <i class="icon-danger"></i> Remember that this is just a simplified demo version of the web
+                    viewer, used to showcase the core BDWatchdog and Serverless Containers features.</strong>
+            </p>
+            <p>
+                For the fully-featured web you can check out the
+                <a href="https://github.com/JonatanEnes/BDWatchdog/tree/master/TimeseriesViewer">repo</a>
+                for the source code, or this
+                <a href="index.html">link</a>
+                for a live, served version.
+            </p>
+        </div>
+
+        <button id="drawHadoopButton" class="action-button yellow"
+                onclick="drawSomething(YarnChilds_form, hadoop_example)">Plot me some Hadoop!
+        </button>
+        <button id="drawSparkButton" class="action-button blue"
+                onclick="drawSomething(SparkExecutors_form, spark_example)">Plot me some Spark!
+        </button>
+        <button id="drawServerlessButton" class="action-button orange"
+                onclick="drawSomething(serverless_form, serverless_example)">Show me something Serverless!
+        </button>
+        <button id="drawEnergyButton" class="action-button green"
+                onclick="drawSomething(energy_form, energy_example)">I want to see energy plots!
+        </button>
+    </div>
+    <!--  DEMO specific -->
+    <!---------------------->
+
+
+    <div class="container form-container" id="formsContainer"
+         style="width: 100%;background-color: #e6ffe6;overflow: auto;"></div>
+
+    <div>
+        <a class="btn btn-danger" href="#menu-toggle" id="menu-toggle">Hide Menu</a>
+        <a class="btn btn-danger" href="#forms-toggle" id="forms-toggle">Hide Forms</a>
+    </div>
+
+    <div class="" id="graphsContainer" style="float:left;width: 100%;padding-left:20px;"></div>
+    <div class="" id="reportsContainer" style="float:left;width: 100%;padding-left:20px;"></div>
+</div>
+<!-- /#wrapper -->
+
+<!-- Menu Toggle Script -->
+<script>
+    $("#menu-toggle").click(function (e) {
+        e.preventDefault();
+        $("#wrapper").toggleClass("toggled");
+        if (this.innerText === "Hide Menu")
+            this.innerText = "Show Menu";
+        else
+            this.innerText = "Hide Menu";
+    })
+    $("#forms-toggle").click(function (e) {
+        e.preventDefault();
+        $("#formsContainer").toggleClass("toggled");
+        if (this.innerText === "Hide Forms") {
+            this.innerText = "Show Forms";
+        } else {
+            this.innerText = "Hide Forms";
+        }
+    })
+</script>
+</body>
+</html>
