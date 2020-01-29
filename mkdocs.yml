@@ -1,11 +1,14 @@
 site_name: BDWatchdog documentation
 nav:
-    - Home: index.md
+    - Introduction: index.md
     - Use case: use_case.md
     - Architecture: architecture.md
     - Deployment: deployment.md
-    - Source code: code/index.html
     - Sponsors: sponsors.md
+
+    - Homepage (external): http://bdwatchdog.dec.udc.es/monitoring/index.html
+    - Source code (external): code/index.html
+
 
 #theme: readthedocs
 #theme: mkdocs
