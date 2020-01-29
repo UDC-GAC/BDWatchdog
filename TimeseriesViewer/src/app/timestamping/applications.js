@@ -86,7 +86,7 @@ function application_label_on_click() {
     "use strict";
     let experiments_form = document.getElementById("experiment_picker");
     let app_label = experiments_form.elements.application;
-    app_label.value = this.innerText;
+    app_label.value = this.label_value;
     app_label.application_id = this.application_id;
     app_label.etag = this.etag;
 }

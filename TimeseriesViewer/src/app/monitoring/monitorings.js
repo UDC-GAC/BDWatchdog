@@ -140,6 +140,7 @@ export function drawTimeseries(form) {
     changeGraphValues(graph_number, metrics, start_date, end_date)
     reDrawGraphByNumber(graph_number)
 }
+window.drawTimeseries = drawTimeseries
 
 export function addMetric(form, metric) {
     let metricsDiv = form.getElementsByClassName("monitorings-div")[0]
@@ -158,6 +159,7 @@ export function addMetric(form, metric) {
     })
     element.appendTo(divList)
 }
+window.addMetric = addMetric
 
 export function addTag(metric, tag) {
     let tagsDiv = metric.getElementsByClassName("tags-div")[0]
@@ -172,6 +174,7 @@ export function addTag(metric, tag) {
     })
     element.appendTo(divList)
 }
+window.addTag = addTag
 
 export function removeThisMetricOrTag(button) {
     let input = button.parentNode.children[0] //input of this button
@@ -184,6 +187,7 @@ export function removeThisMetricOrTag(button) {
         }
     }
 }
+window.removeThisMetricOrTag = removeThisMetricOrTag
 
 // PRIVATE //
 

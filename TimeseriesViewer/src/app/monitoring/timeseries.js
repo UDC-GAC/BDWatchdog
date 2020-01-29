@@ -18,7 +18,7 @@ export let applyScale = false;
 
 export let x_time_reduction_factor = 1;
 
-export const defaultXSize = "700";
+export const defaultXSize = "600";
 export const defaultYSize = "300";
 
 let strokeColors = ["blue", "red", "green", "orange", "purple", "steelblue"];
@@ -272,33 +272,78 @@ export function parseResponseMetricsData(allMetricsData) {
     return allMetricsValues
 }
 
+function translateMetric(metric) {
+    let translated_metric = metric
+
+    //CPU
+    translated_metric = translated_metric.replace("proc.cpu.user", "User CPU")
+    translated_metric = translated_metric.replace("proc.cpu.kernel", "Kernel CPU")
+    translated_metric = translated_metric.replace("structure.cpu.usage", "CPU Used")
+    translated_metric = translated_metric.replace("structure.cpu.current", "CPU Allocated")
+
+    //ENERGY
+    translated_metric = translated_metric.replace("structure.energy.max", "Energy Allowed")
+    translated_metric = translated_metric.replace("structure.energy.min", "Min Energy given")
+    translated_metric = translated_metric.replace("structure.energy.usage", "Energy Used")
+
+    //MEM
+    translated_metric = translated_metric.replace("proc.mem.resident", "Resident MEM")
+    translated_metric = translated_metric.replace("proc.mem.virtual", "Virtual MEM")
+    translated_metric = translated_metric.replace("proc.mem.swap", "Swap MEM")
+
+    //DISK
+    translated_metric = translated_metric.replace("proc.disk.writes.mb", "Writes Disk")
+    translated_metric = translated_metric.replace("proc.disk.reads.mb", "Reads Disk")
+
+    //NET
+    translated_metric = translated_metric.replace("proc.net.tcp.in", "In TCP Network")
+    translated_metric = translated_metric.replace("proc.net.tcp.out", "Out TCP Network")
+
+    return translated_metric
+}
+
+function translateCommand(command) {
+    let translated_command = command
+    translated_command = translated_command.replace("CoarseGrainedExecutorBackend", "Spark Executor")
+    translated_command = translated_command.replace("YarnChild", "Yarn Containers")
+    return translated_command
+}
+
+function translateHost(host) {
+    let translated_host = host
+    return translated_command
+}
+
 function translateLabels(labels) {
     "use strict";
     let translatedLabels = []
 
     for (let j = 0; j < labels.length; j++) {
         let label = labels[j]
-        //CPU
-        label = label.replace("proc.cpu.user", "process user cpu")
-        label = label.replace("proc.cpu.user", "process kernel cpu")
 
-        //MEM
-        label = label.replace("proc.mem.resident", "process resident memory")
-        label = label.replace("proc.mem.virtual", "process virtual memory")
-        label = label.replace("proc.mem.swap", "process swap memory")
+        let splits = label.split(";")
 
-        //DISK
-        label = label.replace("proc.disk.writes.mb", "process writes disk")
-        label = label.replace("proc.disk.reads.mb", "process reads disk")
+        let translated_metric = translateMetric(splits[0])
 
-        //NET
-        label = label.replace("proc.net.tcp.in", "process in TCP traffic")
-        label = label.replace("proc.net.tcp.out", "process out TCP traffic")
+        let translated_command = ""
+        let translated_host = ""
+        for (let z = 1; z < splits.length; z++) {
+            let split = splits[z]
+            if (split.includes("command")) {
+                translated_command = translateCommand(split)
+            } else {
+                translated_command = "command:ALL"
+            }
+            if (split.includes("host")) {
+                translated_host = translateHost(split)
+            } else {
+                translated_host = "host:ALL"
+            }
+        }
 
-        //Applications
-        label = label.replace("CoarseGrainedExecutorBackend", "SparkExecutor")
+        let translated_label = translated_metric + " , " + translated_command + " , " + translated_host
 
-        translatedLabels.push(label)
+        translatedLabels.push(translated_label)
     }
     return translatedLabels
 }

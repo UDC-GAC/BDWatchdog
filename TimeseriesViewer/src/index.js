@@ -252,7 +252,7 @@ function setAutoReload(formID) {
 //--  DEMO specific -----
 
 let spark_example = {
-    label_exp: "spark_experiments",
+    label_exp: "Spark",
     label_app: "PageRank",
     end_time: 1512667973,
     start_time: 1512666728,
@@ -261,7 +261,7 @@ let spark_example = {
 window.spark_example = spark_example
 
 let hadoop_example = {
-    label_exp: "hadoop_experiments",
+    label_exp: "Hadoop",
     label_app: "TeraSort",
     end_time: 1512664138,
     start_time: 1512663747,
