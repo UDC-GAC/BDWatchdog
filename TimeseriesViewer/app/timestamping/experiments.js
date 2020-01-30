@@ -1,18 +1,12 @@
 import {timeConverter} from "../../index.js";
 import {getMongoURLfromUI, sendCORSrequest} from "./shared.js";
 
-let deleted_experiments = []
+let deleted_experiments = [];
 
 export function getExperimentsFromMongo(username) {
     "use strict";
     let endpoint = getMongoURLfromUI();
-    let headers = [{"header": "Accept", "value": "application/json"}];
     let mongo_REST_endpoint = endpoint + "/experiments?where={%22username%22:%22" + username + "%22}";
-
-    //sendCORSrequest("GET", mongo_REST_endpoint, headers, 200, function (response){
-    //    populateExperimentsDropdown(response)
-    //}, "Error getting experiments");
-
     getExperimentsFromMongoPaginated(mongo_REST_endpoint, true)
 
 }
@@ -72,7 +66,7 @@ export function deleteExperiment(experiment, check_confirm) {
 
     let success_function = function (response) {
         deleted_experiments.push(experiment_id)
-    }
+    };
 
     sendCORSrequest("DELETE", mongo_REST_endpoint,
         headers, 204, success_function,
@@ -134,7 +128,7 @@ function populateExperimentsDropdown(experiments, remove_previous) {
         button1.label_value = experiment.experiment_id;
         button1.experiment_id = experiment._id;
         button1.etag = experiment._etag;
-        button1.onclick = experiment_label_on_click
+        button1.onclick = experiment_label_on_click;
         child.appendChild(button1);
 
         let button2 = document.createElement("div");
@@ -142,7 +136,7 @@ function populateExperimentsDropdown(experiments, remove_previous) {
         button2.classList = "btn btn-default ";
         button2.experiment_id = experiment._id;
         button2.etag = experiment._etag;
-        button2.onclick = experiment_delete_on_click
+        button2.onclick = experiment_delete_on_click;
         child.appendChild(button2);
 
         list.append(child);

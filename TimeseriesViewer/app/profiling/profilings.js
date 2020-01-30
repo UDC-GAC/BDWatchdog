@@ -2,7 +2,7 @@ export let profilings = [];
 const divProfilingFormsIdBase = 'profiling-form_';
 var profilings_counter = 0;
 var current_profiling_number = 0;
-var profilings_form_html_filename = "html/profiling_form.html";
+var profilings_form_html_filename = "app/templates/html/profiling_form.html";
 
 
 function addNewProfilingForm(){

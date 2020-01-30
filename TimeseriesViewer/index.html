@@ -50,7 +50,7 @@
 
     </script>
 
-    <script src="./index.js" type="module">
+    <script src="index.js" type="module">
     </script>
 
     <script src="app/forms.js" type="module">
@@ -207,7 +207,8 @@
 
                         <div class="dropdown menu_div">
                             <span>Test:</span>
-                            <input class="input-sm menu_item" style="margin-left:11%;" name="application" type="text"
+                            <input class="input-sm menu_item" style="margin-left:11%;" name="application"
+                                   type="text"
                                    value="TeraGen">
                             <button id="pickAppButton"
                                     class="btn btn-default dropdown-toggle menu_item"
@@ -235,8 +236,7 @@
                         <div id="general_start_time" style="margin-bottom: 10px">
                             <text>Start:</text>
                             <input id="global_start_time"
-                                   name="datetime0"
-                                   name="time_start"
+                                   name="global_start_time"
                                    type="text"
                                    value="2017/02/08-19:52:52">
                             <span class="add-on">
@@ -252,11 +252,12 @@
 
                         <div id="general_end_time">
                             <text>End:</text>
+
                             <input id="global_end_time"
-                                   name="datetime1"
-                                   name="time_end"
+                                   name="global_end_time"
                                    type="text"
                                    value="2017/02/08-21:30:11">
+
                             <span class="add-on">
 									<i data-date-icon="icon-calendar"
                                        data-time-icon="icon-time"></i>
@@ -295,12 +296,12 @@
                                    style="margin-left:20px;position: absolute;width:60%" type="text"
                                    value="http://dante.dec.udc.es:8080/bdwatchdog/tsdb/">
                         </div>
-<!--                        <div>-->
-<!--                            <span>Flame graphs:</span>-->
-<!--                            <input class="input" name="endpoint_MongoDB"-->
-<!--                                   style="margin-left:6px;position: absolute;width:60%" type="text"-->
-<!--                                   value="http://localhost:5000/flamegraph/">-->
-<!--                        </div>-->
+                        <!--                        <div>-->
+                        <!--                            <span>Flame graphs:</span>-->
+                        <!--                            <input class="input" name="endpoint_MongoDB"-->
+                        <!--                                   style="margin-left:6px;position: absolute;width:60%" type="text"-->
+                        <!--                                   value="http://localhost:5000/flamegraph/">-->
+                        <!--                        </div>-->
                     </form>
 
                     <hr class="thin">
@@ -335,7 +336,7 @@
                             <img alt="MongoDB header" src="img/logos/mongodb.png" style=";height:40px;">
                         </a>
                         <a href="https://d3js.org/">
-                            <img src="img/logos/d3.png" style="height:40px;">
+                            <img src="img/logos/d3.png" style="height:40px;" alt="D3 logo">
                         </a>
                     </span>
                 </div>
@@ -398,7 +399,7 @@
             this.innerText = "Show Menu";
         else
             this.innerText = "Hide Menu";
-    })
+    });
     $("#forms-toggle").click(function (e) {
         e.preventDefault();
         $("#formsContainer").toggleClass("toggled");

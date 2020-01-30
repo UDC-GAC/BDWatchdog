@@ -1,19 +1,12 @@
 import {timeConverter} from "../../index.js";
 import {getMongoURLfromUI, sendCORSrequest} from "./shared.js";
 
-
-
 export function getApplicationsFromMongo(username, experiment_id) {
     "use strict";
     let endpoint = getMongoURLfromUI();
     let mongo_REST_endpoint =
         endpoint + "/tests" +
         "?where={%22experiment_id%22:%22" + experiment_id + "%22}";
-    //let mongo_REST_endpoint =
-    //    endpoint + "/tests" +
-    //    "?where={%22username%22:%22" + username +
-    //    "%22,%22experiment_id%22:%22" + experiment_id + "%22}";
-
     getApplicationsFromMongoPaginated(mongo_REST_endpoint, true)
 }
 
@@ -42,7 +35,6 @@ export function getApplicationTimes() {
         propagateApplicationTimes(response)
     }, "Error getting application times");
 }
-
 
 export function deleteApplication(application, check_confirm) {
     "use strict";
@@ -80,7 +72,6 @@ export function deleteApplication(application, check_confirm) {
 
     }, "Error deleting application information");
 }
-
 
 function application_label_on_click() {
     "use strict";
@@ -128,6 +119,5 @@ function populateApplicationsDropdown(applications, remove_previous) {
         child.appendChild(button2);
 
         list.append(child);
-
     }
 }

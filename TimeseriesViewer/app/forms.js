@@ -10,7 +10,7 @@ export function getNumFromForm(form) {
     return form.parentNode.id.split("_")[1]
 }
 
-// For todays date;
+// For today date;
 export function getTodayTime(date){
     "use strict";
     return date.getFullYear() + "/" + (((date.getMonth() + 1) < 10) ? "0" : "") +
@@ -27,8 +27,8 @@ export function getNowTime(date){
 
 
 export function setNowTime(form, timepicker) {
-    let newDate = new Date()
-    let datetime = getTodayTime(newDate) + "-" + getNowTime(newDate)
+    let newDate = new Date();
+    let datetime = getTodayTime(newDate) + "-" + getNowTime(newDate);
 
     if (timepicker === 0) {
         form.elements.datetime0.value = datetime
@@ -47,33 +47,33 @@ export function getFormFromDiv(div) {
 }
 
 export function changeTimeInputs(form, start_time, end_time) {
-    form.elements.datetime0.value = start_time
+    form.elements.datetime0.value = start_time;
     form.elements.datetime1.value = end_time
 }
 
 function removeFormById(formID) {
-    let element = document.getElementById(formID)
-    element.parentNode.removeChild(element)
+    let element = document.getElementById(formID);
+    element.parentNode.removeChild(element);
     let index;
     let graph_number;
 
     for (let form of monitorings){
         if (form.id === formID) {
-            index = monitorings.indexOf(form)
+            index = monitorings.indexOf(form);
             //Remove from metrics list
-            monitorings.splice(index, 1)
-            graph_number = getNumFromForm(form.firstChild)
+            monitorings.splice(index, 1);
+            graph_number = getNumFromForm(form.firstChild);
             //Remove from graphs container and dictionary
-            removeGraphByNumber("graph", graph_number)
+            removeGraphByNumber("graph", graph_number);
             removeReportByNumber(graph_number)
         }
 
     }
     for (let form of profilings){
         if (form.id === formID) {
-            index = profilings.indexOf(form)
-            profilings.splice(index, 1)
-            graph_number = getNumFromForm(form.firstChild)
+            index = profilings.indexOf(form);
+            profilings.splice(index, 1);
+            graph_number = getNumFromForm(form.firstChild);
             removeGraphByNumber("flamegraph", graph_number)
         }
     }
@@ -85,22 +85,5 @@ export function removeForm(form) {
     removeFormById(form.id)
 }
 
-window.removeForm = removeForm
-window.setNowTime = setNowTime
-
-//----------------------
-//--  DEMO specific ----
-jQuery.getJSON('app/templates/hadoop.json', function(data) {
-    window.YarnChilds_form = data
-});
-jQuery.getJSON('app/templates/spark.json', function(data) {
-    window.SparkExecutors_form = data
-});
-jQuery.getJSON('app/templates/metagenomic.json', function(data) {
-    window.energy_form = data
-});
-jQuery.getJSON('app/templates/serverless.json', function(data) {
-    window.serverless_form = data
-});
-//--  DEMO specific ----
-//----------------------
+window.removeForm = removeForm;
+window.setNowTime = setNowTime;
