@@ -1,0 +1,3 @@
+{"type": "experiment", "info": {"username": "hadoop", "start_time": 1512663349, "end_time": 1512664140, "experiment_id": "Hadoop"}}
+{"type": "test", "info": {"username": "hadoop", "start_time": 1512663356, "end_time": 1512663716, "experiment_id": "Hadoop", "test_id": "application_1512408661880_0049", "test_name": "WordCount"}}
+{"type": "test", "info": {"username": "hadoop", "start_time": 1512663747, "end_time": 1512664138, "experiment_id": "Hadoop", "test_id": "application_1512408661880_0050", "test_name": "TeraSort"}}

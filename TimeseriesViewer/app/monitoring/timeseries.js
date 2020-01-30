@@ -326,6 +326,7 @@ function translateLabels(labels) {
 
         let translated_command = "";
         let translated_host = "";
+        let structure = ""
         for (let z = 1; z < splits.length; z++) {
             let split = splits[z];
             if (split.includes("command")) {
@@ -338,9 +339,17 @@ function translateLabels(labels) {
             } else {
                 translated_host = "host:ALL"
             }
+            if (split.includes("structure")) {
+                structure = split
+            }
         }
 
-        let translated_label = translated_metric + " , " + translated_command + " , " + translated_host;
+        let translated_label = "";
+        if (label.includes("structure")){
+            translated_label = translated_metric + " , " + translated_command + " , " + structure;
+        }else {
+            translated_label = translated_metric + " , " + translated_command + " , " + translated_host;
+        }
 
         translatedLabels.push(translated_label)
     }

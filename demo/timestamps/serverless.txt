@@ -1,0 +1,9 @@
+{"type": "experiment", "info": {"username": "serverless", "start_time": 1567386715, "end_time": 1567392859, "experiment_id": "Concurrent_TeraSorts"}}
+{"type": "test", "info": {"username": "serverless", "start_time": 1567386715, "end_time": 1567388477, "experiment_id": "Concurrent_TeraSorts", "test_id": "Concurrent_TeraSorts_baseline", "test_name": "baseline"}}
+{"type": "test", "info": {"username": "serverless", "start_time": 1567391025, "end_time": 1567392859, "experiment_id": "Concurrent_TeraSorts", "test_id": "Concurrent_TeraSorts_serverless", "test_name": "serverless"}}
+{"type": "experiment", "info": {"username": "serverless", "start_time": 1567239611, "end_time": 1567242620, "experiment_id": "PageRank"}}
+{"type": "test", "info": {"username": "serverless", "start_time": 1567239611, "end_time": 1567240894, "experiment_id": "PageRank", "test_id": "PageRank_baseline", "test_name": "baseline"}}
+{"type": "test", "info": {"username": "serverless", "start_time": 1567241258, "end_time": 1567242620, "experiment_id": "PageRank", "test_id": "PageRank_serverless", "test_name": "serverless"}}
+{"type": "experiment", "info": {"username": "serverless", "start_time": 1567363144, "end_time": 1567369745, "experiment_id": "Hybrid_workloads"}}
+{"type": "test", "info": {"username": "serverless", "start_time": 1567363144, "end_time": 1567366401, "experiment_id": "Hybrid_workloads", "test_id": "Hybrid_workloads_baseline", "test_name": "baseline"}}
+{"type": "test", "info": {"username": "serverless", "start_time": 1567366402, "end_time": 1567369745, "experiment_id": "Hybrid_workloads", "test_id": "Hybrid_workloads_serverless", "test_name": "serverless"}}

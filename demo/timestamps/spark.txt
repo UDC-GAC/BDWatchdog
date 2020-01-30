@@ -1,0 +1,5 @@
+{"type": "experiment", "info": {"username": "spark", "start_time": 1512664260, "end_time": 1512667973, "experiment_id": "Spark"}}
+{"type": "test", "info": {"username": "spark", "start_time": 1512664415, "end_time": 1512664960, "experiment_id": "Spark", "test_id": "application_1512408661880_0052", "test_name": "TeraSort"}}
+{"type": "test", "info": {"username": "spark", "start_time": 1512666055, "end_time": 1512666677, "experiment_id": "Spark", "test_id": "application_1512408661880_0054", "test_name": "NWeightGraphX"}}
+{"type": "test", "info": {"username": "spark", "start_time": 1512666728, "end_time": 1512667973, "experiment_id": "Spark", "test_id": "application_1512408661880_0055", "test_name": "PageRank"}}
+{"type": "test", "info": {"username": "spark", "start_time": 1512665011, "end_time": 1512666004, "experiment_id": "Spark", "test_id": "application_1512408661880_0053", "test_name": "KMeans"}}

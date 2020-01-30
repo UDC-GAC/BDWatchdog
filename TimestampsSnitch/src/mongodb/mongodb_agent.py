@@ -109,6 +109,7 @@ class MongoDBTimestampAgent:
                 if r.status_code != 201:
                     eprint("Couldn't properly put document to address {0}".format(endpoint))
                     eprint(r.text)
+                    tries += 1
                 else:
                     iprint("Document created at: {0}".format(
                         time.strftime("%D %H:%M:%S", time.localtime()) + " timestamp is " + str(time.time())))
@@ -127,6 +128,7 @@ class MongoDBTimestampAgent:
                 if r.status_code != 200:
                     eprint("Couldn't properly put document to address {0}".format(endpoint))
                     eprint(r.text)
+                    tries += 1
                 else:
                     iprint("Document updated at: " + time.strftime("%D %H:%M:%S", time.localtime()))
                     break

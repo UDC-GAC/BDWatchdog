@@ -112,19 +112,20 @@
 
             <li>
                 <div>
-                    <div>
+                    <div style="display:none">
                         <h3>Global Controls</h3>
                         <div>
-                            <!--<button class="btn btn-default" onclick="addNewProfilingForm()">Add New Profiling Form</button>-->
-<!--                            <button class="btn btn-default" onclick="addEmptyMetricsForm()">-->
-<!--                                <i class="fa fa-2x fa-plus"></i>-->
-<!--                                Add Form-->
-<!--                            </button>-->
-<!--                            <button id="reloadAllButton" class="btn btn-default" style=""-->
-<!--                                    onclick="autoreloadAll();return false;">-->
-<!--                                <i class="fa fa-2x fa-hourglass-2"></i>-->
-<!--                                Autoreload all-->
-<!--                            </button>-->
+                            <button class="btn btn-default" onclick="addNewProfilingForm()">Add New Profiling Form
+                            </button>
+                            <button class="btn btn-default" onclick="addEmptyMetricsForm()">
+                                <i class="fa fa-2x fa-plus"></i>
+                                Add Form
+                            </button>
+                            <button id="reloadAllButton" class="btn btn-default" style=""
+                                    onclick="autoreloadAll();return false;">
+                                <i class="fa fa-2x fa-hourglass-2"></i>
+                                Autoreload all
+                            </button>
                             <button id="drawAllButton" class="btn btn-default" style=""
                                     onclick="drawAllTimeseries();return false;">
                                 <i class="fa fa-2x fa-area-chart"></i>
@@ -138,24 +139,24 @@
                         </div>
                     </div>
 
-<!--                    <hr class="thin">-->
+                    <hr class="thin">
 
-<!--                    <form>-->
-<!--                        <h3>Json template file</h3>-->
-<!--                        <div style="margin-left: 1vw;">-->
-<!--                            <input type='file' id='fileinput' style="float:left;width: 40%;">-->
-<!--                            <button type='button'-->
-<!--                                    class="btn btn-default"-->
-<!--                                    id='btnLoad'-->
-<!--                                    onclick='loadFile();'>-->
-<!--                                Load-->
-<!--                                <i class="fa fa-upload"></i>-->
-<!--                            </button>-->
+                    <form style="display:none">
+                        <h3>Json template file</h3>
+                        <div style="margin-left: 1vw;">
+                            <input type='file' id='fileinput' style="float:left;width: 40%;">
+                            <button type='button'
+                                    class="btn btn-default"
+                                    id='btnLoad'
+                                    onclick='loadFile();'>
+                                Load
+                                <i class="fa fa-upload"></i>
+                            </button>
 
-<!--                        </div>-->
-<!--                    </form>-->
+                        </div>
+                    </form>
 
-<!--                    <hr class="thin">-->
+                    <hr class="thin">
 
                     <form class="form-inline" id="experiment_picker" name="experiment_picker">
                         <h3>Timestamping service</h3>
@@ -165,7 +166,7 @@
                                 application's timestamping tool</a>
                         </p>
 
-                        <div class="menu_div">
+                        <div class="menu_div" style="display:none">
                             <span>Endpoint:</span>
                             <input class="input-sm menu_item"
                                    name="endpoint"
@@ -202,7 +203,7 @@
                                     type="button"
                                     onclick="getExperimentTimes()">
                                 <i class="fa fa-pencil"></i>
-                                Set
+                                ReTime
                             </button>
                             <ul class="dropdown-menu" id="exps_timepicker_list">
                             </ul>
@@ -225,7 +226,7 @@
                                     type="button"
                                     onclick="getApplicationTimes()">
                                 <i class="fa fa-pencil"></i>
-                                Set
+                                ReTime
                             </button>
                         </div>
 
@@ -233,7 +234,7 @@
 
                     <hr class="thin">
 
-                    <form class="form-inline" id="times_form" name="times_form">
+                    <form class="form-inline" id="times_form" name="times_form" style="display:none">
                         <h3>Times</h3>
                         <div id="general_start_time" style="margin-bottom: 10px">
                             <text>Start:</text>
@@ -290,7 +291,7 @@
 
                     <hr class="thin">
 
-                    <form class="form-inline" id="config_form" name="config_form">
+                    <form class="form-inline" id="config_form" name="config_form" style="display:none">
                         <h3>Endpoints</h3>
                         <div style="margin-bottom: 10px">
                             <span>Time series:</span>
@@ -298,30 +299,30 @@
                                    style="margin-left:20px;position: absolute;width:60%" type="text"
                                    value="http://dante.dec.udc.es:8080/bdwatchdog/tsdb/">
                         </div>
-<!--                        <div>-->
-<!--                            <span>Flame graphs:</span>-->
-<!--                            <input class="input" name="endpoint_MongoDB"-->
-<!--                                   style="margin-left:6px;position: absolute;width:60%" type="text"-->
-<!--                                   value="http://localhost:5000/flamegraph/">-->
-<!--                        </div>-->
+                        <!--                        <div>-->
+                        <!--                            <span>Flame graphs:</span>-->
+                        <!--                            <input class="input" name="endpoint_MongoDB"-->
+                        <!--                                   style="margin-left:6px;position: absolute;width:60%" type="text"-->
+                        <!--                                   value="http://localhost:5000/flamegraph/">-->
+                        <!--                        </div>-->
                     </form>
 
                     <hr class="thin">
 
-<!--                    <form class="form-inline" id="sizes_form" name="sizes_form">-->
-<!--                        <h3>Plot sizes</h3>-->
-<!--                        <div>-->
-<!--                            <span>X size:</span>-->
-<!--                            <input class="" style="max-width:15%;" name="graphX" size="4"-->
-<!--                                   type="number" value="700">-->
-<!--                            <span>Y size:</span>-->
-<!--                            <input class="" style="max-width:15%;" name="graphY" size="4"-->
-<!--                                   type="number" value="300">-->
-<!--                            <button class="btn btn-default"-->
-<!--                                    onclick="resizeAll();return false;">Re-size All-->
-<!--                            </button>-->
-<!--                        </div>-->
-<!--                    </form>-->
+                    <form class="form-inline" id="sizes_form" name="sizes_form" style="display:none">
+                        <h3>Plot sizes</h3>
+                        <div>
+                            <span>X size:</span>
+                            <input class="" style="max-width:15%;" name="graphX" size="4"
+                                   type="number" value="700">
+                            <span>Y size:</span>
+                            <input class="" style="max-width:15%;" name="graphY" size="4"
+                                   type="number" value="300">
+                            <button class="btn btn-default"
+                                    onclick="resizeAll();return false;">Re-size All
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </li>
 
@@ -382,7 +383,52 @@
     <!--  DEMO specific -->
     <div class="container" style="width: 100%; background-color: #e6ffe6; overflow: auto; padding:20px">
 
-        <div class="alert alert-secondary" style="margin-right:20px; width: 20%;background-color: orange;">
+        <div class="alert alert-secondary"
+             style="margin-right:20px; width: 30%;background-color: white;font-size: 1.1em;">
+            <p style="text-align: center;font-size: 1.8em;">
+                <span>&#9432;</span>
+                INSTRUCTIONS
+                <span>&#9432;</span>
+            </p>
+            <div style="font-size: 1.3em;">
+                <p>
+                    In order to see some demo plots, you can
+                </p>
+                <ul>
+                    <li>
+                        <strong>1.</strong>, choose one of the different use cases with
+                        the big quickbuttons to the right.
+                    </li>
+                    <li>
+                        <strong>2.</strong>, choose to view different experimentation plots
+                        using the "Pick" buttons to the left. Choose first an "Experiment" and then
+                        a "Test". Use the "ReTime" button to plot the entire experiment or a single Test.
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+        <div style="width:50%;" >
+            <button id="drawHadoopButton" class="action-button yellow"
+                    onclick="drawSomething(YarnChilds_form, hadoop_example)">Plot me some Hadoop!
+            </button>
+            <button id="drawSparkButton" class="action-button blue"
+                    onclick="drawSomething(SparkExecutors_form, spark_example)">Plot me some Spark!
+            </button>
+            <button id="drawServerlessButton" class="action-button orange"
+                    onclick="drawSomething(serverless_form, serverless_example)">Show me something Serverless!
+            </button>
+            <button id="drawEnergyButton" class="action-button green"
+                    onclick="drawSomething(energy_form, energy_example)">I want to see energy plots!
+            </button>
+        </div>
+        <div class="alert alert-secondary"
+             style="margin-right:20px; width: 20%;background-color: orange;font-size: 1.1em;">
+            <p style="text-align: center;font-size: 1.8em;">
+                <span>&#9888;</span>
+                NOTICE
+                <span>&#9888;</span>
+            </p>
             <p>
                 <strong> <i class="icon-danger"></i> Remember that this is just a simplified demo version of the web
                     viewer, used to showcase the core BDWatchdog and Serverless Containers features.</strong>
@@ -395,19 +441,6 @@
                 for a live, served version.
             </p>
         </div>
-
-        <button id="drawHadoopButton" class="action-button yellow"
-                onclick="drawSomething(YarnChilds_form, hadoop_example)">Plot me some Hadoop!
-        </button>
-        <button id="drawSparkButton" class="action-button blue"
-                onclick="drawSomething(SparkExecutors_form, spark_example)">Plot me some Spark!
-        </button>
-        <button id="drawServerlessButton" class="action-button orange"
-                onclick="drawSomething(serverless_form, serverless_example)">Show me something Serverless!
-        </button>
-        <button id="drawEnergyButton" class="action-button green"
-                onclick="drawSomething(energy_form, energy_example)">I want to see energy plots!
-        </button>
     </div>
     <!--  DEMO specific -->
     <!---------------------->

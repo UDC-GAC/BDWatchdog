@@ -66,7 +66,7 @@ export function addMetricsForm(metrics, yranges) {
     monitorings.push(newdiv);
     newdiv.className += " form";
     let this_form_number = form_counter;
-    increase_form_counter()
+    increase_form_counter();
 
     addGraph(metrics);
     addReport(metrics);

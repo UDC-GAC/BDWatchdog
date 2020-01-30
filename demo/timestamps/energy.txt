@@ -1,0 +1,8 @@
+{"type": "experiment", "info": {"username": "energy", "start_time": 1571588317, "end_time": 1571593092, "experiment_id": "Metagenomics_capped"}}
+{"type": "test", "info": {"username": "energy", "start_time": 1571588317, "end_time": 1571589812, "experiment_id": "Metagenomics_capped", "test_id": "Metagenomics_capped_MicrobeStage", "test_name": "MicrobeStage"}}
+{"type": "test", "info": {"username": "energy", "start_time": 1571588317, "end_time": 1571591354, "experiment_id": "Metagenomics_capped", "test_id": "Metagenomics_capped_FilterHuman", "test_name": "FilterHuman"}}
+{"type": "test", "info": {"username": "energy", "start_time": 1571591430, "end_time": 1571593092, "experiment_id": "Metagenomics_capped", "test_id": "Metagenomics_capped_Identification", "test_name": "Identification"}}
+{"type": "experiment", "info": {"username": "energy", "start_time": 1571504351, "end_time": 1571508521, "experiment_id": "Metagenomics_baseline"}}
+{"type": "test", "info": {"username": "energy", "start_time": 1571504352, "end_time": 1571505505, "experiment_id": "Metagenomics_baseline", "test_id": "Metagenomics_baseline_MicrobeStage", "test_name": "MicrobeStage"}}
+{"type": "test", "info": {"username": "energy", "start_time": 1571504356, "end_time": 1571507190, "experiment_id": "Metagenomics_baseline", "test_id": "Metagenomics_baseline_FilterHuman", "test_name": "FilterHuman"}}
+{"type": "test", "info": {"username": "energy", "start_time": 1571507217, "end_time": 1571508520, "experiment_id": "Metagenomics_baseline", "test_id": "Metagenomics_baseline_Identification", "test_name": "Identification"}}

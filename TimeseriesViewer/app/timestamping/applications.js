@@ -6,7 +6,7 @@ export function getApplicationsFromMongo(username, experiment_id) {
     let endpoint = getMongoURLfromUI();
     let mongo_REST_endpoint =
         endpoint + "/tests" +
-        "?where={%22experiment_id%22:%22" + experiment_id + "%22}";
+        "?where={%22experiment_id%22:%22" + experiment_id + "%22, %22username%22:%22" + username + "%22}";
     getApplicationsFromMongoPaginated(mongo_REST_endpoint, true)
 }
 

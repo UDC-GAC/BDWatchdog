@@ -15,6 +15,7 @@ import {
     formsContainerId,
     graphsContainerId,
     reportsContainerId,
+    resizeAll
 } from "./index.js";
 
 let spark_example = {
@@ -22,7 +23,8 @@ let spark_example = {
     label_app: "PageRank",
     end_time: 1512667973,
     start_time: 1512666728,
-    type: "bdwatchdog"
+    type: "bdwatchdog",
+    username: "spark"
 };
 window.spark_example = spark_example;
 
@@ -31,25 +33,30 @@ let hadoop_example = {
     label_app: "TeraSort",
     end_time: 1512664138,
     start_time: 1512663747,
-    type: "bdwatchdog"
+    type: "bdwatchdog",
+    username: "hadoop"
 };
 window.hadoop_example = hadoop_example;
 
 let serverless_example = {
-    label_exp: "serverless_experiments",
+    label_exp: "Serverless",
     label_app: "TeraSort_PageRank",
     end_time: 1567369745,
     start_time: 1567366402,
-    type: "serverless"
+    type: "serverless",
+    username: "serverless",
+    Xsize: 1200,
+    Ysize: 400
 };
 window.serverless_example = serverless_example;
 
 let energy_example = {
-    label_exp: "energy_experiments",
-    label_app: "Metagenomics",
+    label_exp: "Metagenomics_capped",
+    label_app: "MicrobeStage",
     end_time: 1571593092,
     start_time: 1571588317,
-    type: "serverless"
+    type: "serverless",
+    username: "energy"
 };
 window.energy_example = energy_example;
 
@@ -72,6 +79,9 @@ export function drawSomething(forms, example) {
     set_opentsdb_endpoint_value("http://dante.dec.udc.es:8080/" + example.type + "/tsdb/");
 
     propagateApplicationTimes({end_time: example.end_time, start_time: example.start_time});
+    setUsername(example.username);
+    setSizes(example.Xsize, example.Ysize);
+
     cleanAll();
     addNewMetricsForm(forms);
 
@@ -84,6 +94,7 @@ export function drawSomething(forms, example) {
     setTimeout(function () {
         let reTimeButton = document.getElementById("reTimeButton");
         reTimeButton.click();
+        resizeAll();
     }, 1400);
     //TO BE FIX //
 
@@ -112,25 +123,52 @@ function cleanAll() {
         decrease_report_counter()
     }
 }
+
 window.drawSomething = drawSomething;
 
+function setUsername(username) {
+    "use strict";
+    let experiment_picker = document.getElementById("experiment_picker");
+    experiment_picker.elements.username.value = username;
+}
+
+function setSizes(X, Y) {
+    "use strict";
+    let sizes_form = document.getElementById("sizes_form");
+    sizes_form.elements.graphX.value = X;
+    sizes_form.elements.graphY.value = Y;
+}
 
 // EXECUTION
 
 hideForms();
 
-jQuery.getJSON('app/templates/json/hadoop.json', function(data) {
+jQuery.getJSON('app/templates/json/hadoop.json', function (data) {
     window.YarnChilds_form = data
 });
-jQuery.getJSON('app/templates/json/spark.json', function(data) {
+jQuery.getJSON('app/templates/json/spark.json', function (data) {
     window.SparkExecutors_form = data
 });
-jQuery.getJSON('app/templates/json/metagenomic.json', function(data) {
+jQuery.getJSON('app/templates/json/metagenomic.json', function (data) {
     window.energy_form = data
 });
-jQuery.getJSON('app/templates/json/serverless.json', function(data) {
+jQuery.getJSON('app/templates/json/serverless.json', function (data) {
     window.serverless_form = data
 });
 
+// Override these buttons functionality and add the ReTime feature
+document.getElementById("propagateAppsTimesButton").onclick = function () {
+    getApplicationTimes();
+    setTimeout(function () {
+        let reTimeButton = document.getElementById("reTimeButton");
+        reTimeButton.click();
+    }, 1000);
+};
 
-
+document.getElementById("propagateExperimentsTimesButton").onclick = function () {
+    getExperimentTimes();
+    setTimeout(function () {
+        let reTimeButton = document.getElementById("reTimeButton");
+        reTimeButton.click();
+    }, 1000);
+};
