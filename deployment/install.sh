@@ -15,9 +15,16 @@ install_dependencies(){
     apt install -y mongodb
     apt install -y build-essential
     apt install -y autoconf
-    apt install -y openjdk-8-jdk
     apt install -y gnuplot-x11
     apt install -y apache2
+
+    apt install -y openjdk-8-jdk
+    export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+    echo "\
+# Add JAVA_HOME
+export JAVA_HOME=${JAVA_HOME}
+" >> /etc/environment
+
 }
 
 setup_ssh

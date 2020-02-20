@@ -51,6 +51,13 @@ echo "Install OpenTSDB"
 mkdir -p /var/log/opentsdb/
 git clone git://github.com/OpenTSDB/opentsdb.git
 cd opentsdb
+
+# MAVEN FIX #
+# https://github.com/OpenTSDB/opentsdb/issues/1899
+find . | xargs grep -s central.maven.org | cut -f1 -d : | xargs sed -i '' -e "s/http:\/\/central/https:\/\/repo1/g"
+find . | xargs grep -s repo1.maven.org | cut -f1 -d : | xargs sed -i '' -e "s/http:\/\/repo1/https:\/\/repo1/g"
+# MAVEN FIX #
+
 ./build.sh
 cp ../fix/opentsdb/create_table.sh ./src/create_table.sh
 env COMPRESSION=GZ HBASE_HOME=$BDWATCHDOG_DIR/deployment/metrics/hbase-1.4.12/ ./src/create_table.sh
