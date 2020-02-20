@@ -15,7 +15,7 @@ install_dependencies(){
     apt install -y mongodb
     apt install -y build-essential
     apt install -y autoconf
-    #apt install -y openjdk-8-jdk
+    apt install -y openjdk-8-jdk
     apt install -y gnuplot-x11
     apt install -y apache2
 }
@@ -26,16 +26,19 @@ install_dependencies
 source config.sh
 mkdir -p ${DATA_DIR}
 
+echo "INSTALLING TIMESTAMPING SERVICE"
 cd timestamps
 bash install.sh
 bash start.sh
 cd ..
 
+echo "INSTALLING OPENTSDB SERVICE"
 cd metrics
 bash install.sh
 bash start.sh
 cd ..
 
+echo "INSTALLING WEB SERVER"
 cd webviewer
 bash install.sh
 bash start.sh

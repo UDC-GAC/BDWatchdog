@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-systemclt restart apache2
+systemctl restart apache2

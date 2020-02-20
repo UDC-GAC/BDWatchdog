@@ -7,7 +7,7 @@ then
 fi
 
 ## With copy
-cp -R ${BDWATCHDOG_DIR}/TimeseriesViewer/src/* /var/www/html/
+cp -R ${BDWATCHDOG_DIR}/TimeseriesViewer/app/* /var/www/html/
 
 ## With Symbolic Link
 #cd /var/www/html
