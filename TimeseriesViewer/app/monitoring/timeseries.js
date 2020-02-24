@@ -310,7 +310,7 @@ function translateCommand(command) {
 
 function translateHost(host) {
     let translated_host = host;
-    return translated_command
+    return translated_host
 }
 
 function translateLabels(labels) {
