@@ -129,8 +129,8 @@ export function refreshTimeNow(form) {
 
 export function drawTimeseries(form) {
     "use strict";
-    let start_date = form.elements.datetime0.value;
-    let end_date = form.elements.datetime1.value;
+    let start_date = form.elements.start_time.value;
+    let end_date = form.elements.end_time.value;
     let graph_number = getNumFromForm(form);
 
     let metrics = readFormMetrics(form);
@@ -218,8 +218,8 @@ let initializeForm = function (form_number, metrics, yranges) {
     form.elements.max_y.value = yranges.ymax;
     form.elements.scaleY.checked = true;
 
-    let start_date = form.elements.datetime0.value;
-    let end_date = form.elements.datetime1.value;
+    let start_date = form.elements.start_time.value;
+    let end_date = form.elements.end_time.value;
     let graph_number = getNumFromForm(form);
 
     changeGraphValues(graph_number, metrics, start_date, end_date)

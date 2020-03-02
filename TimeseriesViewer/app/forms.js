@@ -31,9 +31,9 @@ export function setNowTime(form, timepicker) {
     let datetime = getTodayTime(newDate) + "-" + getNowTime(newDate);
 
     if (timepicker === 0) {
-        form.elements.datetime0.value = datetime
+        form.elements.start_time.value = datetime
     }else if (timepicker === 1) {
-        form.elements.datetime1.value = datetime
+        form.elements.end_time.value = datetime
     }
 }
 
@@ -47,8 +47,8 @@ export function getFormFromDiv(div) {
 }
 
 export function changeTimeInputs(form, start_time, end_time) {
-    form.elements.datetime0.value = start_time;
-    form.elements.datetime1.value = end_time
+    form.elements.start_time.value = start_time;
+    form.elements.end_time.value = end_time
 }
 
 function removeFormById(formID) {

@@ -171,8 +171,8 @@ export function resizeAll() {
 export function retimeAll() {
     "use strict";
     let times = document.getElementById("times_form"),
-        time_start = times.elements.global_start_time.value,
-        time_end = times.elements.global_end_time.value;
+        time_start = times.elements.start_time.value,
+        time_end = times.elements.end_time.value;
 
     if (time_end === "NaN/NaN/NaN-NaN:NaN:NaN") {
         let newDate = new Date();

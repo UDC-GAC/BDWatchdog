@@ -345,8 +345,8 @@ function reWriteReportByNumber(report_number) {
 
 export function handleReport(form) {
     "use strict";
-    let start_date = form.elements.datetime0.value;
-    let end_date = form.elements.datetime1.value;
+    let start_date = form.elements.start_time.value;
+    let end_date = form.elements.end_time.value;
     let report_number = getNumFromForm(form);
 
     let metrics = readFormMetrics(form);

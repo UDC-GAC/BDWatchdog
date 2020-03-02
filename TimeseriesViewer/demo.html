@@ -238,9 +238,8 @@
                         <h3>Times</h3>
                         <div id="general_start_time" style="margin-bottom: 10px">
                             <text>Start:</text>
-                            <input id="global_start_time"
-                                   name="datetime0"
-                                   name="time_start"
+                            <input id="start_time"
+                                   name="start_time"
                                    type="text"
                                    value="2017/02/08-19:52:52">
                             <span class="add-on">
@@ -256,9 +255,8 @@
 
                         <div id="general_end_time">
                             <text>End:</text>
-                            <input id="global_end_time"
-                                   name="datetime1"
-                                   name="time_end"
+                            <input id="end_time"
+                                   name="end_time"
                                    type="text"
                                    value="2017/02/08-21:30:11">
                             <span class="add-on">
@@ -281,10 +279,10 @@
                             let now = newDate.getTime();
 
                             newDate = new Date(ago);
-                            document.getElementById("global_start_time").value = getTodayTime(newDate) + "-" + getNowTime(newDate);
+                            document.getElementById("general_start_time").elements.start_time.value = getTodayTime(newDate) + "-" + getNowTime(newDate);
 
                             newDate = new Date(now);
-                            document.getElementById("global_end_time").value = getTodayTime(newDate) + "-" + getNowTime(newDate);
+                            document.getElementById("general_end_time").elements.end_time.value = getTodayTime(newDate) + "-" + getNowTime(newDate);
 
                         </script>
                     </form>
