@@ -76,8 +76,8 @@ export function deleteExperiment(experiment, check_confirm) {
 function propagateExperimentTimes(experiment) {
     "use strict";
     let times = document.getElementById("times_form");
-    times.elements.global_start_time.value = timeConverter(experiment.start_time);
-    times.elements.global_end_time.value = timeConverter(experiment.end_time);
+    times.elements.start_time.value = timeConverter(experiment.start_time);
+    times.elements._end_time.value = timeConverter(experiment.end_time);
 
 }
 

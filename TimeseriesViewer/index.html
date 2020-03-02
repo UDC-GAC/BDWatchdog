@@ -278,10 +278,10 @@
                             let now = newDate.getTime();
 
                             newDate = new Date(ago);
-                            document.getElementById("general_start_time").children.start_time.value = getTodayTime(newDate) + "-" + getNowTime(newDate);
+                            document.getElementById("times_form").elements.start_time.value = getTodayTime(newDate) + "-" + getNowTime(newDate);
 
                             newDate = new Date(now);
-                            document.getElementById("general_end_time").children.end_time.value = getTodayTime(newDate) + "-" + getNowTime(newDate);
+                            document.getElementById("times_form").elements.end_time.value = getTodayTime(newDate) + "-" + getNowTime(newDate);
 
                         </script>
                     </form>

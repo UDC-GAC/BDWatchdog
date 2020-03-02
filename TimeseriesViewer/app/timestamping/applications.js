@@ -85,8 +85,8 @@ function application_label_on_click() {
 export function propagateApplicationTimes(application) {
     "use strict";
     let times = document.getElementById("times_form");
-    times.elements.global_start_time.value = timeConverter(application.start_time);
-    times.elements.global_end_time.value = timeConverter(application.end_time);
+    times.elements.start_time.value = timeConverter(application.start_time);
+    times.elements.end_time.value = timeConverter(application.end_time);
 }
 
 function populateApplicationsDropdown(applications, remove_previous) {
