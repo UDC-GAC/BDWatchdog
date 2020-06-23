@@ -9,11 +9,3 @@ function convert(){
 
 convert
 inkscape -z -e favicon.ico -d 600 icon.svg -D
-
-cd architecture
-convert
-cd ..
-
-cd use_case
-convert
-cd ..

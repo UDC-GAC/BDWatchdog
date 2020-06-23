@@ -28,13 +28,15 @@ In this documentation webpage a simpler approach of the framework's
 architecture is given, in addition to some guidelines for its deployment.
 The documentation webpage has been structured with the following sections:
 
-1. [Use case](use_case.md): This sections summarizes the core use case of this framework with a simple example.
+<!--1. [Use case](use_case.md): This sections summarizes the core use case of this framework with a simple example.-->
 
-2. [Architecture](architecture.md): Which briefly describes the architecture and design used.
+<!--2. [Architecture](architecture.md): Which briefly describes the architecture and design used.-->
 
-3. [Deployment](deployment.md): In this section it is described how to deploy the framework overall. Some guidelines are also provided.
+<!--3. [Deployment](deployment.md): In this section it is described how to deploy the framework overall. Some guidelines are also provided.-->
 
-4. [Source Code](code/index.html): If you are interested on the low-level code and code documentation. 
+4. [Sponsors](sponsors.md): Some comments on the backers and sponsors of this framework.
 
-5. [Sponsors](sponsors.md): Some comments on the backers and sponsors of this framework.
+5. [Source Code](code/index.html): If you are interested on the low-level code and code documentation. 
+
+
 

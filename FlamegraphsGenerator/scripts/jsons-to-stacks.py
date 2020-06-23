@@ -4,16 +4,23 @@ import sys
 import fileinput
 from subprocess import call
 import socket
-import time 
+import time
 import requests
 import json
 import ast
 
+
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
-for line in fileinput.input():
-	stacks = ast.literal_eval(line)
-	eprint("Number of stacks retrieved was : " + str(len(stacks)))
-	for key in stacks:
-		print(key + " " + str(float(stacks[key])))
+
+def main():
+    for line in fileinput.input():
+        stacks = ast.literal_eval(line)
+        eprint("Number of stacks retrieved was : " + str(len(stacks)))
+        for key in stacks:
+            print(key + " " + str(float(stacks[key])))
+
+
+if __name__ == "__main__":
+    main()
