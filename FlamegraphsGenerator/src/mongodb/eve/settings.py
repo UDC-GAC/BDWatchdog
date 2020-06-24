@@ -4,7 +4,7 @@ cpu_schema = {
     'stack': {
         'type': 'string',
         'minlength': 1,
-	'required': True,
+        'required': True,
     },
     'value': {
         'type': 'integer',
@@ -12,15 +12,15 @@ cpu_schema = {
         'required': True,
     },
     'timestamp': {
-	'type': 'integer',
-	'min': 1490778413,
-	'required': True,
+        'type': 'integer',
+        'min': 1490778413,
+        'required': True,
 
     },
     'hostname': {
         'type': 'string',
-	'minlength' : 1,
-        #'required': True,
+        'minlength': 1,
+        # 'required': True,
     },
 }
 
@@ -39,19 +39,18 @@ cpu = {
     'schema': cpu_schema
 }
 
-
 DOMAIN = {'cpu': cpu}
 
 # Let's just use the local mongod instance. Edit as needed.
 
 # Please note that MONGO_HOST and MONGO_PORT could very well be left
 # out as they already default to a bare bones local 'mongod' instance.
-MONGO_HOST = "192.168.56.111"
+MONGO_HOST = "localhost"
 MONGO_PORT = 27017
 
 # Skip these if your db has no auth. But it really should.
-#MONGO_USERNAME = '<your username>'
-#MONGO_PASSWORD = '<your password>'
+# MONGO_USERNAME = '<your username>'
+# MONGO_PASSWORD = '<your password>'
 
 MONGO_DBNAME = 'profiling'
 # Enable reads (GET), inserts (POST) and DELETE for resources/collections
@@ -62,6 +61,5 @@ RESOURCE_METHODS = ['GET', 'POST', 'DELETE']
 # Enable reads (GET), edits (PATCH), replacements (PUT) and deletes of
 # individual items  (defaults to read-only item access).
 ITEM_METHODS = ['GET', 'PATCH', 'PUT', 'DELETE']
-
 
 X_DOMAINS = ['*']

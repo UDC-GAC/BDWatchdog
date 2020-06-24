@@ -3,33 +3,16 @@ from __future__ import print_function
 import sys
 import requests
 import json
-import os
+
+from FlamegraphsGenerator.src.utils import get_mongodb_GET_endpoint
 
 
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
 
-def get_mongodb_endpoint():
-    default_mongodb_port = 5001
-    default_mongodb_ip = "mongodb"
-
-    MONGODB_IP = "MONGODB_IP"
-    mongodb_ip = os.getenv(MONGODB_IP, default_mongodb_ip)
-
-    MONGODB_PORT = "MONGODB_PORT"
-    try:
-        mongodb_port = str(int(os.getenv(MONGODB_PORT, default_mongodb_port)))
-    except ValueError:
-        eprint("Invalid port configuration, using default '" + str(default_mongodb_port) + "'")
-        mongodb_port = str(default_mongodb_port)
-
-    get_endpoint = 'http://' + mongodb_ip + ':' + mongodb_port + '/stacks/'
-    return get_endpoint
-
-
 def get_data(start_time, end_time):
-    get_endpoint = get_mongodb_endpoint()
+    get_endpoint = get_mongodb_GET_endpoint()
     payload = {'start_time': start_time, "end_time": end_time, "hostname": hostname}
 
     r = requests.get(get_endpoint, params=payload)

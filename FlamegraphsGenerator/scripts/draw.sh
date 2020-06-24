@@ -31,4 +31,4 @@ DATE_START=`date --date @${START} +"%Y/%m/%d-%H:%M:%S"`
 
 echo "Drawing flamegraphs from $START ($DATE_START) to $END ($DATE_END) for hostname $HOST"
 rm  ./flamegraph.svg 2> /dev/null
-python ./scripts/mongodb-to-jsons.py $START $END $HOST| ./scripts/jsons-to-stacks.py | ./FlameGraph/flamegraph.pl --color=java > flamegraph.svg
+python ./scripts/mongodb-to-jsons.py $START $END $HOST| ../src/jsons-to-stacks.py | ./FlameGraph/flamegraph.pl --color=java > flamegraph.svg

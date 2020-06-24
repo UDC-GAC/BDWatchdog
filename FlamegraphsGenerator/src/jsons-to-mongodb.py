@@ -6,7 +6,8 @@ import time
 import requests
 import json
 import ast
-import os
+
+from FlamegraphsGenerator.src.utils import get_mongodb_POST_endpoint
 
 
 def eprint(*args, **kwargs):
@@ -15,27 +16,6 @@ def eprint(*args, **kwargs):
 
 max_failed_connection_tries = 4
 post_doc_buffer_length = 10000
-
-
-def get_post_endpoint():
-    default_mongodb_port = 8000
-    default_mongodb_ip = "mongodb"
-    default_profiling_database_name = "cpu"
-    PROFILING_POST_ENDPOINT = "PROFILING_POST_ENDPOINT"
-    profiling_post_endpoint = os.getenv(PROFILING_POST_ENDPOINT, default_profiling_database_name)
-
-    MONGODB_IP = "MONGODB_IP"
-    mongodb_ip = os.getenv(MONGODB_IP, default_mongodb_ip)
-
-    MONGODB_PORT = "MONGODB_PORT"
-    try:
-        mongodb_port = str(int(os.getenv(MONGODB_PORT, default_mongodb_port)))
-    except ValueError:
-        eprint("Invalid port configuration, using default '" + str(default_mongodb_port) + "'")
-        mongodb_port = str(default_mongodb_port)
-
-    post_endpoint = 'http://' + mongodb_ip + ':' + mongodb_port + '/' + profiling_post_endpoint
-    return post_endpoint
 
 
 def send_docs(docs, post_endpoint):
@@ -58,7 +38,7 @@ def send_docs(docs, post_endpoint):
 
 
 def main():
-    post_endpoint = get_post_endpoint()
+    post_endpoint = get_mongodb_POST_endpoint()
     failed_connections = 0
     json_documents = []
     try:

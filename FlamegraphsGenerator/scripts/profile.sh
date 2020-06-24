@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 mkdir -p out
 mkdir -p recording
 
