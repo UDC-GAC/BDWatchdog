@@ -7,7 +7,7 @@ def eprint(*args, **kwargs):
 
 
 def get_mongodb_POST_endpoint():
-    default_mongodb_port = 5000
+    default_mongodb_port = 8001
     default_mongodb_ip = "mongodb"
     default_profiling_database_name = "cpu"
     PROFILING_POST_ENDPOINT = "PROFILING_POST_ENDPOINT"
@@ -28,7 +28,7 @@ def get_mongodb_POST_endpoint():
 
 
 def get_mongodb_GET_endpoint():
-    default_mongodb_port = 5001
+    default_mongodb_port = 8002
     default_mongodb_ip = "mongodb"
 
     MONGODB_IP = "MONGODB_IP"

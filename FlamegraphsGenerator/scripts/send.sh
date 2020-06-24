@@ -19,8 +19,8 @@ do
 		   export TIMESTAMP=$timestamp
 		   (perf script -F comm,pid,tid,cpu,time,event,ip,sym,dso -i $filename 2>/dev/null \
 		   | ./FlameGraph/stackcollapse-perf.pl --pid \
-		   | python3 ./scripts/stacks-to-jsons.py \
-		   | python3 ./scripts/jsons-to-mongodb.py && rm $filename) &
+		   | python3 ../src/stacks-to-jsons.py \
+		   | python3 ../src/jsons-to-mongodb.py && rm $filename) &
 		fi
 	done
 	sleep $TIME_WINDOW_SECONDS
