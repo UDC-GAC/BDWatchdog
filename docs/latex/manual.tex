@@ -1,0 +1,247 @@
+
+\documentclass[12pt]{article}
+\usepackage[english]{babel}
+\usepackage[utf8x]{inputenc}
+
+
+\usepackage[english]{babel}
+
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage[colorinlistoftodos]{todonotes}
+\usepackage{hyperref}
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% University Assignment Title Page 
+% LaTeX Template
+% Version 1.0 (27/12/12)
+%
+% This template has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% Original author:
+% WikiBooks (http://en.wikibooks.org/wiki/LaTeX/Title_Creation)
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+% 
+% Instructions for using this template:
+% This title page is capable of being compiled as is. This is not useful for 
+% including it in another document. To do this, you have two options: 
+%
+% 1) Copy/paste everything between \begin{document} and \end{document} 
+% starting at \begin{titlepage} and paste this into another LaTeX file where you 
+% want your title page.
+% OR
+% 2) Remove everything outside the \begin{titlepage} and \end{titlepage} and 
+% move this file to the same directory as the LaTeX file you wish to add it to. 
+% Then add \input{./title_page_1.tex} to your LaTeX file where you want your
+% title page.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\title{Title page with logo}
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+
+
+\begin{document}
+	
+	\begin{titlepage}
+		
+		\newcommand{\HRule}{\rule{\linewidth}{0.5mm}} % Defines a new command for the horizontal lines, change thickness here
+		
+		\center % Center everything on the page
+		
+		%----------------------------------------------------------------------------------------
+		%	HEADING SECTIONS
+		%----------------------------------------------------------------------------------------
+		
+		\includegraphics[width=0.5\textwidth]{udc_logo.png}\\[1cm]
+		
+		\textsc{\LARGE University of A Coruña}\\[1.5cm] % Name of your university/college
+		\textsc{\Large Computer Architecture Group}\\[0.5cm] % Major heading such as course name
+%		\textsc{\large Minor Heading}\\[0.5cm] % Minor heading such as course title
+		
+		%----------------------------------------------------------------------------------------
+		%	TITLE SECTION
+		%----------------------------------------------------------------------------------------
+		
+		\HRule \\[0.4cm]
+		{ \huge \bfseries BDWatchdog User Guide}\\[0.3cm] % Title of your document
+		\HRule \\[1.5cm]
+		
+		%----------------------------------------------------------------------------------------
+		%	AUTHOR SECTION
+		%----------------------------------------------------------------------------------------
+		
+%		\begin{minipage}{0.4\textwidth}
+%			\begin{flushleft} \large
+%				\emph{Author:}\\
+%				John \textsc{Smith} % Your name
+%			\end{flushleft}
+%		\end{minipage}
+%		~
+%		\begin{minipage}{0.4\textwidth}
+%			\begin{flushright} \large
+%				\emph{Supervisor:} \\
+%				Dr. James \textsc{Smith} % Supervisor's Name
+%			\end{flushright}
+%		\end{minipage}\\[2cm]
+		
+		% If you don't want a supervisor, uncomment the two lines below and remove the section above
+		\Large \emph{Authors:}\\
+		Jonatan Enes, Roberto R. Expósito, \\ Juan Touriño \\[1cm] % Your name
+		
+		%----------------------------------------------------------------------------------------
+		%	DATE SECTION
+		%----------------------------------------------------------------------------------------
+		
+		{\large \today}\\[1cm] % Date, change the \today to a set date if you want to be precise
+		
+		%----------------------------------------------------------------------------------------
+		%	LOGO SECTION
+		%----------------------------------------------------------------------------------------
+		
+		\includegraphics[width=0.3\textwidth]{gac_logo.png}\\[1cm] % Include a department/university logo - this will require the graphicx package
+		
+		%----------------------------------------------------------------------------------------
+		
+		\vfill % Fill the rest of the page with whitespace
+		
+	\end{titlepage}
+
+
+
+
+%\begin{figure}[!t]
+%	\centering
+%	\includegraphics[width=0.5\textwidth]{udc_logo.png}
+%\end{figure}
+%
+%\begin{figure}[!b]
+%	\centering
+%	\includegraphics[width=0.5\textwidth]{gac_logo.png}
+%\end{figure}
+
+\section{Overview}
+
+BDWatchdog is a framework to assist in the in-depth and real-time analysis of the execution of Big Data frameworks and applications. Two approaches are used in order to get an accurate picture of what an application is doing with the resources it has available 1) per-process resource monitoring and 2) mixed system and JVM profiling using flame graphs.
+
+With monitoring and profiling, used individually or combined, it is also possible to easily identify both resources and code bottlenecks as well as account for resource utilization or spot certain patterns that frameworks or applications may have.
+
+In addition, integrated in BDWatchdog, a tool has been designed and implemented to create a serverless container infrastructure where the resource limits (i.e., CPU, Memory, disks, network) of such containers can be rescaled in real time according to multiple user-defined policies such as the resource usage of the applications running inside a container or any desired time-varying resource limit. This tool has also been used in a specific scenario to set a limit on the energy consumption of a container or set of containers by using CPU scaling properly.
+
+\subsection{Monitoring}
+
+For the per-process monitoring, resource usage metrics for CPU, memory, disk and network are retrieved, processed and pushed to a time series database in a continuous stream. Thanks to this stream-based approach, it is possible, in real-time, to see and use this data for several purposes like visualization, reporting or to take automated actions to tackle several situations like resource bottlenecks, loss of efficiency or even resource limitation.
+
+Moreover, the per-process approach allows to deploy this monitoring solution on a broader type of virtualized infrastructures, from the already common bare-metal hosts or virtual machines (Cloud instances) to the newer type of containers.
+
+Finally, thanks to the use of time series as the means to store the data, it is possible to perform several operations through filtering and aggregation, which may overall provide richer reports (e.g., Show the aggregated CPU usage of a command or process across a cluster, show the average disk bandwidth of several hosts).
+
+\subsection{Profiling}
+
+For the real-time profiling of Java-based applications, the perf utils are used to continuously get system-wide CPU stacks, using a configurable frequency. The stacks are then processed, marked to differentiate them across applications and pushed to a document-based database. Once in the database, the stacks can be retrieved and processed with several tools (console script, web interface) to create the interactive flame graphs.
+
+These flame graphs can be created in real time with data collected between two time points on an application's execution. Once created, information regarding the percentage of spent time for each class can be interactively analyzed in a recursive way by following the stack calls.
+
+\subsection{Resource autoscaling}
+
+
+The resource autoscaling tool implemented as part of BDWatchdog allows to create a serverless environment which offers several interesting features that can be exploited from both the user and the provider point of view:
+
+\begin{itemize}
+	\item Increased resource utilization, as it is possible to dynamically adjust the resource scheduling to match the real resource usage of the containers.
+	\item A serverless environment is provided and thus, only the used resource amounts are acccounted for, being the provider's task to adjust the resources provided as needed while minimizing any performance impact.
+	\item Increased serverless flexibility is offered to the user as by using software containers, which offer a similar environment to virtual machines, a broad range of applications can be deployed and executed.
+\end{itemize}
+
+
+\subsubsection{Energy monitoring and limit enforcement}
+
+The energy monitoring and capping features are created by using both the \textit{BDWatchdog} monitoring capabilities as well as the \textit{Autoscaling tool}. This combination makes it possible to rescale the CPU in real time and thus adjust the energy that a container or a set of containers consume at any moment.
+
+With this energy management some interesting features can be exploited:
+\begin{itemize}
+	\item Consider energy as another accountable resource and thus make it possible to be shared and accounted between the users/containers.
+	\item Apply an energy limit to a container(s)/user and have it enforced at any moment.
+\end{itemize}
+
+\section{Modules, Requirements and Installation}
+
+\subsection{Resource metrics generator}
+
+This module serves the purpose of generating the time series that are later used for the monitoring capabilities. 
+
+To be used this module requires an \textit{OpenTSDB} database and the \textit{atop} (for CPU, memory and disk resources) and \textit{nethogs} (for network) programs. Scripts are provided for the installation of these programs on CentOS and on debian-based Linux distributions.
+
+The source code can be found on \url{https://github.com/JonatanEnes/bdwatchdog/tree/master/MetricsFeeder}.
+
+\subsection{Flame graphs generator}
+
+This modules generates the flame graph data that can be later used to create the flame graphs for the profiling capabilities.
+
+To be used this module requires access to the Linux \textit{perf} command as well as a \textit{MongoDB} database and \textit{EVE} as a REST API. 
+
+The source code can be found on \url{https://github.com/JonatanEnes/bdwatchdog/tree/master/FlamegraphsGenerator}.
+
+\subsection{Web user interface}
+
+This module is a web interface that can be used to visualize the time series that represent the monitoring and the flame graphs for the profiling. This user interface has been programmed entirely with HTML + JS + CSS and acts as a static front end that pulls data from the same databases used to push the data in the generators. 
+
+No specific installation or requirement is needed other than downloading the code and accessing the web (index.html file) with a browser.
+
+The source code can be found on
+\url{https://github.com/JonatanEnes/bdwatchdog/tree/master/MetricsFeeder}.
+
+\subsection{Experiment timestamp management tool}
+
+This module is used to manage timestamps for an experiment run and its tests executions. These timestamps are stored in the form of JSON documents with metadata of the experiments and tests including the starting and ending UNIX timestamps. These timestamps are later used by other modules such as the Web user interface to plot monitoring or profiling specifically between two time points.
+
+To use this module a \textit{MongoDB} database is needed to store the JSON documents as well as \textit{EVE} as a REST API. 
+
+The source code can be found on
+\url{https://github.com/JonatanEnes/bdwatchdog/tree/master/TimestampsSnitch}.
+
+\subsection{Automatic resource scaler}
+
+This module implements the automatic resource scaling of resources such as CPU, memory, disk and network. 
+
+To properly deploy this tool, a \textit{CouchDB} database is needed. In addition, if this tool is used to use its energy capping capabilities, an external program capable of producing container-level energy metrics is needed, currently only \textit{PowerAPI} has been integrated and is supported.
+
+The source code of this tool can be found on
+\url{https://github.com/JonatanEnes/AutomaticRescaler}.
+
+The webpage of PowerAPI is \url{https://powerapi.readthedocs.io/en/latest/intro.html}.
+
+
+\section{Usage}
+
+BDWatchdog has been designed and implemented in a modular way and thus, all of its features can be used combined or independently. 
+
+For monitoring and profiling, the recommended way of using BDWatchdog is to deploy the \textit{Resource metrics} and \textit{Flame graphs generators}, execute any task or experiment and mark the start and ending times with the \textit{Experiment timestamp management tool} and finally plot the results using the \textit{Web user interface}.
+
+For the resource autoscaling and energy capping functionalities, the monitoring capabilities of BDWatchdog must be deployed as well as the services of the \textit{Automatic resource scaler}. Once deployed there are several scripts and configurations value to modulate the behaviour of this tool. 
+
+For more information regarding the usage of BDWatchdog please consult its user guide at \url{https://bdwatchdog.readthedocs.io/en/latest/}.
+
+\section{Contact}
+
+BDWatchdog has been entirely developed in the Computer Architecture Group at the University of A
+Coru\~na by the following authors:
+
+
+\begin{itemize}{}{}
+	\item Jonatan Enes Alvarez \url{http://gac.udc.es/~jonatan.enes/}
+	\item Roberto R. Exp\'osito: \url{http:gac.udc.es/~rreye}
+	\item Juan Touri\~no: \url{http:gac.udc.es/~juan}
+\end{itemize}
+
+For any question regarding BDWatchdog, whether about the source code, its usage or functionalities, please address via email to Jonatan enes (jonatan.enes@udc.es).
+
+\end{document}
