@@ -14,12 +14,13 @@ fi
 echo "Stopping everything"
 bash stop.sh
 
-echo "Cleaning all the possibibly remaining previous data and software"
+echo "Cleaning all the possibly remaining previous data and software"
 echo -e "y" | bash wipe_data.sh
 echo -e "y" | bash wipe_software.sh
 
 echo "Install HDFS"
-wget http://apache.rediris.es/hadoop/common/hadoop-2.9.2/hadoop-2.9.2.tar.gz
+#wget http://apache.rediris.es/hadoop/common/hadoop-2.9.2/hadoop-2.9.2.tar.gz
+wget https://archive.apache.org/dist/hadoop/core/hadoop-2.9.2/hadoop-2.9.2.tar.gz
 tar xvf hadoop-2.9.2.tar.gz
 chown -R $(whoami):$(whoami) hadoop-2.9.2
 envsubst < config/hdfs/hdfs-site.xml > hadoop-2.9.2/etc/hadoop/hdfs-site.xml
@@ -37,7 +38,8 @@ hadoop-2.9.2/sbin/start-dfs.sh
 sleep 20
 
 echo "Install HBase"
-wget http://apache.rediris.es/hbase/hbase-1.4.12/hbase-1.4.12-bin.tar.gz
+#wget http://apache.rediris.es/hbase/hbase-1.4.12/hbase-1.4.12-bin.tar.gz
+wget http://archive.apache.org/dist/hbase/hbase-1.4.12/hbase-1.4.12-bin.tar.gz
 tar xvf hbase-1.4.12-bin.tar.gz
 chown -R $(whoami):$(whoami) hbase-1.4.12
 envsubst < config/hbase/hbase-site.xml > hbase-1.4.12/conf/hbase-site.xml
@@ -49,7 +51,11 @@ sleep 20
 
 echo "Install OpenTSDB"
 mkdir -p /var/log/opentsdb/
-git clone git://github.com/OpenTSDB/opentsdb.git
+wget https://github.com/OpenTSDB/opentsdb/archive/refs/tags/v2.4.0.tar.gz
+mv v2.4.0.tar.gz opentsdb-v2.4.0.tar.gz
+tar xvf opentsdb-v2.4.0.tar.gz
+mv opentsdb-2.4.0/ opentsdb
+#git clone git://github.com/OpenTSDB/opentsdb.git
 cd opentsdb
 
 # MAVEN FIX #
