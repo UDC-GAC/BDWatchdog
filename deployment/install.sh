@@ -10,13 +10,11 @@ setup_ssh () {
 
 install_dependencies(){
     apt update
-    apt install -y python-minimal
-    apt install -y python3 python3-pip
-    apt install -y mongodb
+    apt install -y python2-minimal
+    apt install -y python3 python3-pip python-is-python3
     apt install -y build-essential
     apt install -y autoconf
     apt install -y gnuplot-x11
-    apt install -y apache2
 
     apt install -y openjdk-8-jdk
     export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
@@ -37,6 +35,9 @@ echo "INSTALLING TIMESTAMPING SERVICE"
 cd timestamps
 bash install.sh
 bash start.sh
+echo "going to test it now"
+sleep 5
+bash test.sh
 cd ..
 
 echo "INSTALLING OPENTSDB SERVICE"

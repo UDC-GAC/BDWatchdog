@@ -6,6 +6,8 @@ then
     exit 0
 fi
 
+apt install -y apache2
+
 ## With copy
 cp -R ${BDWATCHDOG_DIR}/TimeseriesViewer/* /var/www/html/
 

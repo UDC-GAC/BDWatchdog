@@ -6,7 +6,7 @@ then
     exit 0
 fi
 
-cd ${BDWATCHDOG_DIR}/TimestampsSnitch/
+apt install -y mongodb
+apt install -y gunicorn
+
 pip3 install -r requirements.txt
-bash scripts/install/ubuntu/install-mongodb-dependencies.sh
-cd ${BDWATCHDOG_DIR}/deployment/timestamps
