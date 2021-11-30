@@ -75,8 +75,8 @@ function hideForms() {
 
 export function drawSomething(forms, example) {
     "use strict";
-    set_timestamping_endpoint_value("http://dante.dec.udc.es:8080/" + example.type + "/times/");
-    set_opentsdb_endpoint_value("http://dante.dec.udc.es:8080/" + example.type + "/tsdb/");
+    set_timestamping_endpoint_value("https://dante.dec.udc.es:443/" + example.type + "/times/");
+    set_opentsdb_endpoint_value("https://dante.dec.udc.es:443/" + example.type + "/tsdb/");
 
     propagateApplicationTimes({end_time: example.end_time, start_time: example.start_time});
     setUsername(example.username);
