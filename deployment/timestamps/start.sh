@@ -6,5 +6,4 @@ then
     exit 0
 fi
 systemctl restart mongodb
-cd ${BDWATCHDOG_DIR}/TimestampsSnitch/src/mongodb/eve/
-bash start_server.sh
+bash ${BDWATCHDOG_DIR}/TimestampsSnitch/scripts/services/start_eve_server_tmux.sh
