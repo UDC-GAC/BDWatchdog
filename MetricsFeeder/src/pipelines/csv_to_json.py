@@ -30,9 +30,10 @@ TEMPLATE_PATH = "TEMPLATE_PATH"
 METRICS_PATH = "METRICS_PATH"
 TAGS_PATH = "TAGS_PATH"
 
-template_path = os.getenv(TEMPLATE_PATH, "./src/pipelines/templates/")
-metrics_path = os.getenv(METRICS_PATH, "./src/pipelines/metrics/")
-tags_path = os.getenv(TAGS_PATH, "./src/pipelines/tags/")
+BDWATCHDOG_PATH = os.getenv("BDWATCHDOG_PATH")
+template_path = os.getenv(TEMPLATE_PATH, BDWATCHDOG_PATH+"MetricsFeeder/src/pipelines/templates/")
+metrics_path = os.getenv(METRICS_PATH, BDWATCHDOG_PATH+"MetricsFeeder/src/pipelines/metrics/")
+tags_path = os.getenv(TAGS_PATH, BDWATCHDOG_PATH+"MetricsFeeder/src/pipelines/tags/")
 
 
 def eprint(*args, **kwargs):

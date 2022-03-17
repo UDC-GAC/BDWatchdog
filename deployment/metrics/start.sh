@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 if [ -z ${JAVA_HOME} ]
 then
-    echo "\$JAVA_HOME is not set, check the config.sh file and try again"
+    echo "\$JAVA_HOME is not set"
     exit 0
 fi
 echo "Starting HDFS"

@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
+
 source ../config.sh
+source /etc/environment
+
 if [ -z ${DATA_DIR} ]
 then
     echo "\$DATA_DIR is empty, check the config.sh file and try again"
@@ -7,7 +10,7 @@ then
 fi
 if [ -z ${JAVA_HOME} ]
 then
-    echo "\$JAVA_HOME is not set, check the config.sh file and try again"
+    echo "\$JAVA_HOME is not set, you may need to run the prepare.sh script first"
     exit 0
 fi
 
@@ -66,8 +69,8 @@ find . | xargs grep -s repo1.maven.org | cut -f1 -d : | xargs sed -i '' -e "s/ht
 
 ./build.sh
 cp ../fix/opentsdb/create_table.sh ./src/create_table.sh
-env COMPRESSION=GZ HBASE_HOME=$BDWATCHDOG_DIR/deployment/metrics/hbase-1.4.12/ ./src/create_table.sh
-bash $BDWATCHDOG_DIR/MetricsFeeder/scripts/opentsdb/create-monitoring-opentsdb-metrics.sh
+env COMPRESSION=GZ HBASE_HOME=${BDWATCHDOG_DIR}/deployment/metrics/hbase-1.4.12/ ./src/create_table.sh
+bash ${BDWATCHDOG_DIR}/MetricsFeeder/scripts/opentsdb/create-monitoring-opentsdb-metrics.sh
 envsubst < ../config/opentsdb/opentsdb.conf  > opentsdb.conf # Expand variable $HOME inside of template file
 cd ..
 
