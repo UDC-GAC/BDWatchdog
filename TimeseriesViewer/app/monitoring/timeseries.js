@@ -279,6 +279,10 @@ function translateMetric(metric) {
     translated_metric = translated_metric.replace("proc.cpu.kernel", "Kernel CPU");
     translated_metric = translated_metric.replace("structure.cpu.usage", "CPU Used");
     translated_metric = translated_metric.replace("structure.cpu.current", "CPU Allocated");
+    translated_metric = translated_metric.replace("structure.cpu.min", "CPU Min");
+    translated_metric = translated_metric.replace("structure.cpu.max", "CPU Max");
+    translated_metric = translated_metric.replace("limit.cpu.upper", "CPU upper lim");
+    translated_metric = translated_metric.replace("limit.cpu.lower", "CPU lower lim");
 
     //ENERGY
     translated_metric = translated_metric.replace("structure.energy.max", "Energy Allowed");
