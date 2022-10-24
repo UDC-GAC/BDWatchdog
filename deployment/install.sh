@@ -8,10 +8,10 @@ mkdir -p ${DATA_DIR}
 echo "INSTALLING TIMESTAMPING SERVICE"
 cd timestamps
 bash install.sh
-bash start.sh
-echo "going to test it now"
+#bash start.sh
+#echo "going to test it now"
 sleep 5
-bash test.sh
+#bash test.sh
 cd ..
 
 echo "INSTALLING OPENTSDB SERVICE"

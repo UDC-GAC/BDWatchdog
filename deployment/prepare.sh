@@ -6,6 +6,13 @@ setup_ssh () {
     ssh-keyscan 0.0.0.0 >> ${HOME}/.ssh/known_hosts
 }
 
+## Added by Oscar
+setup_ssh_root () {
+    cat /root/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys
+    ssh-keyscan localhost >> /root/.ssh/known_hosts
+    ssh-keyscan 0.0.0.0 >> /root/.ssh/known_hosts
+}
+
 # TODO
 # Here it should be checked if the /etc/environment file already hast the JAVA_HOME variable set
 install_dependencies(){
@@ -26,5 +33,9 @@ export JAVA_HOME=${JAVA_HOME}
 }
 
 setup_ssh
+
+## Added by Oscar
+setup_ssh_root
+
 install_dependencies
 source /etc/environment
