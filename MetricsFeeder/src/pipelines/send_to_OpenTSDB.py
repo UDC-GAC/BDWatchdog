@@ -33,7 +33,7 @@ from io import BytesIO
 import time
 import os
 from requests.exceptions import ReadTimeout
-
+import yaml
 
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
@@ -46,7 +46,18 @@ POST_DOC_BUFFER_TIMEOUT = "POST_DOC_BUFFER_TIMEOUT"
 POST_SEND_DOCS_TIMEOUT = "POST_SEND_DOCS_TIMEOUT"
 POST_SEND_DOCS_FAILED_TRIES = "POST_SEND_DOCS_FAILED_TRIES"
 
-post_endpoint = os.getenv(POST_ENDPOINT_VARIABLE, 'http://opentsdb:4242/api/put')
+# Get services config variables
+bdwatchdog_path = os.environ['BDWATCHDOG_PATH']
+config_file = bdwatchdog_path + "/services_config.yml"
+with open(config_file, "r") as f:
+    config = yaml.load(f, Loader=yaml.FullLoader)
+
+opentsdb_url = config['OPENTSDB_URL']
+opentsdb_port = config['OPENTSDB_PORT']
+post_endpoint_url = 'http://' + opentsdb_url + ":" + opentsdb_port + "/api/put"
+
+#post_endpoint = os.getenv(POST_ENDPOINT_VARIABLE, 'http://opentsdb:4242/api/put')
+post_endpoint = os.getenv(POST_ENDPOINT_VARIABLE, post_endpoint_url)
 post_doc_buffer_length = int(os.getenv(POST_DOC_BUFFER_LENGTH, 700))
 post_doc_buffer_timeout = int(os.getenv(POST_DOC_BUFFER_TIMEOUT, 5))
 post_send_docs_timeout = int(os.getenv(POST_SEND_DOCS_TIMEOUT, 3))
