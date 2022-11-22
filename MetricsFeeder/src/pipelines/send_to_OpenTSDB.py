@@ -54,7 +54,7 @@ with open(config_file, "r") as f:
 
 opentsdb_url = config['OPENTSDB_URL']
 opentsdb_port = config['OPENTSDB_PORT']
-post_endpoint_url = 'http://' + opentsdb_url + ":" + opentsdb_port + "/api/put"
+post_endpoint_url = 'http://' + opentsdb_url + ":" + str(opentsdb_port) + "/api/put"
 
 #post_endpoint = os.getenv(POST_ENDPOINT_VARIABLE, 'http://opentsdb:4242/api/put')
 post_endpoint = os.getenv(POST_ENDPOINT_VARIABLE, post_endpoint_url)
