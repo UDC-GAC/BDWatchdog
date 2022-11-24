@@ -1,5 +1,5 @@
 setup_ssh () {
-    echo -e "\n" | ssh-keygen -b 2048 -t rsa -q -N ""
+    echo -e "\n" | ssh-keygen -b 2048 -t rsa -q -N "" -f ${HOME}/.ssh/id_rsa
     echo ""
     cat ${HOME}/.ssh/id_rsa.pub >> ${HOME}/.ssh/authorized_keys
     ssh-keyscan localhost >> ${HOME}/.ssh/known_hosts
@@ -8,7 +8,7 @@ setup_ssh () {
 
 ## Added by Oscar
 setup_ssh_root () {
-    cat /root/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys
+    cat ${HOME}/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys
     ssh-keyscan localhost >> /root/.ssh/known_hosts
     ssh-keyscan 0.0.0.0 >> /root/.ssh/known_hosts
 }
