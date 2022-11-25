@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 clean_logs (){
-    rm -Rf /var/log/opentsdb/
+    if [ -z ${OPENTSDB_LOG_PATH} ]
+    then
+        OPENTSDB_LOG_PATH=/var/log/opentsdb/
+    fi
+
+    #rm -Rf /var/log/opentsdb/
+    rm -Rf ${OPENTSDB_LOG_PATH}
     rm hadoop-2.9.2/logs/*
     rm hbase-1.4.12/logs/*
 }

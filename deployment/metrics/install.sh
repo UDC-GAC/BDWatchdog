@@ -53,7 +53,13 @@ hbase-1.4.12/bin/start-hbase.sh
 sleep 20
 
 echo "Install OpenTSDB"
-mkdir -p /var/log/opentsdb/
+if [ -z ${OPENTSDB_LOG_PATH} ]
+then
+    mkdir -p /var/log/opentsdb/
+else
+    mkdir -p ${OPENTSDB_LOG_PATH}
+fi
+
 wget https://github.com/OpenTSDB/opentsdb/archive/refs/tags/v2.4.0.tar.gz
 mv v2.4.0.tar.gz opentsdb-v2.4.0.tar.gz
 tar xvf opentsdb-v2.4.0.tar.gz
@@ -66,6 +72,12 @@ cd opentsdb
 find . | xargs grep -s central.maven.org | cut -f1 -d : | xargs sed -i '' -e "s/http:\/\/central/https:\/\/repo1/g"
 find . | xargs grep -s repo1.maven.org | cut -f1 -d : | xargs sed -i '' -e "s/http:\/\/repo1/https:\/\/repo1/g"
 # MAVEN FIX #
+
+if [ -n ${OPENTSDB_LOG_PATH} ]
+then
+    ## this requires a logback.xml file prepared with the desired path
+    cp ../logback.xml src/logback.xml
+fi
 
 ./build.sh
 cp ../fix/opentsdb/create_table.sh ./src/create_table.sh

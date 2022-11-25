@@ -34,6 +34,12 @@ export JAVA_HOME=${JAVA_HOME}
 
 setup_ssh
 
+if [ -n "$1" ] && [ "$1" == "ssh_setup" ]
+then
+    # only execute the ssh_setup
+    exit 0
+fi
+
 ## Added by Oscar
 setup_ssh_root
 
