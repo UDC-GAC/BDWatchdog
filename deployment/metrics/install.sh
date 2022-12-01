@@ -73,7 +73,7 @@ find . | xargs grep -s central.maven.org | cut -f1 -d : | xargs sed -i '' -e "s/
 find . | xargs grep -s repo1.maven.org | cut -f1 -d : | xargs sed -i '' -e "s/http:\/\/repo1/https:\/\/repo1/g"
 # MAVEN FIX #
 
-if [ -n ${OPENTSDB_LOG_PATH} ]
+if [ ! -z ${OPENTSDB_LOG_PATH} ]
 then
     envsubst < ../config/opentsdb/logback.xml > src/logback.xml
 fi
