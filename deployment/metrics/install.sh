@@ -75,8 +75,7 @@ find . | xargs grep -s repo1.maven.org | cut -f1 -d : | xargs sed -i '' -e "s/ht
 
 if [ -n ${OPENTSDB_LOG_PATH} ]
 then
-    ## this requires a logback.xml file prepared with the desired path
-    cp ../logback.xml src/logback.xml
+    envsubst < ../config/opentsdb/logback.xml > src/logback.xml
 fi
 
 ./build.sh
