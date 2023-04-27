@@ -6,9 +6,10 @@ setup_ssh () {
     ssh-keyscan 0.0.0.0 >> ${HOME}/.ssh/known_hosts
 }
 
-## Added by Oscar
 setup_ssh_root () {
-    cat ${HOME}/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys
+    echo -e "\n" | ssh-keygen -b 2048 -t rsa -q -N "" -f /root/.ssh/id_rsa
+    echo ""
+    cat /root/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys
     ssh-keyscan localhost >> /root/.ssh/known_hosts
     ssh-keyscan 0.0.0.0 >> /root/.ssh/known_hosts
 }
@@ -40,7 +41,6 @@ then
     exit 0
 fi
 
-## Added by Oscar
 setup_ssh_root
 
 install_dependencies
