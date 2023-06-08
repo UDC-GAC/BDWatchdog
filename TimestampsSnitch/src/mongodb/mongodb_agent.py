@@ -111,8 +111,7 @@ class MongoDBTimestampAgent:
                     eprint(r.text)
                     tries += 1
                 else:
-                    iprint("Document created at: {0}".format(
-                        time.strftime("%D %H:%M:%S", time.localtime()) + " timestamp is " + str(time.time())))
+                    iprint("Document created at: {0}".format(time.strftime("%D %H:%M:%S", time.localtime())))
                     break
             else:
                 # Test exists, update

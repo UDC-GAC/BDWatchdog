@@ -32,19 +32,23 @@ from TimestampsSnitch.src.timestamping.utils import get_username, get_timestamp
 from TimestampsSnitch.src.timestamping.utils import eprint, iprint
 
 
-def signal_test(experiment_id, test_name, username, signal, timestamp):
+def signal_test(args):
+    timestamp = get_timestamp(args)
     d = dict()
     info = dict()
-    info["experiment_id"] = experiment_id
-    info["username"] = username
-    info["test_name"] = test_name
-    info["test_id"] = experiment_id + "_" + test_name
+    info["experiment_id"] = args.experiment_name
+    info["username"] = get_username(args)
+    info["test_name"] = args.test_name
+    info["test_id"] = args.experiment_name + "_" + args.test_name
     d["info"] = info
     d["type"] = "test"
     if not timestamp:
         timestamp = int(time.time())
-    d["info"]["{0}_time".format(signal)] = timestamp
-    print(json.dumps(d))
+    d["info"]["{0}_time".format(args.option)] = timestamp
+    if args.push:
+        mongodb_agent.send_test_docs([d["info"]])
+    else:
+        print(json.dumps(d))
 
 
 def print_test(test_data):
@@ -93,13 +97,14 @@ if __name__ == '__main__':
                         help="A time string in the form 'yyyy/mm/dd-HH:MM:SS' (e.g., '2018/06/01-12:34:36')")
     parser.add_argument('--username', type=str, default=None,
                         help="The username")
+    parser.add_argument('--push', action='store_true')
 
     args = parser.parse_args()
 
     username = get_username(args)
 
     if args.option == "start" or args.option == "end":
-        signal_test(args.experiment_name, args.test_name, username, args.option, get_timestamp(args))
+        signal_test(args)
     elif args.option == "delete":
         mongodb_agent.delete_test(args.experiment_name, args.test_name, username)
     elif args.option == "info":

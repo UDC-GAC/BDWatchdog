@@ -88,10 +88,10 @@ def process_line(line):
     header = fields[0]
     line_passes = True
 
-
-    if "@" in line:
-        eprint("[VALIDATOR] line doesn't pass value checks: '" + line.strip() + "'")
-        return None
+    for c in ["@", "[","]"]:
+        if c in line:
+            eprint("[VALIDATOR] line doesn't pass value checks: character {0} invalid'".format(c) + line.strip() + "'")
+            return None
 
     if not check_length(line):
         eprint("[VALIDATOR] line doesn't pass length checks: '" + line.strip() + "'")

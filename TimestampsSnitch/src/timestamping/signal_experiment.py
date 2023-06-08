@@ -31,15 +31,15 @@ from TimestampsSnitch.src.timestamping.utils import get_username, get_timestamp
 from TimestampsSnitch.src.timestamping.utils import eprint, iprint
 
 
-def signal_experiment(experiment_id, username, signal, timestamp):
+def signal_experiment(args):
     d = dict()
-    info = dict()
-    info["experiment_id"] = experiment_id
-    info["username"] = username
-    d["info"] = info
+    d["info"] = {"experiment_id": args.experiment_name, "username": get_username(args)}
     d["type"] = "experiment"
-    d["info"]["{0}_time".format(signal)] = timestamp
-    print(json.dumps(d))
+    d["info"]["{0}_time".format(args.option)] = get_timestamp(args)
+    if args.push:
+        mongodb_agent.send_experiment_docs([d["info"]])
+    else:
+        print(json.dumps(d))
 
 
 def print_experiment(experiment_data):
@@ -85,12 +85,13 @@ if __name__ == '__main__':
                         help="A time string in the form 'yyyy/mm/dd-HH:MM:SS' (e.g., '2018/06/01-12:34:36')")
     parser.add_argument('--username', type=str, default=None,
                         help="The username")
-    args = parser.parse_args()
+    parser.add_argument('--push', action='store_true')
 
+    args = parser.parse_args()
     username = get_username(args)
 
     if args.option == "start" or args.option == "end":
-        signal_experiment(args.experiment_name, username, args.option, get_timestamp(args))
+        signal_experiment(args)
     elif args.option == "delete":
         mongodb_agent.delete_experiment(args.experiment_name, username)
     elif args.option == "info":
