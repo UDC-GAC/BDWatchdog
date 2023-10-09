@@ -57,6 +57,8 @@ def process_line(line):
             out_fields.append(in_fields[10])  # system
             out_fields.append(in_fields[11])  # user
             out_fields.append(in_fields[17])  # sleep-average
+            if in_fields[19] == "n":
+                raise RuntimeError("Not a process")
         if in_fields[0] == "PRD":
             out_fields.append(in_fields[5])  # time interval seconds
             out_fields.append(in_fields[6])  # pid
@@ -202,8 +204,12 @@ def process_line(line):
 
         result_lines.append(str(",".join(out_fields)).strip())
         return result_lines
+    except RuntimeError:
+        eprint("[FIELD FILTER] Line discarded, not a process: " + line)
+        return ""
     except IndexError:
         eprint("[FIELD FILTER] Line discarded, number of fields incorrect: " + line)
+        return ""
 
 
 def behave_like_pipeline():

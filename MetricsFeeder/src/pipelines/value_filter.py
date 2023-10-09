@@ -40,7 +40,7 @@ def process_line(line):
         if float(in_fields[7]) < 10.0:
             return  # resident
     if in_fields[0] == "PRC":
-        if float(in_fields[7]) + float(in_fields[8]) + float(in_fields[9]) < 0.05:
+        if float(in_fields[7]) + float(in_fields[8]) + float(in_fields[9]) < 1:
             return  # sys + user + wait
     if in_fields[0] == "PRD":
         if float(in_fields[7]) + float(in_fields[8]) < 0.05:
