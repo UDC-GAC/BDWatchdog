@@ -244,8 +244,12 @@ export function parseResponseMetricsData(allMetricsData) {
     for (let metricData of allMetricsData) {
         metrics = metricData["dps"];
         let key = Object.keys(metrics)[0];
-        lowestTime = Math.min(lowestTime, parseInt(key))
+        let parsedKey = parseInt(key);
+        if (!isNaN(parsedKey)) {
+            lowestTime = Math.min(lowestTime, parseInt(key))
+        }
     }
+
     for (let metricData of allMetricsData) {
         metrics = metricData["dps"];
         for (let key in metrics) {
