@@ -77,7 +77,7 @@ function propagateExperimentTimes(experiment) {
     "use strict";
     let times = document.getElementById("times_form");
     times.elements.start_time.value = timeConverter(experiment.start_time);
-    times.elements._end_time.value = timeConverter(experiment.end_time);
+    times.elements.end_time.value = timeConverter(experiment.end_time);
 
 }
 
