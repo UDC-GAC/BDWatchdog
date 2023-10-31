@@ -117,18 +117,25 @@ function createReport(parsedData, reportID, dataHasChanged) {
             let metrics = allMetricsValues[i];
 
             let aggregate = metrics[0].value; // Start with the first value
+            let maximum = metrics[0].value
+            let minimum = metrics[0].value
 
             // Perform the integration through steps
+            // Look for the maximum and minimum also
             for (let j = 1; j < metrics.length; j++) {
                 let diff_time = (metrics[j].time - metrics[j - 1].time);
                 aggregate = aggregate + (metrics[j].value * diff_time)
-            }
 
+                maximum = Math.max(maximum, metrics[j].value)
+                minimum = Math.min(minimum, metrics[j].value)
+            }
 
             let average = aggregate / elapsed_time;
 
             aggregations.push({aggregation: "SUM", value: aggregate, label: labels_array[i]});
             aggregations.push({aggregation: "AVG", value: average, label: labels_array[i]})
+            aggregations.push({aggregation: "MAX", value: maximum, label: labels_array[i]})
+            aggregations.push({aggregation: "MIN", value: minimum, label: labels_array[i]})
         }
 
 
