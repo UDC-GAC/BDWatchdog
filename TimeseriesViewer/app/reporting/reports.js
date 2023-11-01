@@ -115,7 +115,9 @@ function createReport(parsedData, reportID, dataHasChanged) {
         aggregations = [];
         for (let i = 0; i < allMetricsValues.length; i++) {
             let metrics = allMetricsValues[i];
-
+            if(metrics.length === 0){
+                continue
+            }
             let aggregate = metrics[0].value; // Start with the first value
             let maximum = metrics[0].value
             let minimum = metrics[0].value
