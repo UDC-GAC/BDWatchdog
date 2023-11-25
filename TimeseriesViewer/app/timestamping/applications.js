@@ -82,6 +82,14 @@ function application_label_on_click() {
     app_label.etag = this.etag;
 }
 
+function application_delete_on_click() {
+    "use strict";
+    var app = {};
+    app.application_id = this.application_id;
+    app.etag = this.etag;
+    deleteApplication(app, false);
+}
+
 export function propagateApplicationTimes(application) {
     "use strict";
     let times = document.getElementById("times_form");
@@ -115,7 +123,7 @@ function populateApplicationsDropdown(applications, remove_previous) {
         button2.classList = "btn btn-default ";
         button2.application_id = app._id;
         button2.etag = app._etag;
-        button2.onclick = deleteApplication
+        button2.onclick = application_delete_on_click
         child.appendChild(button2);
 
         list.append(child);
