@@ -126,7 +126,8 @@ function createReport(parsedData, reportID, dataHasChanged) {
             // Look for the maximum and minimum also
             for (let j = 1; j < metrics.length; j++) {
                 let diff_time = (metrics[j].time - metrics[j - 1].time);
-                aggregate = aggregate + (metrics[j].value * diff_time)
+                let diff_value = (metrics[j].value + metrics[j - 1].value) / 2
+                aggregate = aggregate + (diff_value * diff_time)
 
                 maximum = Math.max(maximum, metrics[j].value)
                 minimum = Math.min(minimum, metrics[j].value)
