@@ -350,7 +350,7 @@ function reWriteReportByNumber(report_number) {
         drawGraph(graph_info["data"], graphID, true)
     };
 
-    getGraphData(createJson(start_date, end_date, metrics, report_number, "1s-avg"), reportID, callback, callback_error)
+    getGraphData(createJson(start_date, end_date, metrics, report_number, undefined), reportID, callback, callback_error)
 }
 
 export function handleReport(form) {
