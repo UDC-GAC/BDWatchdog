@@ -5,6 +5,9 @@ export POST_DOC_BUFFER_TIMEOUT=10
 METRIC="CPU,cpu,MEM,SWP,DSK,NET,PRC,PRM,PRD"
 #METRIC="PRC,PRM,PRD"
 
+scriptDir=$(dirname -- "$(readlink -f -- "$BASH_SOURCE")")
+source "${scriptDir}/../../set_pythonpath.sh"
+
 # Add PRN to support per-process network metrics using the netatop module if available
 
 # If for any reason the module can't be used (e.g., containers of any sort are used), you
@@ -15,4 +18,8 @@ METRIC="CPU,cpu,MEM,SWP,DSK,NET,PRC,PRM,PRD"
 # bash allow_netatop.sh
 
 
-tmux new -s "ATOP" "atop 5 -a -P $METRIC | python3 ./src/atop/atop_to_json_with_java_translation.py | python3 ./src/pipelines/send_to_OpenTSDB.py"
+#tmux new -s "ATOP" "atop 5 -a -P $METRIC | python3 ./src/atop/atop_to_json_with_java_translation.py | python3 ./src/pipelines/send_to_OpenTSDB.py"
+
+tmux new -s "ATOP" -d "atop 5 -a -P $METRIC \
+    | python3 ${BDWATCHDOG_PATH}/MetricsFeeder/src/atop/atop_to_json_with_java_translation.py \
+    | python3 ${BDWATCHDOG_PATH}/MetricsFeeder/src/pipelines/send_to_OpenTSDB.py"
