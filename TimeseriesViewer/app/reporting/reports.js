@@ -284,7 +284,7 @@ function printInfoOfResource(aggregator, label, value) {
     } else if (label.startsWith("proc.mem") || label.startsWith("sys.mem") || label.startsWith("structure.mem") || label.startsWith("limit.mem")) {
         string = value.toFixed(2) + " MB-seconds"
     } else if (label.startsWith("proc.disk") || label.startsWith("sys.disk") || label.startsWith("structure.disk") || label.startsWith("limit.disk")) {
-        string = (value / 100).toFixed(2) + " Mbits"
+        string = value.toFixed(2) + " Mbits"
     } else if (label.startsWith("proc.net") || label.startsWith("sys.net") || label.startsWith("structure.net") || label.startsWith("limit.net")) {
         string = value.toFixed(2) + " Mbits"
     } else {
