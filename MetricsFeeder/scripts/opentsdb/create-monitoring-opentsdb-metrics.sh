@@ -1,77 +1,61 @@
 #!/usr/bin/env bash
 # Run in the opentsdb installation folder
 
-# SYSTEM POWER CONSUMPTION AND TEMP
-	#Core
-	./build/tsdb mkmetric sys.core.temp
-	
-	#Chip (processor or package)
-	./build/tsdb mkmetric sys.cpu.temp
-	./build/tsdb mkmetric sys.cpu.energy
-	
-	#System
-	./build/tsdb mkmetric sys.processors.temp
-	./build/tsdb mkmetric sys.processors.energy
+METRICS=(
+  # SYSTEM POWER CONSUMPTION AND TEMP
+  #Core
+  sys.core.temp
+  #Chip (processor or package)
+  sys.cpu.temp
+  sys.cpu.energy
+  #System
+  sys.processors.temp
+  sys.processors.energy
+  #Process - Generated through system cpu and energy, and process cpu
+  proc.cpu.energy
+  # SYSTEM METRICS
+  #cpu
+  sys.cpu.kernel
+  sys.cpu.user
+  sys.cpu.idle
+  sys.cpu.wait
+  #CPU
+  sys.cpu.usage
+  #DISK
+  sys.disk.usage
+  sys.disk.read.ios
+  sys.disk.read.mb
+  sys.disk.write.ios
+  sys.disk.write.mb
+  #MEM
+  sys.mem.free
+  sys.mem.usage
+  #NET
+  sys.net.in.mb
+  sys.net.out.mb
+  sys.net.usage
+  # PROCESS METRICS
+  #CPU
+  proc.cpu.user
+  proc.cpu.kernel
+  #DISK
+  proc.disk.reads.mb
+  proc.disk.writes.mb
+  #MEM
+  proc.mem.virtual
+  proc.mem.resident
+  proc.mem.swap
+  #SWAP
+  sys.swap.free
+  # NET
+  proc.net.tcp.out.mb
+  proc.net.tcp.out.packets
+  proc.net.tcp.in.mb
+  proc.net.tcp.in.packets
+  proc.net.udp.out.mb
+  proc.net.udp.out.packets
+  proc.net.udp.in.mb
+  proc.net.udp.in.packets
+)
 
-	#Process
-	# Generated through system cpu and energy, and process cpu
-	./build/tsdb mkmetric proc.cpu.energy
-
-# SYSTEM METRICS
-	#cpu
-	./build/tsdb mkmetric sys.cpu.kernel
-	./build/tsdb mkmetric sys.cpu.user
-	./build/tsdb mkmetric sys.cpu.idle
-	./build/tsdb mkmetric sys.cpu.wait
-
-	#CPU
-	./build/tsdb mkmetric sys.cpu.usage
-
-	#DISK
-	./build/tsdb mkmetric sys.disk.usage
-	./build/tsdb mkmetric sys.disk.read.ios
-	./build/tsdb mkmetric sys.disk.read.mb
-	./build/tsdb mkmetric sys.disk.write.ios
-	./build/tsdb mkmetric sys.disk.write.mb
-
-	#MEM
-	./build/tsdb mkmetric sys.mem.free
-	./build/tsdb mkmetric sys.mem.usage
-
-	#NET
-	./build/tsdb mkmetric sys.net.in.mb
-	./build/tsdb mkmetric sys.net.out.mb
-	./build/tsdb mkmetric sys.net.usage
-
-	#INFINIBAND
-	./build/tsdb mkmetric sys.net.in.mb
-	./build/tsdb mkmetric sys.net.out.mb
-
-# PROCESS METRICS
-	#CPU
-	./build/tsdb mkmetric proc.cpu.user
-	./build/tsdb mkmetric proc.cpu.kernel
-
-	#DISK
-	./build/tsdb mkmetric proc.disk.reads.mb
-	./build/tsdb mkmetric proc.disk.writes.mb
-
-	#MEM
-	./build/tsdb mkmetric proc.mem.virtual
-	./build/tsdb mkmetric proc.mem.resident
-	./build/tsdb mkmetric proc.mem.swap
-	
-	#SWAP
-	./build/tsdb mkmetric sys.swap.free
-	
-	#NET
-	./build/tsdb mkmetric proc.net.tcp.out.mb
-	./build/tsdb mkmetric proc.net.tcp.out.packets
-	./build/tsdb mkmetric proc.net.tcp.in.mb
-	./build/tsdb mkmetric proc.net.tcp.in.packets
-	./build/tsdb mkmetric proc.net.udp.out.mb
-	./build/tsdb mkmetric proc.net.udp.out.packets
-	./build/tsdb mkmetric proc.net.udp.in.mb
-	./build/tsdb mkmetric proc.net.udp.in.packets
-
-	
+./build/tsdb mkmetric "${METRICS[@]}"
