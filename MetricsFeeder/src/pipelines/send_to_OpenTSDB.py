@@ -23,8 +23,8 @@
 
 from __future__ import print_function
 
-import fileinput
 import sys
+import select
 import json
 import traceback
 import requests
@@ -59,12 +59,12 @@ post_endpoint_url = 'http://' + opentsdb_url + ":" + str(opentsdb_port) + "/api/
 #post_endpoint = os.getenv(POST_ENDPOINT_VARIABLE, 'http://opentsdb:4242/api/put')
 post_endpoint = os.getenv(POST_ENDPOINT_VARIABLE, post_endpoint_url)
 post_doc_buffer_length = int(os.getenv(POST_DOC_BUFFER_LENGTH, 700))
-post_doc_buffer_timeout = int(os.getenv(POST_DOC_BUFFER_TIMEOUT, 5))
+post_doc_buffer_timeout = float(os.getenv(POST_DOC_BUFFER_TIMEOUT, 0.2))
 post_send_docs_timeout = int(os.getenv(POST_SEND_DOCS_TIMEOUT, 3))
 post_send_docs_failed_tries = int(os.getenv(POST_SEND_DOCS_FAILED_TRIES, 3))
 
 
-def send_json_documents(json_documents, requests_Session=None):
+def send_json_documents(json_documents, requests_session=None):
     headers = {"Content-Type": "application/json", "Content-Encoding": "gzip"}
 
     out = BytesIO()
@@ -72,8 +72,8 @@ def send_json_documents(json_documents, requests_Session=None):
         f.write(json.dumps(json_documents).encode())
 
     try:
-        if requests_Session:
-            r = requests_Session.post(post_endpoint, headers=headers, data=out.getvalue(),
+        if requests_session:
+            r = requests_session.post(post_endpoint, headers=headers, data=out.getvalue(),
                                       timeout=post_send_docs_timeout)
         else:
             r = requests.post(post_endpoint, headers=headers, data=out.getvalue(),
@@ -104,79 +104,80 @@ def process_line(line):
     return new_doc
 
 
-def finish(json_documents, requests_Session, message):
-    success, info = send_json_documents(json_documents, requests_Session)
+def finish(json_documents, requests_session, message):
+    success, info = send_json_documents(json_documents, requests_session)
     sys.stdout.flush()
     eprint("[TSDB SENDER] -> {0}".format(message))
     exit(1)
 
+def flush_data_buffer(requests_session, json_documents, length, failed_connections):
+    try:
+        success, info = send_json_documents(json_documents, requests_session)
+        if not success:
+            eprint("[TSDB SENDER] couldn't properly post documents to address {0} error: {1}".format(
+                post_endpoint, str(info)))
+            failed_connections += 1
+        else:
+            print(f"Post was done at: {time.strftime('%D %H:%M:%S', time.localtime())} with {length} documents")
+            failed_connections = 0  # Reset failed connections, at least this one was successfull now
+            json_documents.clear()  # Empty document buffer
+    except requests.exceptions.ConnectTimeout:
+        failed_connections += 1
+        eprint("[TSDB SENDER] couldn't send documents to address {0} and tried for {1} times".format(
+            post_endpoint, failed_connections))
+
+    if failed_connections >= post_send_docs_failed_tries:
+        message = "terminated due to too much connection errors"
+        finish(json_documents, requests_session, message)
+
+    sys.stdout.flush()
+
+    return failed_connections
+
 
 def behave_like_pipeline():
     # PROGRAM VARIABLES #
-    last_timestamp = time.time() - post_doc_buffer_timeout + 1
     failed_connections = 0
     fails = 0
     MAX_FAILS = 10
-    abort = False
     json_documents = []
-    requests_Session = requests.Session()
+    requests_session = requests.Session()
     try:
-        for line in fileinput.input():
-            new_doc = process_line(line)
+        while True:
+            if select.select([sys.stdin,],[],[],post_doc_buffer_timeout)[0]:
+                line = sys.stdin.readline()
+                if line == "": # EOF
+                    break
 
-            if not new_doc:
-                fails += 1
-                if fails >= MAX_FAILS:
-                    message = "terminated due to too many read pipeline errors"
-                    finish(json_documents, requests_Session, message)
-                else:
-                    continue
-            else:
-                json_documents = json_documents + [new_doc]
-                fails = 0  # Reset fails
-
-            current_timestamp = time.time()
-            time_diff = current_timestamp - last_timestamp
-            length_docs = len(json_documents)
-            if length_docs >= post_doc_buffer_length or time_diff >= post_doc_buffer_timeout:
-                last_timestamp = current_timestamp
-                try:
-                    success, info = send_json_documents(json_documents, requests_Session)
-                    if not success:
-                        eprint("[TSDB SENDER] couldn't properly post documents to address {0} error: {1}".format(
-                            post_endpoint, str(info)))
-                        failed_connections += 1
+                new_doc = process_line(line)
+                if not new_doc:
+                    fails += 1
+                    if fails >= MAX_FAILS:
+                        message = "terminated due to too many read pipeline errors"
+                        finish(json_documents, requests_session, message)
                     else:
-                        print("Post was done at: " + time.strftime("%D %H:%M:%S", time.localtime()) + " with " + str(
-                            length_docs) + " documents")
-                        failed_connections = 0  # Reset failed connections, at least this one was successfull now
-                        json_documents = []  # Empty document buffer
-                except requests.exceptions.ConnectTimeout:
-                    failed_connections += 1
-                    eprint("[TSDB SENDER] couldn't send documents to address {0} and tried for {1} times".format(
-                        post_endpoint, failed_connections))
-                    if failed_connections >= post_send_docs_failed_tries:
-                        abort = True
+                        continue
+                else:
+                    json_documents = json_documents + [new_doc]
+                    fails = 0  # Reset fails
+                length_docs = len(json_documents)
+                if length_docs >= post_doc_buffer_length:
+                    failed_connections = flush_data_buffer(requests_session, json_documents, length_docs, failed_connections)
+            else:
+                length_docs = len(json_documents)
+                if length_docs > 0:
+                    failed_connections = flush_data_buffer(requests_session, json_documents, length_docs, failed_connections)
 
-                if abort:
-                    message = "terminated due to too connection errors"
-                    finish(json_documents, requests_Session, message)
-
-                sys.stdout.flush()
-    except (KeyboardInterrupt, IOError) as e:
+    except KeyboardInterrupt:
         # Exit silently
-        eprint("[TSDB SENDER] terminated with error: " + str(e))
-        track = traceback.format_exc()
-        eprint(track)
-
+        eprint("[TSDB SENDER] terminated with keyboard interrupt")
     except Exception as e:
         eprint("[TSDB SENDER] terminated with error: " + str(e))
         track = traceback.format_exc()
         eprint(track)
 
     message = "finishing"
-    finish(json_documents, requests_Session, message)
-
+    finish(json_documents, requests_session, message)
 
 def main():
     behave_like_pipeline()

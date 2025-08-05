@@ -69,7 +69,7 @@ def process_line(line, metrics_dict, tags_dict, template):
                 if line_value_filtered:
                     for json in csv_to_json.process_line(line_value_filtered, metrics_dict, tags_dict, template):
                         TSDB_json = json_to_TSDB_json.process_line(json)
-                        print(TSDB_json)
+                        print(TSDB_json, flush=True)
 
 
 def previous_process(line, metrics_dict, tags_dict, template):
