@@ -5,7 +5,7 @@ export METRICS_PATH="src/pipelines/metrics/"
 export TAGS_PATH="src/pipelines/tags/"
 
 export PYTHONUNBUFFERED="yes"
-export POST_DOC_BUFFER_TIMEOUT=5
+export POST_DOC_BUFFER_TIMEOUT=0.2
 export NETHOGS_SAMPLING_FREQUENCY=5
 export JAVA_TRANSLATOR_MAX_TRIES=2
 export JAVA_TRANSLATOR_WAIT_TIME=3
