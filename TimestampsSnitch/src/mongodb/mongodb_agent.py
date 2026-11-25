@@ -35,6 +35,7 @@ headers = {'content-type': 'application/json'}
 
 default_mongodb_port = 8000
 default_mongodb_ip = "mongodb"
+services_config_port_key = "EVE_SERVER_PORT"
 default_tests_database_name = "tests"
 default_experiments_database_name = "experiments"
 
@@ -46,19 +47,33 @@ post_doc_buffer_length = 1
 MAX_CONNECTION_TRIES = 3
 
 
+def get_default_mongodb_port():
+    """Port of the Eve server as set in BDWatchdog's services_config.yml (EVE_SERVER_PORT), or 8000 if not available"""
+    try:
+        import yaml
+        bdwatchdog_path = os.getenv("BDWATCHDOG_PATH",
+                                    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", ".."))
+        with open(os.path.join(bdwatchdog_path, "services_config.yml"), "r") as f:
+            config = yaml.safe_load(f) or {}
+        return int(config.get(services_config_port_key, default_mongodb_port))
+    except Exception:
+        return default_mongodb_port
+
+
 class MongoDBTimestampAgent:
 
     def __init__(self, os_env=None):
+        default_port = get_default_mongodb_port()
         if not os_env:
             self.tests_post_endpoint = os.getenv(TESTS_POST_ENDPOINT_OS_VARNAME, default_tests_database_name)
             self.experiments_post_endpoint = os.getenv(EXPERIMENTS_POST_ENDPOINT_OS_VARNAME,
                                                        default_experiments_database_name)
             self.mongodb_ip = os.getenv(MONGODB_IP_OS_VARNAME, default_mongodb_ip)
             try:
-                self.mongodb_port = str(int(os.getenv(MONGODB_PORT_OS_VARNAME, default_mongodb_port)))
+                self.mongodb_port = str(int(os.getenv(MONGODB_PORT_OS_VARNAME, default_port)))
             except ValueError:
-                eprint("Invalid port configuration, using default '" + str(default_mongodb_port) + "'")
-                self.mongodb_port = str(default_mongodb_port)
+                eprint("Invalid port configuration, using default '" + str(default_port) + "'")
+                self.mongodb_port = str(default_port)
         else:
             try:
                 self.tests_post_endpoint = os_env[TESTS_POST_ENDPOINT_OS_VARNAME]
@@ -75,7 +90,7 @@ class MongoDBTimestampAgent:
             try:
                 self.mongodb_port = str(int(os_env[MONGODB_PORT_OS_VARNAME]))
             except (ValueError, KeyError):
-                self.mongodb_port = str(default_mongodb_port)
+                self.mongodb_port = str(default_port)
 
         self.tests_full_endpoint = "http://{0}:{1}/{2}".format(self.mongodb_ip, self.mongodb_port,
                                                                self.tests_post_endpoint)

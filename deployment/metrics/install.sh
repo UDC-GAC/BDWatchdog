@@ -2,6 +2,7 @@
 
 source ../config.sh
 source /etc/environment
+source set_opentsdb_port.sh
 
 if [ -z ${DATA_DIR} ]
 then
@@ -87,7 +88,7 @@ fi
 cp ../fix/opentsdb/create_table.sh ./src/create_table.sh
 env COMPRESSION=GZ HBASE_HOME=${BDWATCHDOG_DIR}/deployment/metrics/hbase-1.4.12/ ./src/create_table.sh
 bash ${BDWATCHDOG_DIR}/MetricsFeeder/scripts/opentsdb/create-monitoring-opentsdb-metrics.sh
-envsubst < ../config/opentsdb/opentsdb.conf  > opentsdb.conf # Expand variable $HOME inside of template file
+envsubst < ../config/opentsdb/opentsdb.conf  > opentsdb.conf # Expand variables (e.g., $BDWATCHDOG_DIR, $OPENTSDB_PORT) inside of template file
 cd ..
 
 echo "Starting OpenTSDB"
