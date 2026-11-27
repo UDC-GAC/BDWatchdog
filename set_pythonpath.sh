@@ -2,7 +2,5 @@
 scriptDir=$(dirname -- "$(readlink -f -- "$BASH_SOURCE")")
 
 export BDWATCHDOG_PATH=$scriptDir/
-export SERVERLESS_PATH=$scriptDir/../ServerlessContainers/
+export SERVERLESS_PATH=${SERVERLESS_PATH:-$scriptDir/../ServerlessContainers/}
 export PYTHONPATH=$BDWATCHDOG_PATH:$SERVERLESS_PATH
-
-
